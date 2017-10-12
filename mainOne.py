@@ -19,10 +19,10 @@ def login():
 def register():
         return render_template('register.html')
 
-@app.route("/<username>")
-def bar(username):
-        return render_template('userTemplate.html',
-                                name=username)
+# @app.route("/<username>")
+# def bar(username):
+#         return render_template('userTemplate.html',
+#                                 name=username)
 
 if __name__ == "__main__":
     app.run(debug=True)
