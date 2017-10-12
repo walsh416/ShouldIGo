@@ -5,6 +5,9 @@ app = Flask(__name__)
 @app.route("/")
 def hello():
     return '''
+<head>
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}" />
+</head>
 <h1>Welcome to isThere.today!</h1>
 Click below to register or login.<br>
 <a href="/register">Register</a><br>
