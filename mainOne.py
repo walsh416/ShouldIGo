@@ -100,6 +100,7 @@ def register():
 # def bar(username):
 #         return render_template('userTemplate.html',
 #                                 name=username)
+# foo
 
 if __name__ == "__main__":
     app.run(debug=True)
