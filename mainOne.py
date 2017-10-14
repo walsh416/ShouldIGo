@@ -96,6 +96,22 @@ def login():
 def register():
         return render_template('register.html')
 
+
+# @app.route("/handlelogin", methods = ["GET","POST"])
+# def handle_login():
+#     uname = request.form['username']
+#     pw = request.form['password']
+#     passback = User.query.filter_by(username=uname).first()
+#     #run unhash method on passback
+
+#     if pw == passback:
+#         redirect("/welcome")
+
+# @app.route("/welcome")
+# def welcome(username)
+#     return render_template("landding.html", username = username)
+    
+
 # @app.route("/<username>")
 # def bar(username):
 #         return render_template('userTemplate.html',
