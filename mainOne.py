@@ -1,12 +1,10 @@
 
 from flask import Flask, render_template, request, redirect, url_for
 from flaskext.mysql import MySQL
-#from flask_restful import Resource, Api, reqparse
 app = Flask(__name__)
 
 mysql = MySQL()
 app = Flask(__name__)
-#api = Api(app)
 
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = ''
@@ -58,9 +56,9 @@ Click below to register or login.<br>
 @app.route("/HandleRegister", methods=["GET","POST"])
 def handle_reg():
     if request.form['password'] != request.form['passwordconfirm']:
-        return redirect("/registerfail")
+        # return redirect("/registerfail")
+        return render_template('register.html', diffPasswords=True, duplicateUser=False)
     else:
-        # connection = mysql.get_db()
         connection = mysql.connect()
         cursor = connection.cursor()
 
@@ -69,36 +67,28 @@ def handle_reg():
         _userUsername = request.form['username']
         _userPassword = request.form['password']
 
-        # print _userUsername
-
-    # #set up string in SQL request form
-        # out = "INSERT INTO User values(" + "\'\',\'" + request.form['firstname'] + "\',\'" + request.form['lastname'] + "\',\'" + request.form['password'] + "\')"
         out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\')"
         cursor.execute(out)
         connection.commit()
         return redirect("/login")
 
+<<<<<<< HEAD
 @app.route("/registerfail", methods = ["GET","POST"])
 def registerfail():
         return render_template('registerwrong.html')
 
+=======
+>>>>>>> Tim
 @app.route("/login")
 def login():
         return render_template('login.html')
 
 @app.route("/register", methods=["GET","POST"])
 def register():
-        return render_template('register.html')
-
-# @app.route("/<username>")
-# def bar(username):
-#         return render_template('userTemplate.html',
-#                                 name=username)
-# foo
+        return render_template('register.html', diffPasswords=False, duplicateUser=False)
 
 if __name__ == "__main__":
     app.run(debug=True)
-
 
 #####################
 ## mySql commands: ##
