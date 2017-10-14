@@ -1,12 +1,12 @@
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from flaskext.mysql import MySQL
-from flask_restful import Resource, Api, reqparse
+#from flask_restful import Resource, Api, reqparse
 app = Flask(__name__)
 
 mysql = MySQL()
 app = Flask(__name__)
-api = Api(app)
+#api = Api(app)
 
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = ''
@@ -38,37 +38,45 @@ def Authenticate():
     else:
      return "Logged in successfully"
 
-class HandleRegister(Resource):
-	def post(self):
-		try:
-			parser = reqparse.RequestParser()
-            		parser.add_argument('email', type=str, help='Email address to create user')
-            		parser.add_argument('password', type=str, help='Password to create user')
-            		args = parser.parse_args()
+# class HandleRegister(Resource):
+# 	def post(self):
+# 		try:
+# 			parser = reqparse.RequestParser()
+#             		parser.add_argument('email', type=str, help='Email address to create user')
+#             		parser.add_argument('password', type=str, help='Password to create user')
+#             		args = parser.parse_args()
 
-            		_userEmail = args['email']
-            		_userPassword = args['password']
+#             		_userEmail = args['email']
+#             		_userPassword = args['password']
 
-            		conn = mysql.connect()
-            		cursor = conn.cursor()
-            		cursor.callproc('spCreateUser',(_userEmail,_userPassword))
-            		data = cursor.fetchall()
+#             		conn = mysql.connect()
+#             		cursor = conn.cursor()
+#             		cursor.callproc('spCreateUser',(_userEmail,_userPassword))
+#             		data = cursor.fetchall()
 
-            		if len(data) is 0:
-                		conn.commit()
-                		return {'StatusCode':'200','Message': 'User creation success'}
-            		else:
-            			return {'StatusCode':'1000','Message': str(data[0])}
+#             		if len(data) is 0:
+#                 		conn.commit()
+#                 		return {'StatusCode':'200','Message': 'User creation success'}
+#             		else:
+#             			return {'StatusCode':'1000','Message': str(data[0])}
 
-        	except Exception as e:
-            		return {'error': str(e)}
+#         	except Exception as e:
+#             		return {'error': str(e)}
 
-api.add_resource(HandleRegister, '/HandleRegister')
+# api.add_resource(HandleRegister, '/HandleRegister')
 
-# @app.route("/handleregister", methods=["GET","POST"])
-# def handle_reg():
-# 	return request.form["firstname"] request.form['lastname'] + request.form['username']
+@app.route("/HandleRegister", methods=["GET","POST"])
+def handle_reg():
+    if request.form['password'] != request.form['passwordconfirm']:
+        return redirect("/registerfail")
+    else:
+    #set up string in SQL request form
+        out = "INSERT INTO some_table_name(" + request.form['firstname'] + "," + request.form['lastname'] + "," + request.form['username'] + "," + request.form['password'] + ")"
+        return out
 
+@app.route("/registerfail", methods = ["GET","POST"])
+def registerfail():
+        return render_template('registerwrong.html')
 @app.route("/login")
 def login():
         return render_template('login.html')
