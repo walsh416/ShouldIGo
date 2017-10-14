@@ -31,27 +31,7 @@ connectionTemp.close()
 
 @app.route("/", methods=["GET","POST"])
 def hello():
-    return '''
-<head>
-        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}" />
-</head>
-<h1>Welcome to isThere.today!</h1>
-Click below to register or login.<br>
-<a href="/register">Register</a><br>
-<a href="/login">Login</a>
-'''
-
-# @app.route("/Authenticate")
-# def Authenticate():
-#     username = request.args.get('UserName')
-#     password = request.args.get('Password')
-#     cursor = mysql.connect().cursor()
-#     cursor.execute("SELECT * from User where Username='" + username + "' and Password='" + password + "'")
-#     data = cursor.fetchone()
-#     if data is None:
-#      return "Username or Password is wrong"
-#     else:
-#      return "Logged in successfully"
+    return render_template('splashScreen.html')
 
 @app.route("/HandleRegister", methods=["GET","POST"])
 def handle_reg():
@@ -59,27 +39,45 @@ def handle_reg():
         # return redirect("/registerfail")
         return render_template('register.html', diffPasswords=True, duplicateUser=False)
     else:
-        connection = mysql.connect()
-        cursor = connection.cursor()
+        try:
+            connection = mysql.connect()
+            cursor = connection.cursor()
 
-        _userFirstname = request.form['firstname']
-        _userLastname = request.form['lastname']
-        _userUsername = request.form['username']
-        _userPassword = request.form['password']
+            _userFirstname = request.form['firstname']
+            _userLastname = request.form['lastname']
+            _userUsername = request.form['username']
+            _userPassword = request.form['password']
 
+            out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\')"
+            cursor.execute(out)
+            connection.commit()
+
+<<<<<<< HEAD
         out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\')"
         cursor.execute(out)
         connection.commit()
 
         return redirect("/login")
+=======
+            # return redirect("/login")
+            return render_template('userHome.html', username=_userUsername, firstname=_userFirstname, lastname=_userLastname)
+        except Exception as e:
+            # print e;
+            # TODO: make sure Exception e is 1062 duplicate entry?
+            return render_template('register.html', diffPasswords=False, duplicateUser=True)
+>>>>>>> Tim
 
 @app.route("/login")
 def login():
-        return render_template('login.html')
+    return render_template('login.html')
 
 @app.route("/register", methods=["GET","POST"])
 def register():
-        return render_template('register.html', diffPasswords=False, duplicateUser=False)
+    return render_template('register.html', diffPasswords=False, duplicateUser=False)
+
+# @app.route("/user", methods=["GET","POST"])
+# def helloUser():
+#     return render_template('helloUser.html', )
 
 if __name__ == "__main__":
     app.run(debug=True)
