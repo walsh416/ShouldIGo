@@ -47,16 +47,10 @@ def handle_reg():
         try:
             connection = mysql.connect()
             cursor = connection.cursor()
-
             _userFirstname = request.form['firstname']
             _userLastname = request.form['lastname']
             _userUsername = request.form['username']
             _userPassword = hash(request.form['password'])
-
-            out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\')"
-            cursor.execute(out)
-            connection.commit()
-
 	        out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\')"
 	        cursor.execute(out)
 	        connection.commit()
