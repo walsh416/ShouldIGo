@@ -23,20 +23,20 @@ def hello():
 <h1>Welcome to isThere.today!</h1>
 Click below to register or login.<br>
 <a href="/register">Register</a><br>
-<a href="/login">Login</a> 
+<a href="/login">Login</a>
 '''
 
-@app.route("/Authenticate")
-def Authenticate():
-    username = request.args.get('UserName')
-    password = request.args.get('Password')
-    cursor = mysql.connect().cursor()
-    cursor.execute("SELECT * from User where Username='" + username + "' and Password='" + password + "'")
-    data = cursor.fetchone()
-    if data is None:
-     return "Username or Password is wrong"
-    else:
-     return "Logged in successfully"
+# @app.route("/Authenticate")
+# def Authenticate():
+#     username = request.args.get('UserName')
+#     password = request.args.get('Password')
+#     cursor = mysql.connect().cursor()
+#     cursor.execute("SELECT * from User where Username='" + username + "' and Password='" + password + "'")
+#     data = cursor.fetchone()
+#     if data is None:
+#      return "Username or Password is wrong"
+#     else:
+#      return "Logged in successfully"
 
 # class HandleRegister(Resource):
 # 	def post(self):
@@ -70,8 +70,16 @@ def handle_reg():
     if request.form['password'] != request.form['passwordconfirm']:
         return redirect("/registerfail")
     else:
-        connection = mysql.get_db()
-        cursor = connection.cursor() 
+        # connection = mysql.get_db()
+        connection = mysql.connect()
+        cursor = connection.cursor()
+
+        _userFirstname = request.form['firstname']
+        _userLastname = request.form['lastname']
+        _userUsername = request.form['username']
+        _userPassword = request.form['password']
+
+
     #set up string in SQL request form
         # out = "INSERT INTO some_table_name(" + request.form['firstname'] + "," + request.form['lastname'] + "," + request.form['username'] + "," + request.form['password'] + ")"
         # cursor.execute(out)
