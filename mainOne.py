@@ -1,6 +1,8 @@
 
 from flask import Flask, render_template, request, redirect, url_for
 from flaskext.mysql import MySQL
+import hashlib
+
 app = Flask(__name__)
 
 mysql = MySQL()
@@ -45,18 +47,18 @@ def handle_reg():
         return render_template('register.html', diffPasswords=True, duplicateUser=False)
     else:
         try:
-            connection = mysql.connect()
-            cursor = connection.cursor()
-            _userFirstname = request.form['firstname']
-            _userLastname = request.form['lastname']
-            _userUsername = request.form['username']
-            _userPassword = hash(request.form['password'])
-	        out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\')"
-	        cursor.execute(out)
-	        connection.commit()
-            return render_template('userHome.html', username=_userUsername, firstname=_userFirstname, lastname=_userLastname)
+			connection = mysql.connect()
+			cursor = connection.cursor()
+			_userFirstname = request.form['firstname']
+			_userLastname = request.form['lastname']
+			_userUsername = request.form['username']
+			_userPassword = hash(request.form['password'])
+			out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\')"
+			cursor.execute(out)
+			connection.commit()
+			return render_template('userHome.html', username=_userUsername, firstname=_userFirstname, lastname=_userLastname)
         except Exception as e:
-            # print e;
+            print e;
             # TODO: make sure Exception e is 1062 duplicate entry?
             return render_template('register.html', diffPasswords=False, duplicateUser=True)
 
