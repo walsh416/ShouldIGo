@@ -72,17 +72,17 @@ def handle_reg():
     else:
         # connection = mysql.get_db()
         connection = mysql.connect()
-        cursor = connection.cursor()
-
-        _userFirstname = request.form['firstname']
-        _userLastname = request.form['lastname']
-        _userUsername = request.form['username']
-        _userPassword = request.form['password']
-
-
-    #set up string in SQL request form
-        # out = "INSERT INTO some_table_name(" + request.form['firstname'] + "," + request.form['lastname'] + "," + request.form['username'] + "," + request.form['password'] + ")"
-        # cursor.execute(out)
+    #     cursor = connection.cursor()
+    #
+    #     _userFirstname = request.form['firstname']
+    #     _userLastname = request.form['lastname']
+    #     _userUsername = request.form['username']
+    #     _userPassword = request.form['password']
+    #
+    #
+    # #set up string in SQL request form
+    #     # out = "INSERT INTO some_table_name(" + request.form['firstname'] + "," + request.form['lastname'] + "," + request.form['username'] + "," + request.form['password'] + ")"
+    #     # cursor.execute(out)
         return redirect("/login")
 
 @app.route("/registerfail", methods = ["GET","POST"])
@@ -103,4 +103,17 @@ def register():
 
 if __name__ == "__main__":
     app.run(debug=True)
-#foo
+
+
+#####################
+## mySql commands: ##
+#####################
+# CREATE DATABASE userDb;
+# USE userDb;
+# CREATE TABLE User(
+# userId INT NOT NULL AUTO_INCREMENT,
+# firstname VARCHAR(50) NOT NULL,
+# lastname VARCHAR(50) NOT NULL,
+# password VARCHAR(40) NOT NULL,
+# primary key(userId)
+# );
