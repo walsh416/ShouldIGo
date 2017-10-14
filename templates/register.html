@@ -5,7 +5,7 @@
 <body>
 <h1>Welcome to isThere.today!</h1>
 	Please register below:
-<form>
+<form action="/HandleRegister" method = "POST">
 	First name:<br>
 	<input type="text" name="firstname"><br>
 	Last name:<br>
@@ -16,8 +16,9 @@
 	<input type="password" name="password"><br>
 	Confirm password:<br>
 	<input type="password" name="passwordconfirm"><br>
+	<input type="submit"  value="Register">
 </form>
-<button id="register">Register</button>
+<!-- <button id="register">Register</button> -->
 <a href="/">Cancel</a>
 
 </body>
