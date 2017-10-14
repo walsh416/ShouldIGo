@@ -34,7 +34,7 @@ def hash(rawpassword):
 	salt = "5gz"
 	db_password = rawpassword+salt
 	h = hashlib.md5(db_password.encode())
-	return h.hexdigest()
+	return str(h.hexdigest())
 
 @app.route("/", methods=["GET","POST"])
 def hello():
@@ -63,27 +63,35 @@ def handle_reg():
             return render_template('register.html', diffPasswords=False, duplicateUser=True)
 
 
-@app.route("/registerfail", methods = ["GET","POST"])
-def registerfail():
-    return render_template('registerwrong.html')
+# @app.route("/registerfail", methods = ["GET","POST"])
+# def registerfail():
+#     return render_template('registerwrong.html')
 
 @app.route("/loginCheck", methods = ["GET", "POST"])
 def loginCheck():
-    username = request.form['username']
-    password = request.form['password']
-    
-    cursor = mysql.connect().cursor()
-    cursor.execute("SELECT * from User where username='" + username + "' and password='" + password + "'")
-    data = cursor.fetchone()
-    if data is None:
-        return "Username or Password is wrong"
-    else:
-        return "Logged in successfully"
-    return render_template('login.html')
-    
+	_username = request.form['username']
+	_hashPassIn = hash(request.form['password'])
+
+	# TODO: get first, last name, etc from DB
+
+	cursor = mysql.connect().cursor()
+	cursor.execute("SELECT * from User where username='" + _username + "'")
+	data = cursor.fetchone()
+	# print "Hash pass in: " + _hashPassIn
+	# print "Hash pass out: " + data[3]
+	# print "data out: %s" % (data,)
+	if data is None:
+		return render_template('login.html', badUser=True, badPass=False)
+	_firstname = data[0]
+	_lastname = data[1]
+	_hashPassOut = data[3]
+	if _hashPassIn != _hashPassOut:
+		return render_template('login.html', badUser=False, badPass=True)
+	return render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname)
+
 @app.route("/login")
 def login():
-    return render_template('login.html')
+    return render_template('login.html', badlogin=False)
 
 @app.route("/register", methods=["GET","POST"])
 def register():
