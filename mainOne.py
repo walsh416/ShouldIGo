@@ -70,9 +70,12 @@ def handle_reg():
     if request.form['password'] != request.form['passwordconfirm']:
         return redirect("/registerfail")
     else:
+        connection = mysql.get_db()
+        cursor = connection.cursor() 
     #set up string in SQL request form
-        out = "INSERT INTO some_table_name(" + request.form['firstname'] + "," + request.form['lastname'] + "," + request.form['username'] + "," + request.form['password'] + ")"
-        return out
+        # out = "INSERT INTO some_table_name(" + request.form['firstname'] + "," + request.form['lastname'] + "," + request.form['username'] + "," + request.form['password'] + ")"
+        # cursor.execute(out)
+        return redirect("/login")
 
 @app.route("/registerfail", methods = ["GET","POST"])
 def registerfail():
