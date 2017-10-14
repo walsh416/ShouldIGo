@@ -59,18 +59,24 @@ def handle_reg():
         # return redirect("/registerfail")
         return render_template('register.html', diffPasswords=True, duplicateUser=False)
     else:
-        connection = mysql.connect()
-        cursor = connection.cursor()
+        try:
+            connection = mysql.connect()
+            cursor = connection.cursor()
 
-        _userFirstname = request.form['firstname']
-        _userLastname = request.form['lastname']
-        _userUsername = request.form['username']
-        _userPassword = request.form['password']
+            _userFirstname = request.form['firstname']
+            _userLastname = request.form['lastname']
+            _userUsername = request.form['username']
+            _userPassword = request.form['password']
 
-        out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\')"
-        cursor.execute(out)
-        connection.commit()
-        return redirect("/login")
+            out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\')"
+            cursor.execute(out)
+            connection.commit()
+
+            return redirect("/login")
+        except Exception as e:
+            # print e;
+            # TODO: make sure Exception e is 1062 duplicate entry?
+            return render_template('register.html', diffPasswords=False, duplicateUser=True)
 
 @app.route("/login")
 def login():
