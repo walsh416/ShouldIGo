@@ -1,12 +1,10 @@
 
 from flask import Flask, render_template, request, redirect, url_for
 from flaskext.mysql import MySQL
-#from flask_restful import Resource, Api, reqparse
 app = Flask(__name__)
 
 mysql = MySQL()
 app = Flask(__name__)
-#api = Api(app)
 
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = ''
@@ -55,39 +53,12 @@ Click below to register or login.<br>
 #     else:
 #      return "Logged in successfully"
 
-# class HandleRegister(Resource):
-# 	def post(self):
-# 		try:
-# 			parser = reqparse.RequestParser()
-#             		parser.add_argument('email', type=str, help='Email address to create user')
-#             		parser.add_argument('password', type=str, help='Password to create user')
-#             		args = parser.parse_args()
-
-#             		_userEmail = args['email']
-#             		_userPassword = args['password']
-
-#             		conn = mysql.connect()
-#             		cursor = conn.cursor()
-#             		cursor.callproc('spCreateUser',(_userEmail,_userPassword))
-#             		data = cursor.fetchall()
-
-#             		if len(data) is 0:
-#                 		conn.commit()
-#                 		return {'StatusCode':'200','Message': 'User creation success'}
-#             		else:
-#             			return {'StatusCode':'1000','Message': str(data[0])}
-
-#         	except Exception as e:
-#             		return {'error': str(e)}
-
-# api.add_resource(HandleRegister, '/HandleRegister')
-
 @app.route("/HandleRegister", methods=["GET","POST"])
 def handle_reg():
     if request.form['password'] != request.form['passwordconfirm']:
-        return redirect("/registerfail")
+        # return redirect("/registerfail")
+        return render_template('register.html', diffPasswords=True, duplicateUser=False)
     else:
-        # connection = mysql.get_db()
         connection = mysql.connect()
         cursor = connection.cursor()
 
@@ -96,10 +67,6 @@ def handle_reg():
         _userUsername = request.form['username']
         _userPassword = request.form['password']
 
-        # print _userUsername
-
-    # #set up string in SQL request form
-        # out = "INSERT INTO User values(" + "\'\',\'" + request.form['firstname'] + "\',\'" + request.form['lastname'] + "\',\'" + request.form['password'] + "\')"
         out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\')"
         cursor.execute(out)
         connection.commit()
@@ -108,19 +75,14 @@ def handle_reg():
 @app.route("/registerfail", methods = ["GET","POST"])
 def registerfail():
         return render_template('registerwrong.html')
+
 @app.route("/login")
 def login():
         return render_template('login.html')
 
 @app.route("/register", methods=["GET","POST"])
 def register():
-        return render_template('register.html')
-
-# @app.route("/<username>")
-# def bar(username):
-#         return render_template('userTemplate.html',
-#                                 name=username)
-# foo
+        return render_template('register.html', diffPasswords=False, duplicateUser=False)
 
 if __name__ == "__main__":
     app.run(debug=True)
