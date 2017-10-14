@@ -70,15 +70,9 @@ def handle_reg():
         out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\')"
         cursor.execute(out)
         connection.commit()
+
         return redirect("/login")
 
-<<<<<<< HEAD
-@app.route("/registerfail", methods = ["GET","POST"])
-def registerfail():
-        return render_template('registerwrong.html')
-
-=======
->>>>>>> Tim
 @app.route("/login")
 def login():
         return render_template('login.html')
