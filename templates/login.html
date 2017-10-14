@@ -5,13 +5,14 @@
 <body>
 <h1>Welcome to isThere.today!</h1>
 Please login below:
-<form>
+<form action="/loginCheck" method = "POST">
 	Username:<br>
 	<input type="text" name="username"><br>
 	Password:<br>
 	<input type="password" name="password"><br>
-	</form>
-<button id="login">Login</button>
+	<input type="submit" value = "login">
+</form>
+
 <a href="/">Cancel</a>
 </body>
 </html>
