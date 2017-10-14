@@ -4,6 +4,12 @@
 </head>
 <body>
 <h1>Welcome to isThere.today!</h1>
+  {% if diffPasswords == true %}
+  Passwords don't match!<br><br>
+  {% endif %}
+  {% if duplicateUser == true %}
+  Username already in use, select another!<br>
+  {% endif %}
 	Please register below:
 <form action="/HandleRegister" method = "POST">
 	First name:<br>
