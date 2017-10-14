@@ -1,18 +1,34 @@
 
 from flask import Flask, render_template, request, redirect, url_for
 from flaskext.mysql import MySQL
-#from flask_restful import Resource, Api, reqparse
+
 app = Flask(__name__)
 
 mysql = MySQL()
 app = Flask(__name__)
-#api = Api(app)
 
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = ''
 app.config['MYSQL_DATABASE_DB'] = 'userDb'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
+
+connectionTemp = mysql.connect()
+cursorTemp = connectionTemp.cursor()
+out = '''DROP database IF EXISTS userDb;
+CREATE DATABASE userDb;
+USE userDb;
+CREATE TABLE User(
+firstname VARCHAR(50) NOT NULL,
+lastname VARCHAR(50) NOT NULL,
+username VARCHAR(50) NOT NULL,
+password VARCHAR(40) NOT NULL,
+primary key(username)
+);'''
+cursorTemp.execute(out)
+connectionTemp.commit()
+connectionTemp.close()
+
 
 @app.route("/", methods=["GET","POST"])
 def hello():
@@ -26,51 +42,12 @@ Click below to register or login.<br>
 <a href="/login">Login</a>
 '''
 
-# @app.route("/Authenticate")
-# def Authenticate():
-#     username = request.args.get('UserName')
-#     password = request.args.get('Password')
-#     cursor = mysql.connect().cursor()
-#     cursor.execute("SELECT * from User where Username='" + username + "' and Password='" + password + "'")
-#     data = cursor.fetchone()
-#     if data is None:
-#      return "Username or Password is wrong"
-#     else:
-#      return "Logged in successfully"
-
-# class HandleRegister(Resource):
-# 	def post(self):
-# 		try:
-# 			parser = reqparse.RequestParser()
-#             		parser.add_argument('email', type=str, help='Email address to create user')
-#             		parser.add_argument('password', type=str, help='Password to create user')
-#             		args = parser.parse_args()
-
-#             		_userEmail = args['email']
-#             		_userPassword = args['password']
-
-#             		conn = mysql.connect()
-#             		cursor = conn.cursor()
-#             		cursor.callproc('spCreateUser',(_userEmail,_userPassword))
-#             		data = cursor.fetchall()
-
-#             		if len(data) is 0:
-#                 		conn.commit()
-#                 		return {'StatusCode':'200','Message': 'User creation success'}
-#             		else:
-#             			return {'StatusCode':'1000','Message': str(data[0])}
-
-#         	except Exception as e:
-#             		return {'error': str(e)}
-
-# api.add_resource(HandleRegister, '/HandleRegister')
 
 @app.route("/HandleRegister", methods=["GET","POST"])
 def handle_reg():
     if request.form['password'] != request.form['passwordconfirm']:
         return redirect("/registerfail")
     else:
-        # connection = mysql.get_db()
         connection = mysql.connect()
         cursor = connection.cursor()
 
@@ -79,15 +56,29 @@ def handle_reg():
         _userUsername = request.form['username']
         _userPassword = request.form['password']
 
-
-    #set up string in SQL request form
-        # out = "INSERT INTO some_table_name(" + request.form['firstname'] + "," + request.form['lastname'] + "," + request.form['username'] + "," + request.form['password'] + ")"
-        # cursor.execute(out)
+        out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\')"
+        cursor.execute(out)
+        connection.commit()
         return redirect("/login")
 
 @app.route("/registerfail", methods = ["GET","POST"])
 def registerfail():
-        return render_template('registerwrong.html')
+    return render_template('registerwrong.html')
+
+@app.route("/loginCheck", methods = ["GET", "POST"])
+def loginCheck():
+    username = request.form['username']
+    password = request.form['password']
+    
+    cursor = mysql.connect().cursor()
+    cursor.execute("SELECT * from user where username='" + username + "' and password='" + password + "'")
+    data = cursor.fetchone()
+    if data is None:
+        return "Username or Password is wrong"
+    else:
+        return "Logged in successfully"
+    return render_template('login.html')
+    
 @app.route("/login")
 def login():
         return render_template('login.html')
@@ -100,6 +91,22 @@ def register():
 # def bar(username):
 #         return render_template('userTemplate.html',
 #                                 name=username)
+# foo
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+#####################
+## mySql commands: ##
+#####################
+# DROP database IF EXISTS userDb;
+# CREATE DATABASE userDb;
+# USE userDb;
+# CREATE TABLE User(
+# firstname VARCHAR(50) NOT NULL,
+# lastname VARCHAR(50) NOT NULL,
+# username VARCHAR(50) NOT NULL,
+# password VARCHAR(40) NOT NULL,
+# primary key(username)
+# );
