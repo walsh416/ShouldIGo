@@ -71,7 +71,7 @@ def loginCheck():
     password = request.form['password']
     
     cursor = mysql.connect().cursor()
-    cursor.execute("SELECT * from user where username='" + username + "' and password='" + password + "'")
+    cursor.execute("SELECT * from User where username='" + username + "' and password='" + password + "'")
     data = cursor.fetchone()
     if data is None:
         return "Username or Password is wrong"
