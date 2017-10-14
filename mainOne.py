@@ -63,6 +63,24 @@ def handle_reg():
             return render_template('register.html', diffPasswords=False, duplicateUser=True)
 
 
+@app.route("/registerfail", methods = ["GET","POST"])
+def registerfail():
+    return render_template('registerwrong.html')
+
+@app.route("/loginCheck", methods = ["GET", "POST"])
+def loginCheck():
+    username = request.form['username']
+    password = request.form['password']
+    
+    cursor = mysql.connect().cursor()
+    cursor.execute("SELECT * from User where username='" + username + "' and password='" + password + "'")
+    data = cursor.fetchone()
+    if data is None:
+        return "Username or Password is wrong"
+    else:
+        return "Logged in successfully"
+    return render_template('login.html')
+    
 @app.route("/login")
 def login():
     return render_template('login.html')
