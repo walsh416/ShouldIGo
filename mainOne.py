@@ -72,10 +72,6 @@ def handle_reg():
         connection.commit()
         return redirect("/login")
 
-@app.route("/registerfail", methods = ["GET","POST"])
-def registerfail():
-        return render_template('registerwrong.html')
-
 @app.route("/login")
 def login():
         return render_template('login.html')
@@ -86,7 +82,6 @@ def register():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
 
 #####################
 ## mySql commands: ##
