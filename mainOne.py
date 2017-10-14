@@ -28,6 +28,11 @@ cursorTemp.execute(out)
 connectionTemp.commit()
 connectionTemp.close()
 
+def hash(rawpassword):
+	salt = "5gz"
+	db_password = rawpassword+salt
+	h = hashlib.md5(db_password.encode())
+	return h.hexdigest()
 
 @app.route("/", methods=["GET","POST"])
 def hello():
@@ -46,7 +51,7 @@ def handle_reg():
             _userFirstname = request.form['firstname']
             _userLastname = request.form['lastname']
             _userUsername = request.form['username']
-            _userPassword = request.form['password']
+            _userPassword = hash(request.form['password'])
 
             out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\')"
             cursor.execute(out)
