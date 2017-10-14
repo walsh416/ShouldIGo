@@ -14,6 +14,23 @@ app.config['MYSQL_DATABASE_DB'] = 'userDb'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
 
+connectionTemp = mysql.connect()
+cursorTemp = connectionTemp.cursor()
+out = '''DROP database IF EXISTS userDb;
+CREATE DATABASE userDb;
+USE userDb;
+CREATE TABLE User(
+firstname VARCHAR(50) NOT NULL,
+lastname VARCHAR(50) NOT NULL,
+username VARCHAR(50) NOT NULL,
+password VARCHAR(40) NOT NULL,
+primary key(username)
+);'''
+cursorTemp.execute(out)
+connectionTemp.commit()
+connectionTemp.close()
+
+
 @app.route("/", methods=["GET","POST"])
 def hello():
     return '''
@@ -72,17 +89,20 @@ def handle_reg():
     else:
         # connection = mysql.get_db()
         connection = mysql.connect()
-    #     cursor = connection.cursor()
-    #
-    #     _userFirstname = request.form['firstname']
-    #     _userLastname = request.form['lastname']
-    #     _userUsername = request.form['username']
-    #     _userPassword = request.form['password']
-    #
-    #
+        cursor = connection.cursor()
+
+        _userFirstname = request.form['firstname']
+        _userLastname = request.form['lastname']
+        _userUsername = request.form['username']
+        _userPassword = request.form['password']
+
+        # print _userUsername
+
     # #set up string in SQL request form
-    #     # out = "INSERT INTO some_table_name(" + request.form['firstname'] + "," + request.form['lastname'] + "," + request.form['username'] + "," + request.form['password'] + ")"
-    #     # cursor.execute(out)
+        # out = "INSERT INTO User values(" + "\'\',\'" + request.form['firstname'] + "\',\'" + request.form['lastname'] + "\',\'" + request.form['password'] + "\')"
+        out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\')"
+        cursor.execute(out)
+        connection.commit()
         return redirect("/login")
 
 @app.route("/registerfail", methods = ["GET","POST"])
@@ -109,12 +129,13 @@ if __name__ == "__main__":
 #####################
 ## mySql commands: ##
 #####################
+# DROP database IF EXISTS userDb;
 # CREATE DATABASE userDb;
 # USE userDb;
 # CREATE TABLE User(
-# userId INT NOT NULL AUTO_INCREMENT,
 # firstname VARCHAR(50) NOT NULL,
 # lastname VARCHAR(50) NOT NULL,
+# username VARCHAR(50) NOT NULL,
 # password VARCHAR(40) NOT NULL,
-# primary key(userId)
+# primary key(username)
 # );
