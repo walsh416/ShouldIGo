@@ -13,7 +13,7 @@ app.config['MYSQL_DATABASE_PASSWORD'] = ''
 app.config['MYSQL_DATABASE_DB'] = 'userDb'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
-# foo bar
+
 connectionTemp = mysql.connect()
 cursorTemp = connectionTemp.cursor()
 out = '''DROP database IF EXISTS userDb;
