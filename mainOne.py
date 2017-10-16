@@ -1,7 +1,7 @@
 
 from flask import Flask, render_template, request, redirect, url_for
 from flaskext.mysql import MySQL
-import hashlib
+import hashlib, os
 
 app = Flask(__name__)
 
@@ -23,17 +23,19 @@ CREATE TABLE User(
 firstname VARCHAR(50) NOT NULL,
 lastname VARCHAR(50) NOT NULL,
 username VARCHAR(50) NOT NULL,
-password VARCHAR(40) NOT NULL,
+password VARCHAR(80) NOT NULL,
+salt VARCHAR(80) NOT NULL,
 primary key(username)
 );'''
 cursorTemp.execute(out)
 connectionTemp.commit()
 connectionTemp.close()
 
-def hash(rawpassword):
-	salt = "5gz"
-	db_password = rawpassword+salt
-	h = hashlib.md5(db_password.encode())
+def get_salt():
+	return str(hashlib.md5(os.urandom(64).encode("base-64")).hexdigest())
+
+def hash_pass(rawpassword):
+	h = hashlib.md5(rawpassword.encode())
 	return str(h.hexdigest())
 
 @app.route("/", methods=["GET","POST"])
@@ -52,8 +54,9 @@ def handle_reg():
 			_userFirstname = request.form['firstname']
 			_userLastname = request.form['lastname']
 			_userUsername = request.form['username']
-			_userPassword = hash(request.form['password'])
-			out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\')"
+			_userSalt = get_salt()
+			_userPassword = hash_pass(request.form['password'] + _userSalt)
+			out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\')"
 			cursor.execute(out)
 			connection.commit()
 			return render_template('userHome.html', username=_userUsername, firstname=_userFirstname, lastname=_userLastname)
@@ -70,7 +73,6 @@ def handle_reg():
 @app.route("/loginCheck", methods = ["GET", "POST"])
 def loginCheck():
 	_username = request.form['username']
-	_hashPassIn = hash(request.form['password'])
 
 	# TODO: get first, last name, etc from DB
 
@@ -85,6 +87,10 @@ def loginCheck():
 	_firstname = data[0]
 	_lastname = data[1]
 	_hashPassOut = data[3]
+	_saltOut = data[4]
+
+	_hashPassIn = hash_pass(request.form['password'] + _saltOut)
+
 	if _hashPassIn != _hashPassOut:
 		return render_template('login.html', badUser=False, badPass=True)
 	return render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname)
