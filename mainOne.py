@@ -19,8 +19,9 @@ mysql.init_app(app)
 ######################################
 # connectionTemp = mysql.connect()
 # cursorTemp = connectionTemp.cursor()
-# # out = '''DROP database IF EXISTS userDb;
-# out = '''USE userDb;
+# out = '''DROP database IF EXISTS userDb;
+# CREATE DATABASE userDb;
+# USE userDb;
 # CREATE TABLE User(
 # firstname VARCHAR(50) NOT NULL,
 # lastname VARCHAR(50) NOT NULL,
@@ -39,6 +40,10 @@ mysql.init_app(app)
 # connectionTemp.commit()
 # connectionTemp.close()
 ######################################
+
+# TODO: change column names in Event, add event attributes, etc
+# TODO: allow deletion of events, user accounts, etc
+# TODO: make events... do something
 
 def get_x_daysFromNow(x):
 	return datetime.today() + timedelta(days=x)
@@ -59,11 +64,13 @@ def splashScreen():
 		data = cursor.fetchone()
 		if data is None:
 			return render_template('login.html', badUser=True, badPass=False)
+		print data
 		_firstname = data[0]
 		_lastname = data[1]
 		_ownedEvents=data[5]
+		_ownsEvents=(_ownedEvents == None)
 
-		resp = make_response(render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname, ownedEvents=_ownedEvents))
+		resp = make_response(render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname, ownedevents=_ownedEvents, ownsevents=_ownedEvents))
 		resp.set_cookie('username', _username, expires=get_x_daysFromNow(90))
 		return resp
 	else:
@@ -78,7 +85,7 @@ def logout():
 @app.route("/login", methods = ["GET","POST"])
 def login():
 	if request.method == "POST":
-		_username = request.form['username']
+		_username = request.form.get('username')
 
 		cursor = mysql.connect().cursor()
 		cursor.execute("SELECT * from User where username='" + _username + "'")
@@ -91,7 +98,7 @@ def login():
 		_saltOut = data[4]
 		_ownedEvents=data[5]
 
-		_hashPassIn = hash_pass(request.form['password'] + _saltOut)
+		_hashPassIn = hash_pass(request.form.get('password') + _saltOut)
 		if _hashPassIn != _hashPassOut:
 			return render_template('login.html', badUser=False, badPass=True)
 		# return render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname, ownedEvents=_ownedEvents)
@@ -107,18 +114,18 @@ def login():
 @app.route("/register", methods=["GET","POST"])
 def register():
 	if request.method == "POST":
-		if request.form['password'] != request.form['passwordconfirm']:
+		if request.form.get('password') != request.form.get('passwordconfirm'):
 			# return redirect("/registerfail")
 			return render_template('register.html', diffPasswords=True, duplicateUser=False)
 		else:
 			try:
 				connection = mysql.connect()
 				cursor = connection.cursor()
-				_userFirstname = request.form['firstname']
-				_userLastname = request.form['lastname']
-				_userUsername = request.form['username']
+				_userFirstname = request.form.get('firstname')
+				_userLastname = request.form.get('lastname')
+				_userUsername = request.form.get('username')
 				_userSalt = get_salt()
-				_userPassword = hash_pass(request.form['password'] + _userSalt)
+				_userPassword = hash_pass(request.form.get('password') + _userSalt)
 				out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\',\'\')"
 				cursor.execute(out)
 				connection.commit()
@@ -137,9 +144,60 @@ def register():
 
 @app.route("/createEvent", methods=["GET","POST"])
 def createEvent():
-	# need to know username here... pass in post method from incoming page?
-	_firstname = "MY FIRST NAME"
-	return render_template('createEvent.html', firstname=_firstname, urlInUse=None, firstTime=True)
+	_username = request.cookies.get('username')
+	if not _username:
+		return redirect(url_for('splashScreen'))
+	connection = mysql.connect()
+	cursor = connection.cursor()
+	cursor.execute("SELECT * from User where username='" + _username + "'")
+	data = cursor.fetchone()
+	if data is None:
+		return redirect(url_for('login'))
+	_firstname = data[0]
+	_lastname = data[1]
+	_ownedEvents=data[5]
+
+	if request.method == "POST":
+		# if doesn't have value for eventName, then still trying to pick a URL
+		if not request.form.get('eventName'):
+			eventUrl=request.form.get('eventURL')
+			# cursor = mysql.connect().cursor()
+			cursor.execute("SELECT * from Event where eventURL='" + eventUrl + "'")
+			data = cursor.fetchone()
+			if data is None:
+				# move on to second stage of creation, picking name and stuff
+				# set cookie with eventURL, temporary, will be destroyed in stage two
+				resp = make_response(render_template('createEvent.html', firstname=_firstname, urlInUse=False, eventURL=eventUrl))
+				resp.set_cookie('eventURL',eventUrl, expires=get_x_daysFromNow(2))
+				return resp
+				# return render_template('createEvent.html', firstname=_firstname, urlInUse=False, eventURL=request.form.get('eventURL'))
+			else:
+				return render_template('createEvent.html', firstname=_firstname, urlInUse=True)
+		else:
+			eventUrl = request.cookies.get('eventURL')
+			eventName = request.form.get('eventName')
+
+			# add event to Event table
+			# connection = mysql.connect()
+			# cursor = connection.cursor()
+			out = "INSERT INTO Event values('" + eventUrl + "', '" + eventName + "')"
+			cursor.execute(out)
+			connection.commit()
+
+			# get old list of ownedEvents from User table
+			cursor.execute("SELECT ownedEventsCSV from User where username='" + _username + "'")
+			data = cursor.fetchone()
+			# append new event to list of old events:
+			out = "UPDATE User SET ownedEventsCSV='" + data[0] + eventUrl + ",' WHERE username='" + _username + "'"
+			cursor.execute(out)
+			connection.commit()
+			# print ("URL: "+eventUrl+", name: "+request.form.get('eventName'))
+
+			resp = make_response(redirect(url_for('splashScreen')))
+			resp.set_cookie('eventUrl', '', expires=0)
+			return resp
+	else:
+		return render_template('createEvent.html', firstname=_firstname, firstTime=True)
 
 # @app.route("/user", methods=["GET","POST"])
 # def helloUser():
