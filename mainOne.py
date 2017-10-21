@@ -63,15 +63,11 @@ def splashScreen():
 		resp.set_cookie('username', _username)
 		return resp
 	else:
-		print "no username!"
 		return render_template('splashScreen.html')
 
 @app.route("/logout")
 def logout():
-	# this one errors out, it doesn't like url_for("/")
-	# resp = make_response(redirect(url_for("/index")))
-	# but this one should be legal:
-	resp = make_response(redirect("/"))
+	resp = make_response(redirect(url_for("splashScreen")))
 	resp.set_cookie('username', '', expires=0)
 	return resp
 
@@ -96,7 +92,9 @@ def login():
 			return render_template('login.html', badUser=False, badPass=True)
 		# return render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname, ownedEvents=_ownedEvents)
 
-		resp = make_response(render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname, ownedEvents=_ownedEvents))
+		# resp = make_response(render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname, ownedEvents=_ownedEvents))
+		# resp = make_response(redirect(url_for('splashScreen', username=_username, firstname=_firstname, lastname=_lastname, ownedEvents=_ownedEvents)))
+		resp = make_response(redirect(url_for('splashScreen')))
 		resp.set_cookie('username', _username)
 		return resp
 	else:
@@ -122,7 +120,8 @@ def register():
 				connection.commit()
 				# return render_template('userHome.html', username=_userUsername, firstname=_userFirstname, lastname=_userLastname)
 
-	   			resp = make_response(render_template('userHome.html', username=_userUsername, firstname=_userFirstname, lastname=_userLastname))
+				# 			resp = make_response(render_template('userHome.html', username=_userUsername, firstname=_userFirstname, lastname=_userLastname))
+				resp = make_response(redirect(url_for('splashScreen')))
 				resp.set_cookie('username', _userUsername)
 				return resp
 			except Exception as e:
