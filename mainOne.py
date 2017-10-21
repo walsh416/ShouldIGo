@@ -1,6 +1,7 @@
 
 from flask import Flask, render_template, request, redirect, url_for, make_response
 from flaskext.mysql import MySQL
+from datetime import datetime, timedelta
 import hashlib, os
 
 app = Flask(__name__)
@@ -39,6 +40,9 @@ mysql.init_app(app)
 # connectionTemp.close()
 ######################################
 
+def get_x_daysFromNow(x):
+	return datetime.today() + timedelta(days=x)
+
 def get_salt():
 	return str(hashlib.md5(os.urandom(64).encode("base-64")).hexdigest())
 
@@ -60,7 +64,7 @@ def splashScreen():
 		_ownedEvents=data[5]
 
 		resp = make_response(render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname, ownedEvents=_ownedEvents))
-		resp.set_cookie('username', _username)
+		resp.set_cookie('username', _username, expires=get_x_daysFromNow(90))
 		return resp
 	else:
 		return render_template('splashScreen.html')
@@ -95,7 +99,7 @@ def login():
 		# resp = make_response(render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname, ownedEvents=_ownedEvents))
 		# resp = make_response(redirect(url_for('splashScreen', username=_username, firstname=_firstname, lastname=_lastname, ownedEvents=_ownedEvents)))
 		resp = make_response(redirect(url_for('splashScreen')))
-		resp.set_cookie('username', _username)
+		resp.set_cookie('username', _username, expires=get_x_daysFromNow(90))
 		return resp
 	else:
 	    return render_template('login.html', badlogin=False)
@@ -122,7 +126,7 @@ def register():
 
 				# 			resp = make_response(render_template('userHome.html', username=_userUsername, firstname=_userFirstname, lastname=_userLastname))
 				resp = make_response(redirect(url_for('splashScreen')))
-				resp.set_cookie('username', _userUsername)
+				resp.set_cookie('username', _userUsername, expires=get_x_daysFromNow(90))
 				return resp
 			except Exception as e:
 				print e;
