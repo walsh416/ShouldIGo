@@ -23,10 +23,15 @@ CREATE TABLE User(
 firstname VARCHAR(50) NOT NULL,
 lastname VARCHAR(50) NOT NULL,
 username VARCHAR(50) NOT NULL,
-ownedPagesCSV VARCHAR(200),
 password VARCHAR(80) NOT NULL,
 salt VARCHAR(80) NOT NULL,
+ownedEventsCSV VARCHAR(200),
 primary key(username)
+);
+CREATE TABLE Event(
+eventURL VARCHAR(50) NOT NULL,
+ownersCSV VARCHAR(200) NOT NULL,
+primary key(eventURL)
 );'''
 cursorTemp.execute(out)
 connectionTemp.commit()
@@ -40,7 +45,7 @@ def hash_pass(rawpassword):
 	return str(h.hexdigest())
 
 @app.route("/", methods=["GET","POST"])
-def hello():
+def splashScreen():
     return render_template('splashScreen.html')
 
 @app.route("/HandleRegister", methods=["GET","POST"])
@@ -57,7 +62,7 @@ def handle_reg():
 			_userUsername = request.form['username']
 			_userSalt = get_salt()
 			_userPassword = hash_pass(request.form['password'] + _userSalt)
-			out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'\',\'" + _userPassword + "\',\'" + _userSalt + "\')"
+			out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\',\'\')"
 			cursor.execute(out)
 			connection.commit()
 			return render_template('userHome.html', username=_userUsername, firstname=_userFirstname, lastname=_userLastname)
@@ -66,44 +71,66 @@ def handle_reg():
             # TODO: make sure Exception e is 1062 duplicate entry?
             return render_template('register.html', diffPasswords=False, duplicateUser=True)
 
-
-# @app.route("/registerfail", methods = ["GET","POST"])
-# def registerfail():
-#     return render_template('registerwrong.html')
-
-@app.route("/loginCheck", methods = ["GET", "POST"])
-def loginCheck():
-	_username = request.form['username']
-
-	# TODO: get first, last name, etc from DB
-
-	cursor = mysql.connect().cursor()
-	cursor.execute("SELECT * from User where username='" + _username + "'")
-	data = cursor.fetchone()
-	# print "Hash pass in: " + _hashPassIn
-	# print "Hash pass out: " + data[3]
-	# print "data out: %s" % (data,)
-	if data is None:
-		return render_template('login.html', badUser=True, badPass=False)
-	_firstname = data[0]
-	_lastname = data[1]
-	_ownedPages = data[3]
-	_hashPassOut = data[4]
-	_saltOut = data[5]
-
-	_hashPassIn = hash_pass(request.form['password'] + _saltOut)
-
-	if _hashPassIn != _hashPassOut:
-		return render_template('login.html', badUser=False, badPass=True)
-	return render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname, ownedPages=_ownedSites)
-
-@app.route("/login")
+@app.route("/login", methods = ["GET","POST"])
 def login():
-    return render_template('login.html', badlogin=False)
+	if request.method == "POST":
+		_username = request.form['username']
+
+		# TODO: get first, last name, etc from DB
+
+		cursor = mysql.connect().cursor()
+		cursor.execute("SELECT * from User where username='" + _username + "'")
+		data = cursor.fetchone()
+		# print "Hash pass in: " + _hashPassIn
+		# print "Hash pass out: " + data[3]
+		# print "data out: %s" % (data,)
+		if data is None:
+			return render_template('login.html', badUser=True, badPass=False)
+		_firstname = data[0]
+		_lastname = data[1]
+		_hashPassOut = data[3]
+		_saltOut = data[4]
+		_ownedEvents=data[5]
+
+		_hashPassIn = hash_pass(request.form['password'] + _saltOut)
+
+		if _hashPassIn != _hashPassOut:
+			return render_template('login.html', badUser=False, badPass=True)
+		return render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname, ownedEvents=_ownedEvents)
+	else:
+	    return render_template('login.html', badlogin=False)
 
 @app.route("/register", methods=["GET","POST"])
 def register():
-    return render_template('register.html', diffPasswords=False, duplicateUser=False)
+	if request.method == "POST":
+		if request.form['password'] != request.form['passwordconfirm']:
+			# return redirect("/registerfail")
+			return render_template('register.html', diffPasswords=True, duplicateUser=False)
+		else:
+			try:
+				connection = mysql.connect()
+				cursor = connection.cursor()
+				_userFirstname = request.form['firstname']
+				_userLastname = request.form['lastname']
+				_userUsername = request.form['username']
+				_userSalt = get_salt()
+				_userPassword = hash_pass(request.form['password'] + _userSalt)
+				out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\',\'\')"
+				cursor.execute(out)
+				connection.commit()
+				return render_template('userHome.html', username=_userUsername, firstname=_userFirstname, lastname=_userLastname)
+			except Exception as e:
+				print e;
+				# TODO: make sure Exception e is 1062 duplicate entry?
+				return render_template('register.html', diffPasswords=False, duplicateUser=True)
+	else:
+	    return render_template('register.html', diffPasswords=False, duplicateUser=False)
+
+@app.route("/createEvent", methods=["GET","POST"])
+def createEvent():
+	# need to know username here... pass in post method from incoming page?
+	_firstname = "MY FIRST NAME"
+	return render_template('createEvent.html', firstname=_firstname, urlInUse=None, firstTime=True)
 
 # @app.route("/user", methods=["GET","POST"])
 # def helloUser():
