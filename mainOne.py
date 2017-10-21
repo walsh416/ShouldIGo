@@ -23,6 +23,7 @@ CREATE TABLE User(
 firstname VARCHAR(50) NOT NULL,
 lastname VARCHAR(50) NOT NULL,
 username VARCHAR(50) NOT NULL,
+ownedPagesCSV VARCHAR(200),
 password VARCHAR(80) NOT NULL,
 salt VARCHAR(80) NOT NULL,
 primary key(username)
@@ -56,7 +57,7 @@ def handle_reg():
 			_userUsername = request.form['username']
 			_userSalt = get_salt()
 			_userPassword = hash_pass(request.form['password'] + _userSalt)
-			out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\')"
+			out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'\',\'" + _userPassword + "\',\'" + _userSalt + "\')"
 			cursor.execute(out)
 			connection.commit()
 			return render_template('userHome.html', username=_userUsername, firstname=_userFirstname, lastname=_userLastname)
@@ -86,14 +87,15 @@ def loginCheck():
 		return render_template('login.html', badUser=True, badPass=False)
 	_firstname = data[0]
 	_lastname = data[1]
-	_hashPassOut = data[3]
-	_saltOut = data[4]
+	_ownedPages = data[3]
+	_hashPassOut = data[4]
+	_saltOut = data[5]
 
 	_hashPassIn = hash_pass(request.form['password'] + _saltOut)
 
 	if _hashPassIn != _hashPassOut:
 		return render_template('login.html', badUser=False, badPass=True)
-	return render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname)
+	return render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname, ownedPages=_ownedSites)
 
 @app.route("/login")
 def login():
