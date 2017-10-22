@@ -55,6 +55,19 @@ def hash_pass(rawpassword):
 	h = hashlib.md5(rawpassword.encode())
 	return str(h.hexdigest())
 
+def eventUrlCSV_to_eventNameStrList(csvIn):
+	urlList = csvIn.split(",")
+	nameList = []
+	cursor = mysql.connect().cursor()
+	for url in urlList:
+		# TODO: fix this, obviously
+		cursor.execute("SELECT * from Event where eventURL='" + url + "'")
+		data = cursor.fetchone()
+		if data is not None:
+			eventName = data[1]
+			nameList.append(eventName)
+	return nameList
+
 @app.route("/", methods=["GET","POST"])
 def splashScreen():
 	_username = request.cookies.get('username')
@@ -68,9 +81,9 @@ def splashScreen():
 		_firstname = data[0]
 		_lastname = data[1]
 		_ownedEvents=data[5]
-		_ownsEvents=(_ownedEvents == None)
+		_ownedEventsList = eventUrlCSV_to_eventNameStrList(_ownedEvents)
 
-		resp = make_response(render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname, ownedevents=_ownedEvents, ownsevents=_ownedEvents))
+		resp = make_response(render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname, ownedevents=_ownedEventsList))
 		resp.set_cookie('username', _username, expires=get_x_daysFromNow(90))
 		return resp
 	else:

@@ -8,8 +8,12 @@ Your username is {{username}}<br>
 And your full name is {{firstname}} {{lastname}}<br>
 I'd show you your hashed password, but then I'd have to kill you.<br>
 <br>
-{% if ownsevents %}
-Your owned events are: {{ownedevents}}<br>
+{% if ownedevents %}
+<!-- Your owned events are: {{ownedevents}}<br> -->
+Your owned events are:
+{% for event in ownedevents %}
+{{event}},
+{% endfor %}<br>
 {% else %}
 You do not currently own any events! Click below to make some!<br>
 {% endif %}
