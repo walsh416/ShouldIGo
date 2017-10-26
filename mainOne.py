@@ -13,33 +13,6 @@ app.config['MYSQL_DATABASE_DB'] = 'userDb'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
 
-# commented out all the stuff to create a new database each time:
-######################################
-# connectionTemp = mysql.connect()
-# cursorTemp = connectionTemp.cursor()
-# out = '''DROP database IF EXISTS userDb;
-# CREATE DATABASE userDb;
-# USE userDb;
-# CREATE TABLE User(
-# firstname VARCHAR(50) NOT NULL,
-# lastname VARCHAR(50) NOT NULL,
-# username VARCHAR(50) NOT NULL,
-# password VARCHAR(80) NOT NULL,
-# salt VARCHAR(80) NOT NULL,
-# ownedEventsCSV VARCHAR(200),
-# primary key(username)
-# );
-# CREATE TABLE Event(
-# eventUrl VARCHAR(50) NOT NULL,
-# ownersCSV VARCHAR(200) NOT NULL,
-# primary key(eventUrl)
-# );'''
-# cursorTemp.execute(out)
-# connectionTemp.commit()
-# connectionTemp.close()
-######################################
-
-# TODO: change column names in Event, add event attributes, etc
 # TODO: allow deletion of events, user accounts, etc
 # TODO: make events... do something
 
@@ -86,11 +59,22 @@ def splashScreen():
 		# print data
 		_firstname = data[0]
 		_lastname = data[1]
-		_ownedEvents=data[5]
-		_ownedEventsList = eventUrlCSV_to_eventNameStrList(_ownedEvents)
+		_ownedEventsUrls=data[5]
+
+		# retrieve list of names of events based on their URLs
+		_ownedEventsList = eventUrlCSV_to_eventNameStrList(_ownedEventsUrls)
+		# split CSV of urls into a list
+		_ownedEventsUrlsList = _ownedEventsUrls.split(",")
+		# prepend a slash to each URL, so it can be given straight to the userHome.html template
+		for url in _ownedEventsUrlsList:
+			# url = '"/'+url+'"'
+			url = '/'+url
+
+		# zip both lists together: creates an equal length list of tuples
+		_ownedEventsZipped = zip(_ownedEventsList,_ownedEventsUrlsList)
 
 		# send user to userHome with appropriate arguments
-		resp = make_response(render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname, ownedevents=_ownedEventsList))
+		resp = make_response(render_template('userHome.html', username=_username, firstname=_firstname, lastname=_lastname, ownedeventszipped=_ownedEventsZipped))
 		# (re)set cookie with username to expire 90 days from now
 		resp.set_cookie('username', _username, expires=get_x_daysFromNow(90))
 		return resp
