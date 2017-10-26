@@ -30,9 +30,9 @@ mysql.init_app(app)
 # primary key(username)
 # );
 # CREATE TABLE Event(
-# eventURL VARCHAR(50) NOT NULL,
+# eventUrl VARCHAR(50) NOT NULL,
 # ownersCSV VARCHAR(200) NOT NULL,
-# primary key(eventURL)
+# primary key(eventUrl)
 # );'''
 # cursorTemp.execute(out)
 # connectionTemp.commit()
@@ -56,14 +56,14 @@ def hash_pass(rawpassword):
 	h = hashlib.md5(rawpassword.encode())
 	return str(h.hexdigest())
 
-# take in CSV of event URLs, use to parse into MySQL to return list of event names
+# take in CSV of event Urls, use to parse into MySQL to return list of event names
 def eventUrlCSV_to_eventNameStrList(csvIn):
-	urlList = csvIn.split(",")
+	UrlList = csvIn.split(",")
 	nameList = []
 	cursor = mysql.connect().cursor()
-	for url in urlList:
+	for Url in UrlList:
 		# TODO: fix this, obviously
-		cursor.execute("SELECT * from Event where eventURL='" + url + "'")
+		cursor.execute("SELECT * from Event where eventUrl='" + Url + "'")
 		data = cursor.fetchone()
 		if data is not None:
 			eventName = data[1]
@@ -83,7 +83,7 @@ def splashScreen():
 		# if there was no data, there was an error somewhere, so have the user log in again:
 		if data is None:
 			return render_template('login.html', badUser=True, badPass=False)
-		print data
+		# print data
 		_firstname = data[0]
 		_lastname = data[1]
 		_ownedEvents=data[5]
@@ -204,31 +204,32 @@ def createEvent():
 
 	# POST method implies data being passed, trying to create event:
 	if request.method == "POST":
-		# if doesn't have value for eventName, then still trying to pick a URL
+		# if doesn't have value for eventName, then still trying to pick a Url
 		if not request.form.get('eventName'):
-			eventUrl=request.form.get('eventURL')
+			eventUrl=request.form.get('eventUrl')
 			# cursor = mysql.connect().cursor()
-			cursor.execute("SELECT * from Event where eventURL='" + eventUrl + "'")
+			cursor.execute("SELECT * from Event where eventUrl='" + eventUrl + "'")
 			data = cursor.fetchone()
-			# if eventURL is not already in the database:
+			# if eventUrl is not already in the database:
 			if data is None:
 				# move on to second stage of creation, picking name and stuff
-				# set cookie with eventURL, temporary, will be destroyed in stage two
-				resp = make_response(render_template('createEvent.html', firstname=_firstname, urlInUse=False, eventURL=eventUrl))
-				resp.set_cookie('eventURL',eventUrl, expires=get_x_daysFromNow(2))
+				# set cookie with eventUrl, temporary, will be destroyed in stage two
+				resp = make_response(render_template('createEvent.html', firstname=_firstname, UrlInUse=False, eventUrl=eventUrl))
+				resp.set_cookie('eventUrl',eventUrl, expires=get_x_daysFromNow(2))
 				return resp
-			# if event URL is in database, have user select a different one:
+			# if event Url is in database, have user select a different one:
 			else:
-				return render_template('createEvent.html', firstname=_firstname, urlInUse=True)
+				return render_template('createEvent.html', firstname=_firstname, UrlInUse=True)
 		# if have form value for eventName, then already have cookie stored with eventUrl
 		else:
-			eventUrl = request.cookies.get('eventURL')
+			eventUrl = request.cookies.get('eventUrl')
 			eventName = request.form.get('eventName')
+			eventDesc = request.form.get('eventDesc')
 
 			# add event to Event table
 			# connection = mysql.connect()
 			# cursor = connection.cursor()
-			out = "INSERT INTO Event values('" + eventUrl + "', '" + eventName + "')"
+			out = "INSERT INTO Event values('" + eventUrl + "', '" + eventName + "', '" + eventDesc + "')"
 			cursor.execute(out)
 			connection.commit()
 
@@ -239,14 +240,61 @@ def createEvent():
 			out = "UPDATE User SET ownedEventsCSV='" + data[0] + eventUrl + ",' WHERE username='" + _username + "'"
 			cursor.execute(out)
 			connection.commit()
-			# print ("URL: "+eventUrl+", name: "+request.form.get('eventName'))
+			# print ("Url: "+eventUrl+", name: "+request.form.get('eventName'))
 
 			resp = make_response(redirect(url_for('splashScreen')))
 			resp.set_cookie('eventUrl', '', expires=0)
 			return resp
-	# GET method means user is here for first time, allow to check URL availability:
+	# GET method means user is here for first time, allow to check Url availability:
 	else:
 		return render_template('createEvent.html', firstname=_firstname, firstTime=True)
+
+# <eventUrl> is a variable that matches with any other URL to check if it's a valid eventUrl
+@app.route("/<eventUrl>")
+def showEvent(eventUrl):
+	connection = mysql.connect()
+	cursor = connection.cursor()
+	cursor.execute("SELECT * from Event where eventURL='" + eventUrl + "'")
+	data = cursor.fetchone()
+	# TODO: does this actually work?  Or does it need to be redone to catch errors?
+	# if no event data in table, redirect to splashScreen:
+	if data is None:
+		return redirect(url_for('splashScreen'))
+	_eventName = data[1]
+	_eventDesc = data[2]
+	return render_template('showEvent.html', eventUrl=eventUrl, eventName=_eventName, eventDesc=_eventDesc)
+
+# Hidden URL never shown to user, for testing only and to be removed before production
+# Gives ability to call MySQL code to reset the databases without logging into MySQL
+@app.route('/KILL_DB')
+def killDb():
+	connectionTemp = mysql.connect()
+	cursorTemp = connectionTemp.cursor()
+	out = '''DROP database IF EXISTS userDb;
+	CREATE DATABASE userDb;
+	USE userDb;
+	CREATE TABLE User(
+	firstname VARCHAR(50) NOT NULL,
+	lastname VARCHAR(50) NOT NULL,
+	username VARCHAR(50) NOT NULL,
+	password VARCHAR(80) NOT NULL,
+	salt VARCHAR(80) NOT NULL,
+	ownedEventsCSV VARCHAR(200),
+	primary key(username)
+	);
+	CREATE TABLE Event(
+	eventUrl VARCHAR(50) NOT NULL,
+	eventName VARCHAR(200) NOT NULL,
+	eventDesc VARCHAR(1000) NOT NULL,
+	primary key(eventUrl)
+	);'''
+	cursorTemp.execute(out)
+	connectionTemp.commit()
+	connectionTemp.close()
+	resp = make_response(redirect(url_for('splashScreen')))
+	resp.set_cookie('username', '', expires=0)
+	return resp
+
 
 # @app.route("/user", methods=["GET","POST"])
 # def helloUser():
@@ -255,3 +303,15 @@ def createEvent():
 # debug=True reloads the webpage whenver changes are made
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+
+
+
+
+
+
+
+
+
+#
