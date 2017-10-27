@@ -1,0 +1,26 @@
+<html>
+<head>
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}" />
+</head>
+<body>
+<h1>Welcome, {{firstname}}!</h1>
+Your username is {{username}}<br>
+And your full name is {{firstname}} {{lastname}}<br>
+I'd show you your hashed password, but then I'd have to kill you.<br>
+<br>
+{% if ownedeventszipped %}
+<!-- Your owned events are: {{ownedeventszipped}}<br> -->
+Your owned events are:
+{% for eventName,eventUrl in ownedeventszipped %}
+<!-- "if not loop.last" just checks if it's the last element, if not it puts in a comma -->
+<a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %}
+{% endfor %}<br>
+{% else %}
+You do not currently own any events! Click below to make some!<br>
+{% endif %}
+<br>
+<a href="/createEvent">Create a new event!</a><br>
+<br>
+<a href="/logout">Log out</a>
+</body>
+</html>
