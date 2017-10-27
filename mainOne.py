@@ -14,6 +14,7 @@ app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
 
 # TODO: allow deletion of events, user accounts, etc
+# TODO: make events... do something
 
 # returns datetime object for x days from now (for cookie expiration dates)
 def get_x_daysFromNow(x):
@@ -34,6 +35,7 @@ def eventUrlCSV_to_eventNameStrList(csvIn):
 	nameList = []
 	cursor = mysql.connect().cursor()
 	for Url in UrlList:
+		# TODO: fix this, obviously
 		cursor.execute("SELECT * from Event where eventUrl='" + Url + "'")
 		data = cursor.fetchone()
 		if data is not None:
@@ -145,14 +147,7 @@ def register():
 				# get a random salt:
 				_userSalt = get_salt()
 				_userPassword = hash_pass(request.form.get('password') + _userSalt)
-
-				# check if username is already in database:
-				cursor.execute("SELECT * from User where username='" + _userUsername + "'")
-				data = cursor.fetchone()
-				# if there was data returned, then that usename is alreay in use:
-				if data is not None:
-					return render_template('register.html', diffPasswords=False, duplicateUser=True)
-				# if there was no data returned, add user to database:
+				# add user to database:
 				out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\',\'\')"
 				cursor.execute(out)
 				connection.commit()
@@ -164,6 +159,9 @@ def register():
 				return resp
 			except Exception as e:
 				print e;
+				# TODO: make sure Exception e is 1062 duplicate entry?
+				# TODO: query database for someone with the username already.  If
+				# 	returned is not None, then there is someone with that username
 				return render_template('register.html', diffPasswords=False, duplicateUser=True)
 	# GET method means user is here for the first time:
 	else:
@@ -251,6 +249,19 @@ def showEvent(eventUrl):
 		_eventName = data[1]
 		_eventDesc = data[2]
 		return render_template('showEvent.html', eventUrl=eventUrl, eventName=_eventName, eventDesc=_eventDesc)
+=======
+	connection = mysql.connect()
+	cursor = connection.cursor()
+	cursor.execute("SELECT * from Event where eventURL='" + eventUrl + "'")
+	data = cursor.fetchone()
+	# TODO: does this actually work?  Or does it need to be redone to catch errors?
+	# if no event data in table, redirect to splashScreen:
+	if data is None:
+		return redirect(url_for('splashScreen'))
+	_eventName = data[1]
+	_eventDesc = data[2]
+	return render_template('showEvent.html', eventUrl=eventUrl, eventName=_eventName, eventDesc=_eventDesc)
+>>>>>>> parent of dd05c0c... Fixed exception handling in register
 
 # Hidden URL never shown to user, for testing only and to be removed before production
 # Gives ability to call MySQL code to reset the databases without logging into MySQL
