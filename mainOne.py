@@ -237,19 +237,6 @@ def createEvent():
 @app.route("/<eventUrl>", methods=["GET","POST"])
 def showEvent(eventUrl):
 	if request.method=="POST":
-		
-	else:
-		connection = mysql.connect()
-		cursor = connection.cursor()
-		cursor.execute("SELECT * from Event where eventURL='" + eventUrl + "'")
-		data = cursor.fetchone()
-		# if no event data in table, redirect to splashScreen:
-		if data is None:
-			return redirect(url_for('splashScreen'))
-		_eventName = data[1]
-		_eventDesc = data[2]
-		return render_template('showEvent.html', eventUrl=eventUrl, eventName=_eventName, eventDesc=_eventDesc)
-=======
 	connection = mysql.connect()
 	cursor = connection.cursor()
 	cursor.execute("SELECT * from Event where eventURL='" + eventUrl + "'")
@@ -261,7 +248,6 @@ def showEvent(eventUrl):
 	_eventName = data[1]
 	_eventDesc = data[2]
 	return render_template('showEvent.html', eventUrl=eventUrl, eventName=_eventName, eventDesc=_eventDesc)
->>>>>>> parent of dd05c0c... Fixed exception handling in register
 
 # Hidden URL never shown to user, for testing only and to be removed before production
 # Gives ability to call MySQL code to reset the databases without logging into MySQL
