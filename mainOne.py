@@ -236,7 +236,6 @@ def createEvent():
 # <eventUrl> is a variable that matches with any other URL to check if it's a valid eventUrl
 @app.route("/<eventUrl>", methods=["GET","POST"])
 def showEvent(eventUrl):
-	if request.method=="POST":
 	connection = mysql.connect()
 	cursor = connection.cursor()
 	cursor.execute("SELECT * from Event where eventURL='" + eventUrl + "'")
