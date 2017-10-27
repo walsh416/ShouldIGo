@@ -236,18 +236,21 @@ def createEvent():
 		return render_template('createEvent.html', firstname=_firstname, firstTime=True)
 
 # <eventUrl> is a variable that matches with any other URL to check if it's a valid eventUrl
-@app.route("/<eventUrl>")
+@app.route("/<eventUrl>", methods=["GET","POST"])
 def showEvent(eventUrl):
-	connection = mysql.connect()
-	cursor = connection.cursor()
-	cursor.execute("SELECT * from Event where eventURL='" + eventUrl + "'")
-	data = cursor.fetchone()
-	# if no event data in table, redirect to splashScreen:
-	if data is None:
-		return redirect(url_for('splashScreen'))
-	_eventName = data[1]
-	_eventDesc = data[2]
-	return render_template('showEvent.html', eventUrl=eventUrl, eventName=_eventName, eventDesc=_eventDesc)
+	if request.method=="POST":
+		
+	else:
+		connection = mysql.connect()
+		cursor = connection.cursor()
+		cursor.execute("SELECT * from Event where eventURL='" + eventUrl + "'")
+		data = cursor.fetchone()
+		# if no event data in table, redirect to splashScreen:
+		if data is None:
+			return redirect(url_for('splashScreen'))
+		_eventName = data[1]
+		_eventDesc = data[2]
+		return render_template('showEvent.html', eventUrl=eventUrl, eventName=_eventName, eventDesc=_eventDesc)
 
 # Hidden URL never shown to user, for testing only and to be removed before production
 # Gives ability to call MySQL code to reset the databases without logging into MySQL

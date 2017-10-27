@@ -7,6 +7,12 @@
 This is your event!<br>
 Here is its description:<br><br>
 {{eventDesc}}<br><br>
-<a href="/">Return</a><br>
+<a href="/">Return</a><br><br><br>
+{% if owner==true %}
+You own this event! Click below to edit it:
+<form method = "POST">
+  <input type="submit" value="Edit">
+</form>
+{% endif %}
 </body>
 </html>
