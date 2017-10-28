@@ -233,25 +233,36 @@ def createEvent():
 	else:
 		return render_template('createEvent.html', firstname=_firstname, firstTime=True)
 
-# TODO: finish this. Lol.
-# @app.route('/editUser', methods=["GET","POST"])
-# def editUser():
-# 	# confirm user is logged in
-# 	_username = request.cookies.get('username')
-# 	# if they are not, redirect to the splashScreen
-# 	if not _username:
-# 		return redirect(url_for('splashScreen'))
-# 	# otherwise, pull user data from database:
-# 	connection = mysql.connect()
-# 	cursor = connection.cursor()
-# 	cursor.execute("SELECT * from User where username='" + _username + "'")
-# 	data = cursor.fetchone()
-# 	# if no user data in table, have user log in again:
-# 	if data is None:
-# 		return redirect(url_for('login'))
-# 	_firstname = data[0]
-# 	_lastname = data[1]
-#
+@app.route('/editUser', methods=["GET","POST"])
+def editUser():
+	# confirm user is logged in
+	_username = request.cookies.get('username')
+	# if they are not, redirect to the splashScreen
+	if not _username:
+		return redirect(url_for('splashScreen'))
+	# otherwise, pull user data from database:
+	connection = mysql.connect()
+	cursor = connection.cursor()
+	cursor.execute("SELECT * from User where username='" + _username + "'")
+	data = cursor.fetchone()
+	# if no user data in table, have user log in again:
+	if data is None:
+		return redirect(url_for('login'))
+	_firstname = data[0]
+	_lastname = data[1]
+
+	if request.method=="GET":
+		return render_template('editUser.html', firstname=_firstname, lastname=_lastname)
+	new_firstname=request.form.get('firstname')
+	new_lastname=request.form.get('lastname')
+	# out = "UPDATE User SET firstname=\'" + new_firstname + "\', \'" + new_lastname + "\' WHERE username=\'" + _username + "\'"
+	out = "UPDATE User SET firstname='" + new_firstname + "' WHERE username='" + _username + "'"
+	cursor.execute(out)
+	connection.commit()
+	out = "UPDATE User SET lastname='" + new_lastname + "' WHERE username='" + _username + "'"
+	cursor.execute(out)
+	connection.commit()
+	return make_response(redirect(url_for('splashScreen')))
 
 # <eventUrl> is a variable that matches with any other URL to check if it's a valid eventUrl
 @app.route("/<eventUrl>", methods=["GET","POST"])
