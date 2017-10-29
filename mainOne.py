@@ -256,8 +256,41 @@ def createEvent():
 	else:
 		return render_template('createEvent.html', firstname=_firstname, firstTime=True)
 
+@app.route('/editUser', methods=["GET","POST"])
+def editUser():
+	# confirm user is logged in
+	_username = request.cookies.get('username')
+	# if they are not, redirect to the splashScreen
+	if not _username:
+		return redirect(url_for('splashScreen'))
+	# otherwise, pull user data from database:
+	connection = mysql.connect()
+	cursor = connection.cursor()
+	cursor.execute("SELECT * from User where username='" + _username + "'")
+	data = cursor.fetchone()
+	# if no user data in table, have user log in again:
+	if data is None:
+		return redirect(url_for('login'))
+	_firstname = data[0]
+	_lastname = data[1]
+	# GET means that this is the first time here, so show page allowing user to edit their info
+	if request.method=="GET":
+		return render_template('editUser.html', firstname=_firstname, lastname=_lastname)
+	# POST means that the form has already been submitted, time to execute it
+	new_firstname=request.form.get('firstname')
+	new_lastname=request.form.get('lastname')
+	# Two different MySQL commands to update first and last name.  Tried to combine into one line but kept getting errors.
+	out = "UPDATE User SET firstname='" + new_firstname + "' WHERE username='" + _username + "'"
+	cursor.execute(out)
+	connection.commit()
+	out = "UPDATE User SET lastname='" + new_lastname + "' WHERE username='" + _username + "'"
+	cursor.execute(out)
+	connection.commit()
+	# Throw user back to "/" and view the splashScreen/userHome.
+	return make_response(redirect(url_for('splashScreen')))
+
 # <eventUrl> is a variable that matches with any other URL to check if it's a valid eventUrl
-@app.route("/<eventUrl>")
+@app.route("/<eventUrl>", methods=["GET","POST"])
 def showEvent(eventUrl):
 	connection = mysql.connect()
 	cursor = connection.cursor()
