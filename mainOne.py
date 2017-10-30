@@ -16,7 +16,7 @@ app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
 
 mail=Mail(app)
-# Following two lines are both(?) needed to allow access to gmail account
+# Following two lines are both(?) needed to allow initial access to new gmail account
 # www.google.com/settings/security/lesssecureapps
 # accounts.google.com/DisplayUnlockCaptcha
 app.config.update(
@@ -60,22 +60,31 @@ def eventUrlCSV_to_eventNameStrList(csvIn):
 			nameList.append(eventName)
 	return nameList
 
+def is_EventUrl_in_EventUrlCSV(urlIn, csvIn):
+	UrlList = csvIn.split(",")
+	for url in UrlList:
+		if urlIn==url:
+			return True
+	return False
+
 # takes in an email to send, and sends it on a separate thread so main process doesn't hang
 def send_async_email(app, msg):
     with app.app_context():
         mail.send(msg)
 
-@app.route("/sendEmail")
-def sendEmail():
-	msg = Message(
-              'Hello',
-	       sender='timsemailforlols@google.com',
-	       recipients=
-               ['walsh416@gmail.com'])
-	msg.body = "This is the email body"
-	mail.send(msg)
-	return make_response(redirect(url_for("splashScreen")))
-
+# BS piece for testing email sending, pretty sure it's useless but left it in for funsies:
+# @app.route("/sendEmail")
+# def sendEmail():
+# 	msg = Message(
+#         	'Hello',
+# 			sender='timsemailforlols@google.com',
+# 			recipients=
+#                ['walsh416@gmail.com'])
+# 	msg.body = "This is the email body"
+# 	mail.send(msg)
+# 	# TODO: should anything happen if bogus email is given?  Some sort of two stage
+# 	# 		"now go verify your email" type of deal that forces the user to show it's legit?
+# 	return make_response(redirect(url_for("splashScreen")))
 
 # default/index page
 @app.route("/", methods=["GET","POST"])
@@ -183,12 +192,12 @@ def register():
 				_userSalt = get_salt()
 				_userPassword = hash_pass(request.form.get('password') + _userSalt)
 				# add user to database:
-				out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\',\'\',\'" + _userEmail + "\')"
+				out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\',\'\',\'" + _userEmail + "\',\'\')"
 				cursor.execute(out)
 				connection.commit()
 
 				msg = Message(
-						'Welcome to ConsiderA.party!',
+						'Hello, %s!' % _userFirstname,
 						sender='timsemailforlols@google.com',
 						recipients=[_userEmail]
 						)
@@ -197,6 +206,8 @@ def register():
 				# mail.send(msg)
 				thr = Thread(target=send_async_email, args=[app, msg])
 				thr.start()
+				# TODO: should anything happen if bogus email is given?  Some sort of two stage
+				# 		"now go verify your email" type of deal that forces the user to show it's legit?
 
 				# redirect user to splashScreen
 				resp = make_response(redirect(url_for('splashScreen')))
@@ -228,6 +239,7 @@ def createEvent():
 	# if no user data in table, have user log in again:
 	if data is None:
 		return redirect(url_for('login'))
+	# otherwise, pull rest of user data
 	_firstname = data[0]
 	_lastname = data[1]
 	_ownedEvents=data[5]
@@ -259,7 +271,7 @@ def createEvent():
 			# add event to Event table
 			# connection = mysql.connect()
 			# cursor = connection.cursor()
-			out = "INSERT INTO Event values('" + eventUrl + "', '" + eventName + "', '" + eventDesc + "')"
+			out = "INSERT INTO Event values('" + eventUrl + "', '" + eventName + "', '" + eventDesc + "','')"
 			cursor.execute(out)
 			connection.commit()
 
@@ -317,6 +329,39 @@ def editUser():
 def showEvent(eventUrl):
 	connection = mysql.connect()
 	cursor = connection.cursor()
+	# confirm user is logged in
+	_username = request.cookies.get('username')
+	if request.method == "POST":
+		# get old list of ownedEvents from User table
+		cursor.execute("SELECT followedEventsCSV from User where username='" + _username + "'")
+		data = cursor.fetchone()
+		# append new event to list of old events:
+		out = "UPDATE User SET followedEventsCSV='" + data[0] + eventUrl + ",' WHERE username='" + _username + "'"
+		cursor.execute(out)
+		connection.commit()
+		# return render_template('showEvent.html', eventUrl=eventUrl, eventName=_eventName, eventDesc=_eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed)
+		return redirect(url_for('showEvent', eventUrl=eventUrl))
+	# currUserIsOwner = False
+	userLoggedIn = False
+	subscribed = False
+	# if they are, show event page with "follow" button
+	if _username:
+		# pull user data from database:
+		# connection = mysql.connect()
+		# cursor = connection.cursor()
+		cursor.execute("SELECT * from User where username='" + _username + "'")
+		data = cursor.fetchone()
+		# if no user data in table, have user log in again:
+		if data is None:
+			return redirect(url_for('login'))
+		# otherwise, pull rest of user data
+		_firstname = data[0]
+		_lastname = data[1]
+		_ownedEvents=data[5]
+		userLoggedIn = True
+		subscribed = is_EventUrl_in_EventUrlCSV(eventUrl, _ownedEvents)
+	# connection = mysql.connect()
+	# cursor = connection.cursor()
 	cursor.execute("SELECT * from Event where eventURL='" + eventUrl + "'")
 	data = cursor.fetchone()
 	# TODO: does this actually work?  Or does it need to be redone to catch errors?
@@ -325,7 +370,7 @@ def showEvent(eventUrl):
 		return redirect(url_for('splashScreen'))
 	_eventName = data[1]
 	_eventDesc = data[2]
-	return render_template('showEvent.html', eventUrl=eventUrl, eventName=_eventName, eventDesc=_eventDesc)
+	return render_template('showEvent.html', eventUrl=eventUrl, eventName=_eventName, eventDesc=_eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed)
 
 # Hidden URL never shown to user, for testing only and to be removed before production
 # Gives ability to call MySQL code to reset the databases without logging into MySQL
@@ -342,14 +387,16 @@ def killDb():
 	username VARCHAR(50) NOT NULL,
 	password VARCHAR(80) NOT NULL,
 	salt VARCHAR(80) NOT NULL,
-	ownedEventsCSV VARCHAR(200),
+	ownedEventsCSV VARCHAR(500),
 	email VARCHAR(80) NOT NULL,
+	followedEventsCSV VARCHAR(500),
 	primary key(username)
 	);
 	CREATE TABLE Event(
 	eventUrl VARCHAR(50) NOT NULL,
 	eventName VARCHAR(200) NOT NULL,
 	eventDesc VARCHAR(1000) NOT NULL,
+	followers VARCHAR(1000) NOT NULL,
 	primary key(eventUrl)
 	);'''
 	cursorTemp.execute(out)
