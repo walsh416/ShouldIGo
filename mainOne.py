@@ -68,7 +68,7 @@ def sendEmail():
                ['walsh416@gmail.com'])
 	msg.body = "This is the email body"
 	mail.send(msg)
-	return "Sent"
+	return make_response(redirect(url_for("splashScreen")))
 
 
 # default/index page
@@ -172,13 +172,23 @@ def register():
 				_userFirstname = request.form.get('firstname')
 				_userLastname = request.form.get('lastname')
 				_userUsername = request.form.get('username')
+				_userEmail = request.form.get('email')
 				# get a random salt:
 				_userSalt = get_salt()
 				_userPassword = hash_pass(request.form.get('password') + _userSalt)
 				# add user to database:
-				out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\',\'\')"
+				out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\',\'\',\'" + _userEmail + "\')"
 				cursor.execute(out)
 				connection.commit()
+
+				msg = Message(
+						'Welcome to ConsiderA.party!',
+						sender='timsemailforlols@google.com',
+						recipients=[_userEmail]
+						)
+				msg.body = render_template("registerEmail.txt", firstname=_userFirstname)
+				msg.html = render_template("registerEmail.html", firstname=_userFirstname)
+				mail.send(msg)
 
 				# redirect user to splashScreen
 				resp = make_response(redirect(url_for('splashScreen')))
@@ -325,6 +335,7 @@ def killDb():
 	password VARCHAR(80) NOT NULL,
 	salt VARCHAR(80) NOT NULL,
 	ownedEventsCSV VARCHAR(200),
+	email VARCHAR(80) NOT NULL,
 	primary key(username)
 	);
 	CREATE TABLE Event(
@@ -336,6 +347,7 @@ def killDb():
 	cursorTemp.execute(out)
 	connectionTemp.commit()
 	connectionTemp.close()
+	print "################ DB killed ################"
 	resp = make_response(redirect(url_for('splashScreen')))
 	resp.set_cookie('username', '', expires=0)
 	return resp
