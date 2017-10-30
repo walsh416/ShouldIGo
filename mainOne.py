@@ -2,7 +2,6 @@
 from flask import Flask, render_template, request, redirect, url_for, make_response
 from flaskext.mysql import MySQL
 from datetime import datetime, timedelta
-from flask_mail import Mail, Message
 import hashlib, os
 
 # Open MySQL connection:
@@ -14,34 +13,8 @@ app.config['MYSQL_DATABASE_DB'] = 'userDb'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
 
-# # email server
-# mail = Mail()
-# MAIL_SERVER = 'smtp.googlemail.com'
-# MAIL_PORT = 465
-# MAIL_USE_TLS = False
-# MAIL_USE_SSL = True
-# MAIL_USERNAME = 'timsemailforlols@gmail.com'
-# MAIL_PASSWORD = 'thisisthepassword'
-# mail.init_app(app)
-#
-# # administrator list
-# ADMINS = ['timsemailforlols@gmail.com']
-
-mail=Mail(app)
-
-app.config.update(
-	DEBUG=True,
-	#EMAIL SETTINGS
-	MAIL_SERVER='smtp.gmail.com',
-	MAIL_PORT=465,
-	MAIL_USE_SSL=True,
-	MAIL_USERNAME = 'timsemailforlols@gmail.com',
-	MAIL_PASSWORD = 'thisisthepassword'
-	)
-
-mail=Mail(app)
-
 # TODO: allow deletion of events, user accounts, etc
+# TODO: make events... do something
 
 # returns datetime object for x days from now (for cookie expiration dates)
 def get_x_daysFromNow(x):
@@ -69,23 +42,6 @@ def eventUrlCSV_to_eventNameStrList(csvIn):
 			eventName = data[1]
 			nameList.append(eventName)
 	return nameList
-
-@app.route("/sendEmail")
-def sendEmail():
-	# msg = Message('test subject', sender=ADMINS[0], recipients=ADMINS)
-	# msg.body = 'lol the body'
-	# msg.html = '<b>HTML</b> body'
-	# mail.send(msg)
-	# return make_response(redirect(url_for("splashScreen")))
-	msg = Message(
-              'Hello',
-	       sender='timsemailforlols@google.com',
-	       recipients=
-               ['walsh416@gmail.com'])
-	msg.body = "This is the email body"
-	mail.send(msg)
-	return "Sent"
-
 
 # default/index page
 @app.route("/", methods=["GET","POST"])
