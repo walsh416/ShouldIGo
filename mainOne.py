@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, make_respo
 from flaskext.mysql import MySQL
 from datetime import datetime, timedelta
 from flask_mail import Mail, Message
+from threading import Thread
 import hashlib, os
 
 # Open MySQL connection:
@@ -58,6 +59,11 @@ def eventUrlCSV_to_eventNameStrList(csvIn):
 			eventName = data[1]
 			nameList.append(eventName)
 	return nameList
+
+# takes in an email to send, and sends it on a separate thread so main process doesn't hang
+def send_async_email(app, msg):
+    with app.app_context():
+        mail.send(msg)
 
 @app.route("/sendEmail")
 def sendEmail():
@@ -188,7 +194,9 @@ def register():
 						)
 				msg.body = render_template("registerEmail.txt", firstname=_userFirstname)
 				msg.html = render_template("registerEmail.html", firstname=_userFirstname)
-				mail.send(msg)
+				# mail.send(msg)
+				thr = Thread(target=send_async_email, args=[app, msg])
+				thr.start()
 
 				# redirect user to splashScreen
 				resp = make_response(redirect(url_for('splashScreen')))
