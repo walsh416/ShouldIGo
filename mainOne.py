@@ -14,21 +14,10 @@ app.config['MYSQL_DATABASE_DB'] = 'userDb'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
 
-# # email server
-# mail = Mail()
-# MAIL_SERVER = 'smtp.googlemail.com'
-# MAIL_PORT = 465
-# MAIL_USE_TLS = False
-# MAIL_USE_SSL = True
-# MAIL_USERNAME = 'timsemailforlols@gmail.com'
-# MAIL_PASSWORD = 'thisisthepassword'
-# mail.init_app(app)
-#
-# # administrator list
-# ADMINS = ['timsemailforlols@gmail.com']
-
 mail=Mail(app)
-
+# Following two lines are both(?) needed to allow access to gmail account
+# www.google.com/settings/security/lesssecureapps
+# accounts.google.com/DisplayUnlockCaptcha
 app.config.update(
 	DEBUG=True,
 	#EMAIL SETTINGS
@@ -72,11 +61,6 @@ def eventUrlCSV_to_eventNameStrList(csvIn):
 
 @app.route("/sendEmail")
 def sendEmail():
-	# msg = Message('test subject', sender=ADMINS[0], recipients=ADMINS)
-	# msg.body = 'lol the body'
-	# msg.html = '<b>HTML</b> body'
-	# mail.send(msg)
-	# return make_response(redirect(url_for("splashScreen")))
 	msg = Message(
               'Hello',
 	       sender='timsemailforlols@google.com',
