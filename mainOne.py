@@ -28,10 +28,13 @@ app.config.update(
 	MAIL_USERNAME = 'timsemailforlols@gmail.com',
 	MAIL_PASSWORD = 'thisisthepassword'
 	)
-
-mail=Mail(app)
+#
+# mail=Mail(app)
 
 # TODO: allow deletion of events, user accounts, etc
+# TODO: send email to subscribers when an event is updated (given an event,
+# 			figuring out who is subscribed to it is gonna be ugly (searching
+# 			through each users CSV or something... ugh))
 
 # returns datetime object for x days from now (for cookie expiration dates)
 def get_x_daysFromNow(x):
@@ -60,6 +63,7 @@ def eventUrlCSV_to_eventNameStrList(csvIn):
 			nameList.append(eventName)
 	return nameList
 
+# take in a CSV list and a string, and return boolean val of whether the string is in the list
 def is_EventUrl_in_EventUrlCSV(urlIn, csvIn):
 	UrlList = csvIn.split(",")
 	for url in UrlList:
@@ -71,20 +75,6 @@ def is_EventUrl_in_EventUrlCSV(urlIn, csvIn):
 def send_async_email(app, msg):
     with app.app_context():
         mail.send(msg)
-
-# BS piece for testing email sending, pretty sure it's useless but left it in for funsies:
-# @app.route("/sendEmail")
-# def sendEmail():
-# 	msg = Message(
-#         	'Hello',
-# 			sender='timsemailforlols@google.com',
-# 			recipients=
-#                ['walsh416@gmail.com'])
-# 	msg.body = "This is the email body"
-# 	mail.send(msg)
-# 	# TODO: should anything happen if bogus email is given?  Some sort of two stage
-# 	# 		"now go verify your email" type of deal that forces the user to show it's legit?
-# 	return make_response(redirect(url_for("splashScreen")))
 
 # default/index page
 @app.route("/", methods=["GET","POST"])
@@ -406,11 +396,6 @@ def killDb():
 	resp = make_response(redirect(url_for('splashScreen')))
 	resp.set_cookie('username', '', expires=0)
 	return resp
-
-
-# @app.route("/user", methods=["GET","POST"])
-# def helloUser():
-#     return render_template('helloUser.html', )
 
 # debug=True reloads the webpage whenver changes are made
 if __name__ == "__main__":
