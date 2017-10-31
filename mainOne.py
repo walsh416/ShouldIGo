@@ -202,8 +202,9 @@ def register():
 				# TODO: still need to actually send the user an email and have them confirm it
 
 				# add user to database:
-				out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\',\'\',\'" + _userEmail + "\',\'\')"
-				cursor.execute(out)
+				out = "INSERT INTO User values (_userFirstname=%s,_userLastname=%s,_userUsername=%s,_userPassword=%s,_userSalt=%s,_userEmail=%s)"
+				#out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\',\'\',\'" + _userEmail + "\',\'\')"
+				cursor.execute(out, (_userFirstname,_userLastname,_userUsername,_userPassword,_userSalt,_userEmail))
 				connection.commit()
 
 				msg = Message(
@@ -285,7 +286,7 @@ def createEvent():
 			cursor.execute(out)
 			connection.commit()
 
-<<<<<<< HEAD
+
 
 # @app.route("/handlelogin", methods = ["GET","POST"])
 # def handle_login():
@@ -306,7 +307,7 @@ def createEvent():
 # def bar(username):
 #         return render_template('userTemplate.html',
 #                                 name=username)
-=======
+
 			# get old list of ownedEvents from User table
 			cursor.execute("SELECT ownedEventsCSV from User where username='" + _username + "'")
 			data = cursor.fetchone()
@@ -315,7 +316,7 @@ def createEvent():
 			cursor.execute(out)
 			connection.commit()
 			# print ("Url: "+eventUrl+", name: "+request.form.get('eventName'))
->>>>>>> master
+
 
 			resp = make_response(redirect(url_for('splashScreen')))
 			resp.set_cookie('eventUrl', '', expires=0)
