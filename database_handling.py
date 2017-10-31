@@ -12,6 +12,8 @@ class User:
         self.followedEventsList = []
         self.verifiedEmail = ""
 
+    # TODO: need way to add to these via the CSV or something...
+    #           Maybe admit defeat on having the lists and work with CSVs?
     def getOwnedEventsCSV(self):
         toreturn = ""
         for event in self.ownedEventsList:
@@ -25,7 +27,8 @@ class User:
         return toreturn
 
     def insertString(self):
-        toreturn = "INSERT INTO User values(\'" + self.firstname + "\',\'" + self.lastname + "\',\'" + self.username + "\',\'" + self.password + "\',\'" + self.salt + "\',\'\',\'" + self.email + "\',\'\',\'" + self.verifiedEmail + "\')"
+        # toreturn = "INSERT INTO User values(\'" + self.firstname + "\',\'" + self.lastname + "\',\'" + self.username + "\',\'" + self.password + "\',\'" + self.salt + "\',\'\',\'" + self.email + "\',\'\',\'" + self.verifiedEmail + "\')"
+        toreturn = "INSERT INTO User values(\'" + self.firstname + "\',\'" + self.lastname + "\',\'" + self.username + "\',\'" + self.password + "\',\'" + self.salt + "\',\'" + self.getOwnedEventsCSV() + "\',\'" + self.email + "\',\'" + self.getFollowedEventsCSV() + "\',\'" + self.verifiedEmail + "\')"
         return toreturn
 
     def updateString(self, attribute, value):
@@ -60,3 +63,50 @@ class User:
             "\nfollowedEvents: " + self.followedEventsCSV
 
 class Event:
+    def __init__(self, eventUrl):
+        self.eventUrl = eventUrl
+        self.eventName = ""
+        self.eventDesc = ""
+        self.followersList = []
+
+    def getFollowersCSV(self):
+        toreturn = ""
+        for event in self.followersList:
+            toreturn = toreturn + ","
+        return toreturn
+
+    def insertString(self):
+        # toreturn = "INSERT INTO Event values('" + self.eventUrl + "', '" + self.eventName + "', '" + self.eventDesc + "','')"
+        toreturn = "INSERT INTO Event values('" + self.eventUrl + "', '" + self.eventName + "', '" + self.eventDesc + "','" + self.getFollowersCSV() + "')"
+        return toreturn
+
+    def updateString(self, attribute, value):
+        toreturn = "UPDATE Event SET " + attribute + "='" + value + ",' WHERE eventUrl='" + self.eventUrl + "'"
+        return toreturn
+
+    def selectString(self, attribute):
+        toreturn = "SELECT " + attribute + " from Event WHERE eventUrl='" + self.eventUrl "'"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
