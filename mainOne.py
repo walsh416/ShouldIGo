@@ -298,17 +298,22 @@ def editUser():
 		return redirect(url_for('login'))
 	_firstname = data[0]
 	_lastname = data[1]
+	_email = data[6]
 	# GET means that this is the first time here, so show page allowing user to edit their info
 	if request.method=="GET":
-		return render_template('editUser.html', firstname=_firstname, lastname=_lastname)
+		return render_template('editUser.html', firstname=_firstname, lastname=_lastname, email=_email)
 	# POST means that the form has already been submitted, time to execute it
 	new_firstname=request.form.get('firstname')
 	new_lastname=request.form.get('lastname')
+	new_email=request.form.get('email')
 	# Two different MySQL commands to update first and last name.  Tried to combine into one line but kept getting errors.
 	out = "UPDATE User SET firstname='" + new_firstname + "' WHERE username='" + _username + "'"
 	cursor.execute(out)
 	connection.commit()
 	out = "UPDATE User SET lastname='" + new_lastname + "' WHERE username='" + _username + "'"
+	cursor.execute(out)
+	connection.commit()
+	out = "UPDATE User SET email='" + new_email + "' WHERE username='" + _username + "'"
 	cursor.execute(out)
 	connection.commit()
 	# Throw user back to "/" and view the splashScreen/userHome.
