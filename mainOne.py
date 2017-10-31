@@ -15,21 +15,26 @@ app.config['MYSQL_DATABASE_DB'] = 'userDb'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
 
-mail=Mail(app)
+# mail=Mail(app)
 # Following two lines are both(?) needed to allow initial access to new gmail account
-# www.google.com/settings/security/lesssecureapps
-# accounts.google.com/DisplayUnlockCaptcha
+## www.google.com/settings/security/lesssecureapps
+## accounts.google.com/DisplayUnlockCaptcha
 app.config.update(
 	DEBUG=True,
-	#EMAIL SETTINGS
-	MAIL_SERVER='smtp.gmail.com',
+	# MAIL_SERVER='smtp.googlemail.com',
+	MAIL_SERVER = 'smtp.gmail.com',
+	# MAIL_PORT=587,
+	# MAIL_USE_SSL=False,
+	# MAIL_USE_TSL=True,
 	MAIL_PORT=465,
 	MAIL_USE_SSL=True,
+	MAIL_USE_TLS=False,
 	MAIL_USERNAME = 'timsemailforlols@gmail.com',
-	MAIL_PASSWORD = 'thisisthepassword'
+	MAIL_PASSWORD = 'vqlavnjpsmsytbtx'
+	# MAIL_PASSWORD = 'thisisthepassword'
 	)
 #
-# mail=Mail(app)
+mail=Mail(app)
 
 # TODO: allow deletion of events, user accounts, etc
 # TODO: send email to subscribers when an event is updated (given an event,
@@ -73,8 +78,10 @@ def is_EventUrl_in_EventUrlCSV(urlIn, csvIn):
 
 # takes in an email to send, and sends it on a separate thread so main process doesn't hang
 def send_async_email(app, msg):
-    with app.app_context():
-        mail.send(msg)
+	with app.app_context():
+		print "about to send email"
+		mail.send(msg)
+		print "sent email"
 
 # default/index page
 @app.route("/", methods=["GET","POST"])
