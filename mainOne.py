@@ -70,7 +70,7 @@ def eventUrlCSV_to_eventNameStrList(csvIn):
 
 # take in a CSV list and a string, and return boolean val of whether the string is in the list
 def is_EventUrl_in_EventUrlCSV(urlIn, csvIn):
-	print "looking for url: " + urlIn + " in CSV: " + csvIn
+	# print "looking for url: " + urlIn + " in CSV: " + csvIn
 	UrlList = csvIn.split(",")
 	for url in UrlList:
 		if urlIn==url:
@@ -80,9 +80,9 @@ def is_EventUrl_in_EventUrlCSV(urlIn, csvIn):
 # takes in an email to send, and sends it on a separate thread so main process doesn't hang
 def send_async_email(app, msg):
 	with app.app_context():
-		print "about to send email"
+		# print "about to send email"
 		mail.send(msg)
-		print "sent email"
+		# print "sent email"
 
 # default/index page
 @app.route("/", methods=["GET","POST"])
@@ -340,7 +340,7 @@ def showEvent(eventUrl):
 		data = cursor.fetchone()
 		# append new event to list of old events:
 		out = "UPDATE User SET followedEventsCSV='" + data[0] + eventUrl + ",' WHERE username='" + _username + "'"
-		print "executing mysql: " + out
+		# print "executing mysql: " + out
 		cursor.execute(out)
 		connection.commit()
 		# return render_template('showEvent.html', eventUrl=eventUrl, eventName=_eventName, eventDesc=_eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed)
@@ -359,7 +359,7 @@ def showEvent(eventUrl):
 		if data is None:
 			return redirect(url_for('login'))
 		# otherwise, pull rest of user data
-		print data
+		# print data
 		_firstname = data[0]
 		_lastname = data[1]
 		_followedEvents=data[7]
