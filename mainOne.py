@@ -129,21 +129,10 @@ def splashScreen():
 		# (re)set cookie with username to expire 90 days from now
 		resp.set_cookie('username', _username, expires=get_x_daysFromNow(90))
 		return resp
-	# if there wasn't a cookie named "username":
-	else:
-		# show the default "Welcome! Login or Register below!"
-		return render_template('splashScreen.html')
-
-@app.route("/logout")
-def logout():
-	# redirect to index and call function splashScreen
-	resp = make_response(redirect(url_for("splashScreen")))
-	# delete username cookie
-	resp.set_cookie('username', '', expires=0)
-	return resp
-
-@app.route("/login", methods = ["GET","POST"])
-def login():
+	# # if there wasn't a cookie named "username":
+	# else:
+	# 	# show the default "Welcome! Login or Register below!"
+	# 	return render_template('splashScreen.html')
 	# POST method means script was sent login data by user:
 	if request.method == "POST":
 		# pull user's username:
@@ -176,7 +165,51 @@ def login():
 		return resp
 	# GET method means user is logging in for the first time:
 	else:
-	    return render_template('login.html', badlogin=False)
+		return render_template('login.html', badlogin=False)
+
+@app.route("/logout")
+def logout():
+	# redirect to index and call function splashScreen
+	resp = make_response(redirect(url_for("splashScreen")))
+	# delete username cookie
+	resp.set_cookie('username', '', expires=0)
+	return resp
+
+# @app.route("/login", methods = ["GET","POST"])
+# def login():
+# 	# POST method means script was sent login data by user:
+# 	if request.method == "POST":
+# 		# pull user's username:
+# 		_username = request.form.get('username')
+# 		# find user in database
+# 		cursor = mysql.connect().cursor()
+# 		cursor.execute("SELECT * from User where username='" + _username + "'")
+# 		data = cursor.fetchone()
+# 		# if no user was found:
+# 		if data is None:
+# 			# try logging in again, with "bad username!" shown to user
+# 			return render_template('login.html', badUser=True, badPass=False)
+# 		# otherwise, get rest of user info from database response
+# 		_firstname = data[0]
+# 		_lastname = data[1]
+# 		_hashPassOut = data[3]
+# 		_saltOut = data[4]
+# 		_ownedEvents=data[5]
+#
+# 		# hashPassIn is the raw password entered by the user plus the salt from the database
+# 		_hashPassIn = hash_pass(request.form.get('password') + _saltOut)
+# 		# if the password the user entered doesn't match the password in the database:
+# 		if _hashPassIn != _hashPassOut:
+# 			# keep user at login screen, with "bad password!" shown to user
+# 			return render_template('login.html', badUser=False, badPass=True)
+# 		# otherwise, password was good, so user can log in and redirect to welcome screen:
+# 		resp = make_response(redirect(url_for('splashScreen')))
+# 		# reset username cookie to expire 90 days from now
+# 		resp.set_cookie('username', _username, expires=get_x_daysFromNow(90))
+# 		return resp
+# 	# GET method means user is logging in for the first time:
+# 	else:
+# 	    return render_template('login.html', badlogin=False)
 
 @app.route("/register", methods=["GET","POST"])
 def register():
@@ -285,7 +318,8 @@ def createEvent():
 	data = cursor.fetchone()
 	# if no user data in table, have user log in again:
 	if data is None:
-		return redirect(url_for('login'))
+		# return redirect(url_for('login'))
+		return redirect(url_for('splashScreen'))
 	# otherwise, pull rest of user data
 	_firstname = data[0]
 	_lastname = data[1]
@@ -358,7 +392,8 @@ def resendValidationEmail():
 		data = cursor.fetchone()
 		# if no user data in table, have user log in again:
 		if data is None:
-			return redirect(url_for('login'))
+			# return redirect(url_for('login'))
+			return redirect(url_for('splashScreen'))
 		_firstname = data[0]
 		_lastname = data[1]
 		_username = data[2]
@@ -413,7 +448,8 @@ def editUser():
 	data = cursor.fetchone()
 	# if no user data in table, have user log in again:
 	if data is None:
-		return redirect(url_for('login'))
+		# return redirect(url_for('login'))
+		return redirect(url_for('splashScreen'))
 	_firstname = data[0]
 	_lastname = data[1]
 	_email = data[6]
@@ -467,7 +503,8 @@ def showEvent(eventUrl):
 		data = cursor.fetchone()
 		# if no user data in table, have user log in again:
 		if data is None:
-			return redirect(url_for('login'))
+			# return redirect(url_for('login'))
+			return redirect(url_for('splashScreen'))
 		# otherwise, pull rest of user data
 		# print data
 		_firstname = data[0]
