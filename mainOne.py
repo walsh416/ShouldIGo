@@ -301,6 +301,58 @@ def createEvent():
 	else:
 		return render_template('createEvent.html', firstname=_firstname, firstTime=True)
 
+#in progress
+@app.route("/deleteEvent", methods=["DELETE"])
+def deleteEvent():
+	# confirm user is logged in
+	_username = request.cookies.get('username')
+	# if they are not, redirect to the splashScreen
+	if not _username:
+		return redirect(url_for('splashScreen'))
+	# otherwise, pull user data from database:
+	connection = mysql.connect()
+	cursor = connection.cursor()
+	cursor.execute("SELECT * from User where username='" + _username + "'")
+	data = cursor.fetchone()
+	# if no user data in table, have user log in again:
+	if data is None:
+		return redirect(url_for('login'))
+	_firstname = data[0]
+	_lastname = data[1]
+	_ownedEvents=data[5]
+
+	# DELETE method implies data is in table, trying to delete event:
+	if request.method == "DELETE":
+		# if doesn't have value for eventName, then still trying to pick a Url
+			eventUrl = request.cookies.get('eventUrl')
+			eventName = request.form.get('eventName')
+			eventDesc = request.form.get('eventDesc')
+
+			# add event to Event table
+			# connection = mysql.connect()
+			# cursor = connection.cursor()
+			out = "DELETE FROM Event values('" + eventUrl + "', '" + eventName + "', '" + eventDesc + "')"
+			cursor.execute(out)
+			connection.commit()
+
+			# get old list of ownedEvents from User table
+			cursor.execute("SELECT ownedEventsCSV from User where username='" + _username + "'")
+			data = cursor.fetchone()
+			# append new event to list of old events:
+			out = "UPDATE User SET ownedEventsCSV='" + data[0] + eventUrl + ",' WHERE username='" + _username + "'"
+			cursor.execute(out)
+			connection.commit()
+			# print ("Url: "+eventUrl+", name: "+request.form.get('eventName'))
+
+			resp = make_response(redirect(url_for('splashScreen')))
+			resp.set_cookie('eventUrl', '', expires=0)
+			return resp
+	# GET method means user is here for first time, allow to check Url availability:
+	else:
+		return render_template('deleteEvent.html', firstname=_firstname, firstTime=True)
+
+
+
 # TODO: resend verification email if a new email is entered
 @app.route('/editUser', methods=["GET","POST"])
 def editUser():
