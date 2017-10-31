@@ -8,6 +8,11 @@ Your username is {{username}}<br>
 And your full name is {{firstname}} {{lastname}}<br>
 I'd show you your hashed password, but then I'd have to kill you.<br>
 <br>
+{% if not verified %}
+You have not yet verified your email!  Click below to resend a validation email:<br>
+<a href={{ url_for("resendValidationEmail")}}>Validate Email</a><br>
+After validating, then you can start creating events!
+{% else %}
 {% if ownedeventszipped %}
 <!-- Your owned events are: {{ownedeventszipped}}<br> -->
 Your owned events are:
@@ -20,6 +25,7 @@ You do not currently own any events! Click below to make some!<br>
 {% endif %}
 <br>
 <a href="/createEvent">Create a new event!</a><br>
+{% endif %}
 <a href="/editUser">Edit my user information<br>
 <a href="/logout">Log out</a>
 </body>
