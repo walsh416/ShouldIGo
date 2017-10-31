@@ -49,8 +49,8 @@ def get_x_daysFromNow(x):
 	return datetime.today() + timedelta(days=x)
 
 # return random string for a salt for a user
-def get_salt():
-	return str(hashlib.md5(os.urandom(64).encode("base-64")).hexdigest())
+def get_x_randoms(x):
+	return str(hashlib.md5(os.urandom(64).encode("base-64")).hexdigest())[:x]
 
 # take in raw password, return it hashed
 def hash_pass(rawpassword):
@@ -192,8 +192,10 @@ def register():
 				_userUsername = request.form.get('username')
 				_userEmail = request.form.get('email')
 				# get a random salt:
-				_userSalt = get_salt()
+				_userSalt = get_x_randoms(64)
 				_userPassword = hash_pass(request.form.get('password') + _userSalt)
+				_userEmailValidation = get_x_randoms(16)
+				print _userEmailValidation
 
 				# checking valid email against regexp for it
 				validEmail = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', _userEmail)
@@ -202,7 +204,8 @@ def register():
 				# TODO: still need to actually send the user an email and have them confirm it
 
 				# add user to database:
-				out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\',\'\',\'" + _userEmail + "\',\'\')"
+				out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\',\'\',\'" + _userEmail + "\',\'\',\'" + _userEmailValidation + "\')"
+
 				cursor.execute(out)
 				connection.commit()
 
@@ -211,8 +214,8 @@ def register():
 						sender='timsemailforlols@google.com',
 						recipients=[_userEmail]
 						)
-				msg.body = render_template("registerEmail.txt", firstname=_userFirstname)
-				msg.html = render_template("registerEmail.html", firstname=_userFirstname)
+				msg.body = render_template("registerEmail.txt", firstname=_userFirstname, username=_userUsername, validation=_userEmailValidation)
+				msg.html = render_template("registerEmail.html", firstname=_userFirstname, username=_userUsername, validation=_userEmailValidation)
 				# mail.send(msg)
 				thr = Thread(target=send_async_email, args=[app, msg])
 				thr.start()
@@ -230,9 +233,36 @@ def register():
 				# TODO: query database for someone with the username already.  If
 				# 	returned is not None, then there is someone with that username
 				return render_template('register.html', diffPasswords=False, duplicateUser=True)
-	# GET method means user is here for the first time:
+	# GET method means user is here for the first time or is confirming email address:
 	else:
-	    return render_template('register.html', diffPasswords=False, duplicateUser=False)
+		# try pulling username and validation code out of GET method
+		# TODO: make sure this all works right on initial registration (maybe surround in try/except or something?)
+		# TODO: what happens if user clicks to verify email twice?  Goes through properly the first time, and then...?
+		# 				Maybe check if username already has validation==1 or not?
+		username=request.args.get('username')
+		validation=request.args.get('validation')
+		if not username:
+			return render_template('register.html', diffPasswords=False, duplicateUser=False)
+		connection = mysql.connect()
+		cursor = connection.cursor()
+		cursor.execute("SELECT verifiedEmail from User where username='" + username + "'")
+		data = cursor.fetchone()
+		# if no user data in table, have user register again:
+		if data is None:
+			return redirect(url_for('register'))
+		dbValidation = data[0]
+		if dbValidation == validation:
+			# Validation code was good!!  Reset code in table to 1
+			out = "UPDATE User SET verifiedEmail='0' WHERE username='" + username + "'"
+			cursor.execute(out)
+			connection.commit()
+			# redirect user to splashScreen
+			resp = make_response(redirect(url_for('splashScreen')))
+			# add cookie with username to expire in 90 days
+			resp.set_cookie('username', username, expires=get_x_daysFromNow(90))
+			return resp
+		return render_template('register.html', diffPasswords=False, duplicateUser=False)
+
 
 @app.route("/createEvent", methods=["GET","POST"])
 def createEvent():
@@ -396,6 +426,11 @@ def showEvent(eventUrl):
 def killDb():
 	connectionTemp = mysql.connect()
 	cursorTemp = connectionTemp.cursor()
+	##########################################################
+	###### Database notes:
+	###### verifiedEmail is initially a 16 character random string.
+	######		Once the user has verified their email, it is updated to "1"
+	##########################################################
 	out = '''DROP database IF EXISTS userDb;
 	CREATE DATABASE userDb;
 	USE userDb;
@@ -408,7 +443,7 @@ def killDb():
 	ownedEventsCSV VARCHAR(500),
 	email VARCHAR(80) NOT NULL,
 	followedEventsCSV VARCHAR(500),
-	verifiedEmail VARCHAR(2),
+	verifiedEmail VARCHAR(20),
 	primary key(username)
 	);
 	CREATE TABLE Event(
@@ -429,7 +464,6 @@ def killDb():
 # debug=True reloads the webpage whenver changes are made
 if __name__ == "__main__":
     app.run(debug=True)
-
 
 
 
