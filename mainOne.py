@@ -200,6 +200,8 @@ def register():
 				if validEmail == None:
 					return render_template('register.html', badEmail=True)
 				# TODO: still need to actually send the user an email and have them confirm it
+				# 			Do this in the register email.
+				# 			OR: follow this example www.scottbrady91.com/Email-Verification/Python-Email-Verification-Script
 
 				# add user to database:
 				out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\',\'\',\'" + _userEmail + "\',\'\')"
@@ -216,8 +218,6 @@ def register():
 				# mail.send(msg)
 				thr = Thread(target=send_async_email, args=[app, msg])
 				thr.start()
-				# TODO: should anything happen if bogus email is given?  Some sort of two stage
-				# 		"now go verify your email" type of deal that forces the user to show it's legit?
 
 				# redirect user to splashScreen
 				resp = make_response(redirect(url_for('splashScreen')))
