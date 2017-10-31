@@ -7,6 +7,9 @@
   {% if diffPasswords == true %}
   Passwords don't match!<br><br>
   {% endif %}
+  {% if badEmail == true %}
+  Invalid email address!<br><br>
+  {% endif %}
   {% if duplicateUser == true %}
   Username already in use, select another!<br><br>
   {% endif %}

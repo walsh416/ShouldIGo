@@ -4,7 +4,7 @@ from flaskext.mysql import MySQL
 from datetime import datetime, timedelta
 from flask_mail import Mail, Message
 from threading import Thread
-import hashlib, os
+import hashlib, os, re
 
 # Open MySQL connection:
 mysql = MySQL()
@@ -33,13 +33,16 @@ app.config.update(
 	MAIL_PASSWORD = 'vqlavnjpsmsytbtx'
 	# MAIL_PASSWORD = 'thisisthepassword'
 	)
-#
 mail=Mail(app)
 
 # TODO: allow deletion of events, user accounts, etc
 # TODO: send email to subscribers when an event is updated (given an event,
 # 			figuring out who is subscribed to it is gonna be ugly (searching
 # 			through each users CSV or something... ugh))
+# TODO: additional col in User for "verifiedEmail", just a boolean 1 or 0.
+# 			if it's a 0, then cripple splashScreen until they update or confirm email.
+# 			How to confirm... Need link back from email, but should be random-ish,
+# 			hopefully temporary... ugh.
 
 # returns datetime object for x days from now (for cookie expiration dates)
 def get_x_daysFromNow(x):
@@ -77,7 +80,7 @@ def is_EventUrl_in_EventUrlCSV(urlIn, csvIn):
 			return True
 	return False
 
-# takes in an email to send, and sends it on a separate thread so main process doesn't hang
+# takes in an email message to send, and sends it on a separate thread so main process doesn't hang
 def send_async_email(app, msg):
 	with app.app_context():
 		# print "about to send email"
@@ -180,6 +183,8 @@ def register():
 		else:
 			# try opening connection to database:
 			try:
+				# TODO: there should be some sweet maker pattern to implement to add stuff to the database
+				# 			ex: createUser(username).addFirstname(foo).addLastname(bar).... etc.
 				connection = mysql.connect()
 				cursor = connection.cursor()
 				_userFirstname = request.form.get('firstname')
@@ -189,6 +194,13 @@ def register():
 				# get a random salt:
 				_userSalt = get_salt()
 				_userPassword = hash_pass(request.form.get('password') + _userSalt)
+
+				# checking valid email against regexp for it
+				validEmail = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', _userEmail)
+				if validEmail == None:
+					return render_template('register.html', badEmail=True)
+				# TODO: still need to actually send the user an email and have them confirm it
+
 				# add user to database:
 				out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\',\'\',\'" + _userEmail + "\',\'\')"
 				cursor.execute(out)
@@ -289,6 +301,7 @@ def createEvent():
 	else:
 		return render_template('createEvent.html', firstname=_firstname, firstTime=True)
 
+# TODO: resend verification email if a new email is entered
 @app.route('/editUser', methods=["GET","POST"])
 def editUser():
 	# confirm user is logged in
@@ -395,6 +408,7 @@ def killDb():
 	ownedEventsCSV VARCHAR(500),
 	email VARCHAR(80) NOT NULL,
 	followedEventsCSV VARCHAR(500),
+	verifiedEmail VARCHAR(2),
 	primary key(username)
 	);
 	CREATE TABLE Event(
