@@ -338,6 +338,7 @@ def createEvent():
 	else:
 		return render_template('createEvent.html', firstname=_firstname, firstTime=True)
 
+
 #in progress
 @app.route("/deleteEvent", methods=["DELETE"])
 def deleteEvent():
@@ -448,6 +449,7 @@ def resendValidationEmail():
 		# add cookie with username to expire in 90 days
 		resp.set_cookie('username', username, expires=get_x_daysFromNow(90))
 		return resp
+
 
 # TODO: resend verification email if a new email is entered
 @app.route('/editUser', methods=["GET","POST"])
