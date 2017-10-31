@@ -506,6 +506,7 @@ def editUser():
 	_firstname = data[0]
 	_lastname = data[1]
 	_email = data[6]
+	# TODO: revalidate new email address
 	# GET means that this is the first time here, so show page allowing user to edit their info
 	if request.method=="GET":
 		return render_template('editUser.html', firstname=_firstname, lastname=_lastname, email=_email)
