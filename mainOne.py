@@ -2,7 +2,9 @@
 from flask import Flask, render_template, request, redirect, url_for, make_response
 from flaskext.mysql import MySQL
 from datetime import datetime, timedelta
-import hashlib, os
+from flask_mail import Mail, Message
+from threading import Thread
+import hashlib, os, re
 
 # Open MySQL connection:
 mysql = MySQL()
@@ -13,8 +15,34 @@ app.config['MYSQL_DATABASE_DB'] = 'userDb'
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 mysql.init_app(app)
 
+# mail=Mail(app)
+# Following two lines are both(?) needed to allow initial access to new gmail account
+## www.google.com/settings/security/lesssecureapps
+## accounts.google.com/DisplayUnlockCaptcha
+app.config.update(
+	DEBUG=True,
+	# MAIL_SERVER='smtp.googlemail.com',
+	MAIL_SERVER = 'smtp.gmail.com',
+	# MAIL_PORT=587,
+	# MAIL_USE_SSL=False,
+	# MAIL_USE_TSL=True,
+	MAIL_PORT=465,
+	MAIL_USE_SSL=True,
+	MAIL_USE_TLS=False,
+	MAIL_USERNAME = 'timsemailforlols@gmail.com',
+	MAIL_PASSWORD = 'vqlavnjpsmsytbtx'
+	# MAIL_PASSWORD = 'thisisthepassword'
+	)
+mail=Mail(app)
+
 # TODO: allow deletion of events, user accounts, etc
-# TODO: make events... do something
+# TODO: send email to subscribers when an event is updated (given an event,
+# 			figuring out who is subscribed to it is gonna be ugly (searching
+# 			through each users CSV or something... ugh))
+# TODO: additional col in User for "verifiedEmail", just a boolean 1 or 0.
+# 			if it's a 0, then cripple splashScreen until they update or confirm email.
+# 			How to confirm... Need link back from email, but should be random-ish,
+# 			hopefully temporary... ugh.
 
 # returns datetime object for x days from now (for cookie expiration dates)
 def get_x_daysFromNow(x):
@@ -42,6 +70,22 @@ def eventUrlCSV_to_eventNameStrList(csvIn):
 			eventName = data[1]
 			nameList.append(eventName)
 	return nameList
+
+# take in a CSV list and a string, and return boolean val of whether the string is in the list
+def is_EventUrl_in_EventUrlCSV(urlIn, csvIn):
+	# print "looking for url: " + urlIn + " in CSV: " + csvIn
+	UrlList = csvIn.split(",")
+	for url in UrlList:
+		if urlIn==url:
+			return True
+	return False
+
+# takes in an email message to send, and sends it on a separate thread so main process doesn't hang
+def send_async_email(app, msg):
+	with app.app_context():
+		# print "about to send email"
+		mail.send(msg)
+		# print "sent email"
 
 # default/index page
 @app.route("/", methods=["GET","POST"])
@@ -139,18 +183,41 @@ def register():
 		else:
 			# try opening connection to database:
 			try:
+				# TODO: there should be some sweet maker pattern to implement to add stuff to the database
+				# 			ex: createUser(username).addFirstname(foo).addLastname(bar).... etc.
 				connection = mysql.connect()
 				cursor = connection.cursor()
 				_userFirstname = request.form.get('firstname')
 				_userLastname = request.form.get('lastname')
 				_userUsername = request.form.get('username')
+				_userEmail = request.form.get('email')
 				# get a random salt:
 				_userSalt = get_salt()
 				_userPassword = hash_pass(request.form.get('password') + _userSalt)
+
+				# checking valid email against regexp for it
+				validEmail = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', _userEmail)
+				if validEmail == None:
+					return render_template('register.html', badEmail=True)
+				# TODO: still need to actually send the user an email and have them confirm it
+
 				# add user to database:
-				out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\',\'\')"
+				out = "INSERT INTO User values(\'" + _userFirstname + "\',\'" + _userLastname + "\',\'" + _userUsername + "\',\'" + _userPassword + "\',\'" + _userSalt + "\',\'\',\'" + _userEmail + "\',\'\')"
 				cursor.execute(out)
 				connection.commit()
+
+				msg = Message(
+						'Hello, %s!' % _userFirstname,
+						sender='timsemailforlols@google.com',
+						recipients=[_userEmail]
+						)
+				msg.body = render_template("registerEmail.txt", firstname=_userFirstname)
+				msg.html = render_template("registerEmail.html", firstname=_userFirstname)
+				# mail.send(msg)
+				thr = Thread(target=send_async_email, args=[app, msg])
+				thr.start()
+				# TODO: should anything happen if bogus email is given?  Some sort of two stage
+				# 		"now go verify your email" type of deal that forces the user to show it's legit?
 
 				# redirect user to splashScreen
 				resp = make_response(redirect(url_for('splashScreen')))
@@ -182,6 +249,7 @@ def createEvent():
 	# if no user data in table, have user log in again:
 	if data is None:
 		return redirect(url_for('login'))
+	# otherwise, pull rest of user data
 	_firstname = data[0]
 	_lastname = data[1]
 	_ownedEvents=data[5]
@@ -213,7 +281,7 @@ def createEvent():
 			# add event to Event table
 			# connection = mysql.connect()
 			# cursor = connection.cursor()
-			out = "INSERT INTO Event values('" + eventUrl + "', '" + eventName + "', '" + eventDesc + "')"
+			out = "INSERT INTO Event values('" + eventUrl + "', '" + eventName + "', '" + eventDesc + "','')"
 			cursor.execute(out)
 			connection.commit()
 
@@ -256,6 +324,7 @@ def createEvent():
 	else:
 		return render_template('createEvent.html', firstname=_firstname, firstTime=True)
 
+# TODO: resend verification email if a new email is entered
 @app.route('/editUser', methods=["GET","POST"])
 def editUser():
 	# confirm user is logged in
@@ -273,17 +342,22 @@ def editUser():
 		return redirect(url_for('login'))
 	_firstname = data[0]
 	_lastname = data[1]
+	_email = data[6]
 	# GET means that this is the first time here, so show page allowing user to edit their info
 	if request.method=="GET":
-		return render_template('editUser.html', firstname=_firstname, lastname=_lastname)
+		return render_template('editUser.html', firstname=_firstname, lastname=_lastname, email=_email)
 	# POST means that the form has already been submitted, time to execute it
 	new_firstname=request.form.get('firstname')
 	new_lastname=request.form.get('lastname')
+	new_email=request.form.get('email')
 	# Two different MySQL commands to update first and last name.  Tried to combine into one line but kept getting errors.
 	out = "UPDATE User SET firstname='" + new_firstname + "' WHERE username='" + _username + "'"
 	cursor.execute(out)
 	connection.commit()
 	out = "UPDATE User SET lastname='" + new_lastname + "' WHERE username='" + _username + "'"
+	cursor.execute(out)
+	connection.commit()
+	out = "UPDATE User SET email='" + new_email + "' WHERE username='" + _username + "'"
 	cursor.execute(out)
 	connection.commit()
 	# Throw user back to "/" and view the splashScreen/userHome.
@@ -294,6 +368,41 @@ def editUser():
 def showEvent(eventUrl):
 	connection = mysql.connect()
 	cursor = connection.cursor()
+	# confirm user is logged in
+	_username = request.cookies.get('username')
+	if request.method == "POST":
+		# get old list of ownedEvents from User table
+		cursor.execute("SELECT followedEventsCSV from User where username='" + _username + "'")
+		data = cursor.fetchone()
+		# append new event to list of old events:
+		out = "UPDATE User SET followedEventsCSV='" + data[0] + eventUrl + ",' WHERE username='" + _username + "'"
+		# print "executing mysql: " + out
+		cursor.execute(out)
+		connection.commit()
+		# return render_template('showEvent.html', eventUrl=eventUrl, eventName=_eventName, eventDesc=_eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed)
+		return redirect(url_for('showEvent', eventUrl=eventUrl))
+	# currUserIsOwner = False
+	userLoggedIn = False
+	subscribed = False
+	# if they are, show event page with "follow" button
+	if _username:
+		# pull user data from database:
+		# connection = mysql.connect()
+		# cursor = connection.cursor()
+		cursor.execute("SELECT * from User where username='" + _username + "'")
+		data = cursor.fetchone()
+		# if no user data in table, have user log in again:
+		if data is None:
+			return redirect(url_for('login'))
+		# otherwise, pull rest of user data
+		# print data
+		_firstname = data[0]
+		_lastname = data[1]
+		_followedEvents=data[7]
+		userLoggedIn = True
+		subscribed = is_EventUrl_in_EventUrlCSV(eventUrl, _followedEvents)
+	# connection = mysql.connect()
+	# cursor = connection.cursor()
 	cursor.execute("SELECT * from Event where eventURL='" + eventUrl + "'")
 	data = cursor.fetchone()
 	# TODO: does this actually work?  Or does it need to be redone to catch errors?
@@ -302,7 +411,7 @@ def showEvent(eventUrl):
 		return redirect(url_for('splashScreen'))
 	_eventName = data[1]
 	_eventDesc = data[2]
-	return render_template('showEvent.html', eventUrl=eventUrl, eventName=_eventName, eventDesc=_eventDesc)
+	return render_template('showEvent.html', eventUrl=eventUrl, eventName=_eventName, eventDesc=_eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed)
 
 # Hidden URL never shown to user, for testing only and to be removed before production
 # Gives ability to call MySQL code to reset the databases without logging into MySQL
@@ -319,26 +428,26 @@ def killDb():
 	username VARCHAR(50) NOT NULL,
 	password VARCHAR(80) NOT NULL,
 	salt VARCHAR(80) NOT NULL,
-	ownedEventsCSV VARCHAR(200),
+	ownedEventsCSV VARCHAR(500),
+	email VARCHAR(80) NOT NULL,
+	followedEventsCSV VARCHAR(500),
+	verifiedEmail VARCHAR(2),
 	primary key(username)
 	);
 	CREATE TABLE Event(
 	eventUrl VARCHAR(50) NOT NULL,
 	eventName VARCHAR(200) NOT NULL,
 	eventDesc VARCHAR(1000) NOT NULL,
+	followers VARCHAR(1000) NOT NULL,
 	primary key(eventUrl)
 	);'''
 	cursorTemp.execute(out)
 	connectionTemp.commit()
 	connectionTemp.close()
+	print "################ DB killed ################"
 	resp = make_response(redirect(url_for('splashScreen')))
 	resp.set_cookie('username', '', expires=0)
 	return resp
-
-
-# @app.route("/user", methods=["GET","POST"])
-# def helloUser():
-#     return render_template('helloUser.html', )
 
 # debug=True reloads the webpage whenver changes are made
 if __name__ == "__main__":

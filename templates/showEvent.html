@@ -8,11 +8,21 @@ This is your event!<br>
 Here is its description:<br><br>
 {{eventDesc}}<br><br>
 <a href="/">Return</a><br><br><br>
-{% if owner==true %}
+{% if userLoggedIn == true %}
+{% if subscribed == false %}
+<form method = "POST">
+  <input type="submit" value="Follow this event">
+</form>
+{% else %}
+<!-- TODO: some way to unfollow? -->
+You already follow this event!
+{% endif %}
+{% endif %}
+<!-- {% if owner==true %}
 You own this event! Click below to edit it:
 <form method = "POST">
   <input type="submit" value="Edit">
 </form>
-{% endif %}
+{% endif %} -->
 </body>
 </html>

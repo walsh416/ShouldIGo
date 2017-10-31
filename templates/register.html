@@ -7,6 +7,9 @@
   {% if diffPasswords == true %}
   Passwords don't match!<br><br>
   {% endif %}
+  {% if badEmail == true %}
+  Invalid email address!<br><br>
+  {% endif %}
   {% if duplicateUser == true %}
   Username already in use, select another!<br><br>
   {% endif %}
@@ -18,6 +21,8 @@
 	<input type="text" name="lastname"><br>
 	Username:<br>
 	<input type="text" name="username"><br>
+	Email:<br>
+	<input type="text" name="email"><br>
 	Password:<br>
 	<input type="password" name="password"><br>
 	Confirm password:<br>
