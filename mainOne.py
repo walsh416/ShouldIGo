@@ -39,10 +39,7 @@ mail=Mail(app)
 # TODO: send email to subscribers when an event is updated (given an event,
 # 			figuring out who is subscribed to it is gonna be ugly (searching
 # 			through each users CSV or something... ugh))
-# TODO: additional col in User for "verifiedEmail", just a boolean 1 or 0.
-# 			if it's a 0, then cripple splashScreen until they update or confirm email.
-# 			How to confirm... Need link back from email, but should be random-ish,
-# 			hopefully temporary... ugh.
+# TODO: validate event URLs (no slashes, no periods, etc)
 
 # returns datetime object for x days from now (for cookie expiration dates)
 def get_x_daysFromNow(x):
