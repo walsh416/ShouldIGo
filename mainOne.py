@@ -70,6 +70,7 @@ def eventUrlCSV_to_eventNameStrList(csvIn):
 
 # take in a CSV list and a string, and return boolean val of whether the string is in the list
 def is_EventUrl_in_EventUrlCSV(urlIn, csvIn):
+	print "looking for url: " + urlIn + " in CSV: " + csvIn
 	UrlList = csvIn.split(",")
 	for url in UrlList:
 		if urlIn==url:
@@ -339,6 +340,7 @@ def showEvent(eventUrl):
 		data = cursor.fetchone()
 		# append new event to list of old events:
 		out = "UPDATE User SET followedEventsCSV='" + data[0] + eventUrl + ",' WHERE username='" + _username + "'"
+		print "executing mysql: " + out
 		cursor.execute(out)
 		connection.commit()
 		# return render_template('showEvent.html', eventUrl=eventUrl, eventName=_eventName, eventDesc=_eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed)
@@ -357,11 +359,12 @@ def showEvent(eventUrl):
 		if data is None:
 			return redirect(url_for('login'))
 		# otherwise, pull rest of user data
+		print data
 		_firstname = data[0]
 		_lastname = data[1]
-		_ownedEvents=data[5]
+		_followedEvents=data[7]
 		userLoggedIn = True
-		subscribed = is_EventUrl_in_EventUrlCSV(eventUrl, _ownedEvents)
+		subscribed = is_EventUrl_in_EventUrlCSV(eventUrl, _followedEvents)
 	# connection = mysql.connect()
 	# cursor = connection.cursor()
 	cursor.execute("SELECT * from Event where eventURL='" + eventUrl + "'")
