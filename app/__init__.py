@@ -23,38 +23,6 @@ mail = Mail(app)
 def get_x_daysFromNow(x):
     return datetime.today() + timedelta(days=x)
 
-# return random string for a salt for a user
-def get_x_randoms(x):
-    return str(hashlib.md5(os.urandom(64).encode("base-64")).hexdigest())[:x]
-
-# take in raw password, return it hashed
-def hash_pass(rawpassword):
-    h = hashlib.md5(rawpassword.encode())
-    return str(h.hexdigest())
-
-# take in CSV of event Urls, use to parse into MySQL to return list of event names
-def eventUrlCSV_to_eventNameStrList(csvIn):
-    UrlList = csvIn.split(",")
-    nameList = []
-    cursor = mysql.connect().cursor()
-    for Url in UrlList:
-        # TODO: fix this, obviously
-        cursor.execute("SELECT * from Event where eventUrl='" + Url + "'")
-        data = cursor.fetchone()
-        if data is not None:
-            eventName = data[1]
-            nameList.append(eventName)
-    return nameList
-
-# take in a CSV list and a string, and return boolean val of whether the string is in the list
-def is_EventUrl_in_EventUrlCSV(urlIn, csvIn):
-    # print "looking for url: " + urlIn + " in CSV: " + csvIn
-    UrlList = csvIn.split(",")
-    for url in UrlList:
-        if urlIn==url:
-            return True
-    return False
-
 # takes in an email message to send, and sends it on a separate thread so main process doesn't hang
 def send_async_email(app, msg):
     with app.app_context():
@@ -135,14 +103,13 @@ def register():
                 usr.firstname = request.form.get('firstname')
                 usr.lastname = request.form.get('lastname')
                 usr.email = request.form.get('email')
-                # get a random salt:
-                usr.salt = get_x_randoms(64)
-                usr.password = hash_pass(request.form.get('password') + usr.salt)
-                usr.verifiedEmail = get_x_randoms(16)
+                usr.assignPassAndSalt()
+                usr.assignVerifiedEmail()
                 # checking valid email against regexp for it
                 validEmailBool = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', usr.email)
                 if validEmailBool == None:
                     return render_template('register.html', badEmail=True)
+                usr.email = request.form.get('email')
                 usr.insert()
 
                 msg = Message(
@@ -179,7 +146,7 @@ def register():
         if db_h.User.usernameAvail(username):
             return redirect(url_for('register'))
         usr=db_h.User(username)
-        
+
         if usr.verifiedEmail == validation:
             # Validation code was good!!  Reset code in table to 0
             usr.verifiedEmail="0"
@@ -329,7 +296,7 @@ def showEvent(eventUrl):
         usr=db_h.User(_username)
         userLoggedIn = True
         # TODO: put this in database_handling:
-        subscribed = is_EventUrl_in_EventUrlCSV(eventUrl, usr.followedEventsCSV)
+        subscribed = db_h.Event.is_EventUrl_in_EventUrlCSV(eventUrl, usr.followedEventsCSV)
 
     # eventUrl is avail, so event does not exist.  Redirect to splashScreen
     if db_h.Event.eventUrlAvail(eventUrl):

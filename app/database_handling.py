@@ -16,15 +16,24 @@ mysql.init_app(app)
 def get_x_randoms(x):
     return str(hashlib.md5(os.urandom(64).encode("base-64")).hexdigest())[:x]
 
+# take in raw password, return it hashed
+def hash_pass(rawpassword):
+    h = hashlib.md5(rawpassword.encode())
+    return str(h.hexdigest())
 
 class User:
     # pullFromDb tells the constructor to query the User table for info on the user
     #       It should be set to false if the user is not yet in the database
+    # def __init__ (self, username, pullFromDb=True, password=""):
     def __init__ (self, username, pullFromDb=True):
         self.username = username
         self.firstname = ""
         self.lastname = ""
         self.email = ""
+        # if password is not None:
+        #     self.salt = get_x_randoms(64)
+        #     self.password = hash_pass(password + self.salt)
+        # else:
         self.password = ""
         self.salt = ""
         self.ownedEventsCSV = ""
@@ -57,6 +66,13 @@ class User:
         if data is None:
             return True
         return False
+
+    def assignPassAndSalt(self, rawPass):
+        self.salt = get_x_randoms(64)
+        self.password = hash_pass(rawPass, self.salt)
+
+    def assignVerifiedEmail(self):
+        self.verifiedEmail = get_x_randoms(16)
 
     def getListOfOwnedEventNames(self):
         UrlList = self.ownedEventsCSV.split(",")
@@ -172,6 +188,28 @@ class Event:
             return True
         return False
 
+    @staticmethod
+    def eventUrlCSV_to_eventNameStrList(csvIn):
+        urlList = csvIn.split(",")
+        nameList = []
+        cursor = mysql.connect().server()
+        for url in urlList:
+            cursor.execute("SELECT * from Event where eventUrl='" + url + "'")
+            data = cursor.fetchone()
+            if data is not None:
+                eventName = data[1]
+                nameList.append(eventName)
+        return nameList
+
+    @staticmethod
+    def is_EventUrl_in_EventUrlCSV(urlIn, csvIn):
+        # print "looking for url: " + urlIn + " in CSV: " + csvIn
+        UrlList = csvIn.split(",")
+        for url in UrlList:
+            if urlIn==url:
+                return True
+        return False
+
     def insert(self):
         connection = mysql.connect()
         cursor = connection.cursor()
@@ -239,16 +277,3 @@ def killDb():
     cursorTemp.execute(out)
     connectionTemp.commit()
     connectionTemp.close()
-
-
-
-
-
-
-
-
-
-
-
-
-#
