@@ -176,11 +176,10 @@ def register():
         validation=request.args.get('validation')
         if not username:
             return render_template('register.html', diffPasswords=False, duplicateUser=False)
+        if db_h.User.usernameAvail(username):
+            return redirect(url_for('register'))
         usr=db_h.User(username)
-        # # TODO: enable this:
-        # # if no user data in table, have user register again:
-        # if data is None:
-        #     return redirect(url_for('register'))
+        
         if usr.verifiedEmail == validation:
             # Validation code was good!!  Reset code in table to 0
             usr.verifiedEmail="0"
@@ -200,23 +199,15 @@ def createEvent():
     if not _username:
         return redirect(url_for('splashScreen'))
     # otherwise, pull user data from database:
+    if db_h.User.usernameAvail(_username):
+        return redirect(url_for('splashScreen'))
     usr=db_h.User(_username)
-    # # TODO: enable this:
-    # # if no user data in table, have user log in again:
-    # if data is None:
-    #     # return redirect(url_for('login'))
-    #     return redirect(url_for('splashScreen'))
 
     # POST method implies data being passed, trying to create event:
     if request.method == "POST":
         # if doesn't have value for eventName, then still trying to pick a Url
         if not request.form.get('eventName'):
             eventUrl=request.form.get('eventUrl')
-            # # cursor = mysql.connect().cursor()
-            # cursor.execute("SELECT * from Event where eventUrl='" + eventUrl + "'")
-            # data = cursor.fetchone()
-            # # if eventUrl is not already in the database:
-            # if data is None:
             if db_h.Event.eventUrlAvail(eventUrl):
                 # move on to second stage of creation, picking name and stuff
                 # set cookie with eventUrl, temporary, will be destroyed in stage two
@@ -236,12 +227,6 @@ def createEvent():
             event.eventName = eventName
             event.eventDesc = eventDesc
             event.insert()
-            # # add event to Event table
-            # connection = mysql.connect()
-            # cursor = connection.cursor()
-            # out = "INSERT INTO Event values('" + eventUrl + "', '" + eventName + "', '" + eventDesc + "','')"
-            # cursor.execute(out)
-            # connection.commit()
 
             usr.appendToOwnedEventsCSV(eventUrl)
 
@@ -264,13 +249,10 @@ def resendValidationEmail():
         # if they are not, redirect to the splashScreen
         if not _username:
             return redirect(url_for('splashScreen'))
+        if db_h.User.usernameAvail(_username):
+            return redirect(url_for('splashScreen'))
         # otherwise, pull user data from database:
         usr=db_h.User(_username)
-        # # TODO: implement this:
-        # # if no user data in table, have user log in again:
-        # if data is None:
-        #     # return redirect(url_for('login'))
-        #     return redirect(url_for('splashScreen'))
         msg = Message(
                 'Validating %s\'s email!' % usr.firstname,
                 sender='timsemailforlols@google.com',
@@ -278,8 +260,6 @@ def resendValidationEmail():
         )
         msg.body = render_template("registerEmail.txt", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
         msg.html = render_template("registerEmail.html", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
-        # mail.send(msg)
-        # print msg
         thr = Thread(target=send_async_email, args=[app, msg])
         thr.start()
         # redirect user to splashScreen
@@ -288,11 +268,9 @@ def resendValidationEmail():
         # add cookie with username to expire in 90 days
         resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
         return resp
+    if db_h.User.usernameAvail(username):
+        return redirect(url_for('register'))
     usr=db_h.User(username)
-    # # TODO: implement this:
-    # # if no user data in table, have user register again:
-    # if data is None:
-    #     return redirect(url_for('register'))
     if usr.verifiedEmail == validation:
         # Validation code was good!!  Reset code in table to 1
         usr.verifiedEmail="0"
@@ -303,7 +281,6 @@ def resendValidationEmail():
         resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
         return resp
 
-
 # TODO: resend verification email if a new email is entered
 @app.route('/editUser', methods=["GET","POST"])
 def editUser():
@@ -313,12 +290,9 @@ def editUser():
     if not _username:
         return redirect(url_for('splashScreen'))
     # otherwise, pull user data from database:
+    if db_h.User.usernameAvail(_username):
+        return redirect(url_for('splashScreen'))
     usr=db_h.User(_username)
-    # # TODO: impelment this:
-    # # if no user data in table, have user log in again:
-    # if data is None:
-    #     # return redirect(url_for('login'))
-    #     return redirect(url_for('splashScreen'))
     # TODO: revalidate new email address
     # GET means that this is the first time here, so show page allowing user to edit their info
     if request.method=="GET":
@@ -327,7 +301,6 @@ def editUser():
     new_firstname=request.form.get('firstname')
     new_lastname=request.form.get('lastname')
     new_email=request.form.get('email')
-    # Two different MySQL commands to update first and last name.  Tried to combine into one line but kept getting errors.
     usr.firstname=new_firstname
     usr.lastname=new_lastname
     usr.email=new_email
@@ -340,36 +313,25 @@ def editUser():
 # <eventUrl> is a variable that matches with any other URL to check if it's a valid eventUrl
 @app.route("/<eventUrl>", methods=["GET","POST"])
 def showEvent(eventUrl):
-    # connection = mysql.connect()
-    # cursor = connection.cursor()
     # confirm user is logged in
     _username = request.cookies.get('username')
     # POST method means user clicked the "follow" button, since it's just a blank form
     if request.method == "POST":
         usr=db_h.User(_username)
         usr.appendToFollowedEventsCSV(eventUrl)
-        # return render_template('showEvent.html', eventUrl=eventUrl, eventName=_eventName, eventDesc=_eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed)
         return redirect(url_for('showEvent', eventUrl=eventUrl))
-    # currUserIsOwner = False
     userLoggedIn = False
     subscribed = False
     # if they are, show event page with "follow" button
     if _username:
+        if db_h.User.usernameAvail(_username):
+            return redirect(url_for('splashScreen'))
         usr=db_h.User(_username)
-        # # TODO: implement this:
-        # # if no user data in table, have user log in again:
-        # if data is None:
-        #     # return redirect(url_for('login'))
-        #     return redirect(url_for('splashScreen'))
         userLoggedIn = True
         # TODO: put this in database_handling:
         subscribed = is_EventUrl_in_EventUrlCSV(eventUrl, usr.followedEventsCSV)
 
-    # cursor.execute("SELECT * from Event where eventURL='" + eventUrl + "'")
-    # data = cursor.fetchone()
-    # # TODO: does this actually work?  Or does it need to be redone to catch errors?
-    # # if no event data in table, redirect to splashScreen:
-    # if data is None:
+    # eventUrl is avail, so event does not exist.  Redirect to splashScreen
     if db_h.Event.eventUrlAvail(eventUrl):
         return redirect(url_for('splashScreen'))
     event = db_h.Event(eventUrl)

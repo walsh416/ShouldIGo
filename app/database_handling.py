@@ -49,6 +49,15 @@ class User:
         # else:
         #     self.insert()
 
+    @staticmethod
+    def usernameAvail(usernameIn):
+        cursor = mysql.connect().cursor()
+        cursor.execute("SELECT * from User where username ='" + usernameIn + "'")
+        data = cursor.fetchone()
+        if data is None:
+            return True
+        return False
+
     def getListOfOwnedEventNames(self):
         UrlList = self.ownedEventsCSV.split(",")
         nameList = []
