@@ -67,15 +67,32 @@ class User:
             return True
         return False
 
+    def checkHashPass(self, rawPassIn):
+        correctPass = hash_pass(rawPassIn + self.salt)
+        return correctPass == self.password
+
     def assignPassAndSalt(self, rawPass):
         self.salt = get_x_randoms(64)
-        self.password = hash_pass(rawPass, self.salt)
+        self.password = hash_pass(rawPass)
 
     def assignVerifiedEmail(self):
         self.verifiedEmail = get_x_randoms(16)
 
     def getListOfOwnedEventNames(self):
         UrlList = self.ownedEventsCSV.split(",")
+        nameList = []
+        cursor = mysql.connect().cursor()
+        for Url in UrlList:
+            # TODO: fix this, obviously
+            cursor.execute("SELECT * from Event where eventUrl='" + Url + "'")
+            data = cursor.fetchone()
+            if data is not None:
+                eventName = data[1]
+                nameList.append(eventName)
+        return nameList
+
+    def getListOfFollowedEventNames(self):
+        UrlList = self.followedEventsCSV.split(",")
         nameList = []
         cursor = mysql.connect().cursor()
         for Url in UrlList:

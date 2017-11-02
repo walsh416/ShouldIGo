@@ -49,12 +49,17 @@ def splashScreen():
         for url in _ownedEventsUrlsList:
             # url = '"/'+url+'"'
             url = '/'+url
-
         # zip both lists together: creates an equal length list of tuples
         _ownedEventsZipped = zip(_ownedEventsList,_ownedEventsUrlsList)
 
+        _followedEventsList = usr.getListOfFollowedEventNames()
+        _followedEventsUrlsList = usr.followedEventsCSV.split(",")
+        for url in _followedEventsUrlsList:
+            url = '/'+url
+        _followedEventsZipped = zip(_followedEventsList,_followedEventsUrlsList)
+
         # send user to userHome with appropriate arguments
-        resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, ownedeventszipped=_ownedEventsZipped, verified=True))
+        resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, ownedeventszipped=_ownedEventsZipped, followedeventszipped=_followedEventsZipped, verified=True))
         # (re)set cookie with username to expire 90 days from now
         resp.set_cookie('username', _username, expires=get_x_daysFromNow(90))
         return resp
@@ -62,9 +67,10 @@ def splashScreen():
     if request.method == "POST":
         usr = db_h.User(request.form.get('username'))
         # hashPassIn is the raw password entered by the user plus the salt from the database
-        _hashPassIn = hash_pass(request.form.get('password') + usr.salt)
-        # if the password the user entered doesn't match the password in the database:
-        if _hashPassIn != usr.password:
+        # _hashPassIn = hash_pass(request.form.get('password') + usr.salt)
+        # # if the password the user entered doesn't match the password in the database:
+        # if _hashPassIn != usr.password:
+        if not usr.checkHashPass(request.form.get('password')):
             # keep user at login screen, with "bad password!" shown to user
             return render_template('login.html', badPass=True)
         # otherwise, password was good, so user can log in and redirect to welcome screen:
@@ -103,7 +109,7 @@ def register():
                 usr.firstname = request.form.get('firstname')
                 usr.lastname = request.form.get('lastname')
                 usr.email = request.form.get('email')
-                usr.assignPassAndSalt()
+                usr.assignPassAndSalt(request.form.get('password'))
                 usr.assignVerifiedEmail()
                 # checking valid email against regexp for it
                 validEmailBool = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', usr.email)
