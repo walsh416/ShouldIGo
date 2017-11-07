@@ -11,8 +11,16 @@ I'd show you your hashed password, but then I'd have to kill you.<br>
 {% if not verified %}
 You have not yet verified your email!  Click below to resend a validation email:<br>
 <a href={{ url_for("resendValidationEmail")}}>Validate Email</a><br>
-After validating, then you can start creating events!
+After validating, then you can start creating and following events!
 {% else %}
+{% if followedeventszipped %}
+These are the events you follow:
+{% for eventName,eventUrl in followedeventszipped %}
+<a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %}
+{% endfor %}<br>
+{% else %}
+You do not currently follow any events, explore to find ones you like!<br>
+{% endif %}
 {% if ownedeventszipped %}
 <!-- Your owned events are: {{ownedeventszipped}}<br> -->
 Your owned events are:
