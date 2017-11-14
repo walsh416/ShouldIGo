@@ -215,7 +215,7 @@ def createEvent():
 
 @app.route('/validateEmail')
 def resendValidationEmail():
-    # TODO: allow users to edit their email address
+    # TODO: revalidate email address after user edits it
     username=request.args.get('username')
     validation=request.args.get('validation')
     # here for first time, so send them an email:
