@@ -3,18 +3,11 @@ from flask import Flask
 import hashlib, os
 from flaskext.mysql import MySQL
 from flask_sqlalchemy import SQLAlchemy
-# from app import app
-
-# TODO: bring all mysql interaction into here, out of mainOne.py
-# TODO: rename User and Event tables UserTable and EventTable to differentiate between them and classes
 
 app = Flask(__name__)
 app.config.from_object('config')
 
 alch_db = SQLAlchemy(app)
-
-# alch_db = SQLAlchemy()
-# alch_db.init_app(app)
 
 mysql = MySQL()
 mysql.init_app(app)
@@ -41,15 +34,14 @@ class User_alch(alch_db.Model):
     verifiedEmail = alch_db.Column(alch_db.String(20), nullable=True)
 
     # TODO: bring salt and verification stuff back in this file, out of __init__
-    def __init__(self, firstname, lastname, username, email, salt, password, verifiedEmail):
+    def __init__(self, firstname, lastname, username, email, rawpassword):
         super(User_alch, self).__init__()
         self.firstname = firstname
         self.lastname = lastname
         self.username = username
         self.email = email
-        self.salt = salt
-        self.password = password
-        self.verifiedEmail = verifiedEmail
+        self.assignPassAndSalt(rawpassword)
+        self.assignVerifiedEmail()
         self.ownedEventsCSV = ""
         self.followedEventsCSV = ""
 
@@ -59,6 +51,13 @@ class User_alch(alch_db.Model):
     def checkHashPass(self, rawPassIn):
         correctPass = hash_pass(rawPassIn + self.salt)
         return correctPass == self.password
+
+    def assignPassAndSalt(self, rawPass):
+        self.salt = get_x_randoms(64)
+        self.password = hash_pass(rawPass+self.salt)
+
+    def assignVerifiedEmail(self):
+        self.verifiedEmail = get_x_randoms(16)
 
     # TODO: FIX THIS!!!  Need to use relation between User_alch and Event_alch...
     def getListOfOwnedEventNames(self):
@@ -95,198 +94,40 @@ class User_alch(alch_db.Model):
         # return nameList
 
 def usernameAvail(usernameIn):
-    data = User_alch.query.filter_by(username=usernameIn).count()
+    user_count = User_alch.query.filter_by(username=usernameIn).count()
     # print data
     # if data is None:
-    if data==0:
+    if user_count==0:
         # print "RETURNING TRUE"
         return True
     # print "RETURNING FALSE"
     return False
 
 class Event_alch(alch_db.Model):
-    eventUrl = alch_db.Column(alch_db.String(50), nullable=False)
+    eventUrl = alch_db.Column(alch_db.String(50), primary_key=True, nullable=False)
     eventName = alch_db.Column(alch_db.String(200), nullable=False)
-    eventDesc = alch_db.Column(alch_db.String(1000), primary_key=True, nullable=True)
+    eventDesc = alch_db.Column(alch_db.String(1000), nullable=True)
     followers = alch_db.Column(alch_db.String(1000), nullable=True)
 
     def __repr__(self):
         return '<Event Url: %r>' % self.eventUrl
 
-class User:
-    # pullFromDb tells the constructor to query the User table for info on the user
-    #       It should be set to false if the user is not yet in the database
-    # def __init__ (self, username, pullFromDb=True, password=""):
-    def __init__ (self, username, pullFromDb=True):
-        self.username = username
-        self.firstname = ""
-        self.lastname = ""
-        self.email = ""
-        # if password is not None:
-        #     self.salt = get_x_randoms(64)
-        #     self.password = hash_pass(password + self.salt)
-        # else:
-        self.password = ""
-        self.salt = ""
-        self.ownedEventsCSV = ""
-        self.followedEventsCSV = ""
-        self.verifiedEmail = ""
-        # TODO: instead of CSVs, put these in as actual lists:
-        self.ownedEventsList = []
-        self.followedEventsList = []
-        if pullFromDb==True:
-            # TODO: probably surround this with a try/except...
-            cursor = mysql.connect().cursor()
-            out = "SELECT * from User where username= %s"
-            #cursor.execute("SELECT * from User where username='" + self.username + "'")
-            cursor.execute(out,(self.username))
-            data = cursor.fetchone()
-            self.firstname = data[0]
-            self.lastname = data[1]
-            self.password = data[3]
-            self.salt = data[4]
-            self.ownedEventsCSV = data[5]
-            self.email = data[6]
-            self.followedEventsCSV = data[7]
-            self.verifiedEmail = data[8]
-        # else:
-        #     self.insert()
+    def __init__(self, url, name, desc):
+        super(Event_alch, self).__init__()
+        self.eventUrl = url
+        self.eventName = name
+        self.eventDesc = desc
+        self.followers = ""
 
-    # @staticmethod
-    # def usernameAvail(usernameIn):
-    #     cursor = mysql.connect().cursor()
-    #     out = "SELECT * from User where username= %s"
-    #     #cursor.execute("SELECT * from User where username ='" + usernameIn + "'")
-    #     cursor.execute(out,(usernameIn))
-    #     data = cursor.fetchone()
-    #     if data is None:
-    #         return True
-    #     return False
+def eventUrlAvail(urlIn):
+    event_count = Event_alch.query.filter_by(eventUrl=urlIn).count()
+    if event_count == 0:
+        return True
+    return False
 
-    def checkHashPass(self, rawPassIn):
-        correctPass = hash_pass(rawPassIn + self.salt)
-        return correctPass == self.password
 
-    def assignPassAndSalt(self, rawPass):
-        self.salt = get_x_randoms(64)
-        self.password = hash_pass(rawPass+self.salt)
-
-    def assignVerifiedEmail(self):
-        self.verifiedEmail = get_x_randoms(16)
-
-    def getListOfOwnedEventNames(self):
-        UrlList = self.ownedEventsCSV.split(",")
-        nameList = []
-        cursor = mysql.connect().cursor()
-        for Url in UrlList:
-            # TODO: fix this, obviously
-            out = "SELECT * from Event where eventUrl= %s"
-            #cursor.execute("SELECT * from Event where eventUrl='" + Url + "'")
-            cursor.execute(out,(Url))
-            data = cursor.fetchone()
-            if data is not None:
-                eventName = data[1]
-                nameList.append(eventName)
-        return nameList
-
-    def getListOfFollowedEventNames(self):
-        UrlList = self.followedEventsCSV.split(",")
-        nameList = []
-        cursor = mysql.connect().cursor()
-        for Url in UrlList:
-            # TODO: fix this, obviously
-            out = "SELECT * from Event where eventUrl=%s"
-            #cursor.execute("SELECT * from Event where eventUrl='" + Url + "'")
-            cursor.execute(out,(Url))
-            data = cursor.fetchone()
-            if data is not None:
-                eventName = data[1]
-                nameList.append(eventName)
-        return nameList
-
-    def insert(self):
-        connection = mysql.connect()
-        cursor = connection.cursor()
-        cmd = "INSERT INTO User values(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
-        #out = "INSERT INTO User values(\'" + self.firstname + "\',\'" + self.lastname + "\',\'" + self.username + "\',\'" + self.password + "\',\'" + self.salt + "\',\'" + self.getOwnedEventsCSV() + "\',\'" + self.email + "\',\'" + self.getFollowedEventsCSV() + "\',\'" + self.verifiedEmail + "\')"
-        #send = mysql.escape(out)
-        cursor.execute(cmd, (self.firstname,self.lastname,self.username,self.password,self.salt,self.getOwnedEventsCSV(),self.email,self.getFollowedEventsCSV(),self.verifiedEmail))
-        #cursor.execute(out)
-        connection.commit()
-
-    # def update(self, attribute, value):
-    #     # TODO: this doesn't update the user object, just its entry in the table
-    #     cursor = mysql.connect().cursor()
-    #     out = toreturn = "UPDATE User SET " + attribute + "='" + value + "' WHERE username='" + self.username + "'"
-    def updateFirstname(self):
-        connection = mysql.connect()
-        cursor = connection.cursor()
-        #out = "UPDATE User SET firstname='" + self.firstname + "' WHERE username='" + self.username + "'"
-        out = "UPDATE User SET firstname=%s WHERE username=%s"
-        cursor.execute(out,(self.firstname,self.username))
-        connection.commit()
-    def updateLastname(self):
-        connection = mysql.connect()
-        cursor = connection.cursor()
-        #out = "UPDATE User SET lastname='" + self.lastname + "' WHERE username='" + self.username + "'"
-        out = "UPDATE User SET lastname=%s WHERE username=%s"
-        cursor.execute(out,(self.lastname,self.username))
-        connection.commit()
-    def updateEmail(self):
-        connection = mysql.connect()
-        cursor = connection.cursor()
-       # out = "UPDATE User SET email='" + self.email + "' WHERE username='" + self.username + "'"
-        out = "UPDATE User SET email=%s WHERE username=%s"
-        cursor.execute(out, (self.email,self.username))
-        connection.commit()
-    def updateVerifiedemail(self):
-        connection = mysql.connect()
-        cursor = connection.cursor()
-        #out = "UPDATE User SET verifiedEmail='" + self.verifiedEmail + "' WHERE username='" + self.username + "'"
-        out = "UPDATE User SET verifiedEmail=%s WHERE username=%s"
-        cursor.execute(out,(self.verifiedEmail,self.username))
-        connection.commit()
-
-    def appendToOwnedEventsCSV(self, newEventUrl):
-        self.ownedEventsCSV = self.ownedEventsCSV + newEventUrl + ","
-        connection = mysql.connect()
-        cursor = connection.cursor()
-        #out = "UPDATE User SET ownedEventsCSV='" + self.ownedEventsCSV + "' WHERE username='" + self.username + "'"
-        out = "UPDATE User SET ownedEventsCSV=%s WHERE username=%s"
-        cursor.execute(out,(self.ownedEventsCSV,self.username))
-        connection.commit()
-    def appendToFollowedEventsCSV(self, newEventUrl):
-        self.followedEventsCSV = self.followedEventsCSV + newEventUrl + ","
-        connection = mysql.connect()
-        cursor = connection.cursor()
-        #out = "UPDATE User SET followedEventsCSV='" + self.followedEventsCSV + "' WHERE username='" + self.username + "'"
-        out = "UPDATE User SET followedEventsCSV=%s WHERE username=%s"
-        cursor.execute(out,(self.followedEventsCSV,self.username))
-        connection.commit()
-
-    # TODO: to be implemented when "/deleteEvent" goes live:
-    # def deleteFromOwnedEventsCSV(self, deleteEventUrl):
-    #     cursor = mysql.connect().cursor()
-    #
-
-    # TODO: create the verifiedEmail string in this script, not __init__.py
-
-    # TODO: need way to add to these via the CSV or something...
-    #           Maybe admit defeat on having the lists and work with CSVs?
-    def getOwnedEventsCSV(self):
-        toreturn = ""
-        for event in self.ownedEventsList:
-            toreturn = toreturn + ","
-        return toreturn
-
-    def getFollowedEventsCSV(self):
-        toreturn = ""
-        for event in self.followedEventsList:
-            toreturn = toreturn + ","
-        return toreturn
-
-    def printUser(self):
-        print "firstname: " + self.firstname + "\nlastname: " + self.lastname + "\nusername: " + self.username + "\nemail: " + self.email + "\nownedEvents: " + self.ownedEventsCSV + "\nfollowedEvents: " + self.followedEventsCSV
+# def printUser(self):
+#     print "firstname: " + self.firstname + "\nlastname: " + self.lastname + "\nusername: " + self.username + "\nemail: " + self.email + "\nownedEvents: " + self.ownedEventsCSV + "\nfollowedEvents: " + self.followedEventsCSV
 
 class Event:
     # pullFromDb tells the constructor to query the Event table for info on the event
@@ -377,6 +218,7 @@ class Event:
 
 
 def killDb():
+    alch_db.drop_all()
     alch_db.create_all()
 
 # def killDb():

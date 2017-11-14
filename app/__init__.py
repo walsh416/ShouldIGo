@@ -23,6 +23,8 @@ mail = Mail(app)
 #             through each users CSV or something... ugh))
 # TODO: validate event URLs (no slashes, no periods, etc)
 
+# TODO: logging in bad username creates NoneType error... fix this.
+
 # returns datetime object for x days from now (for cookie expiration dates)
 def get_x_daysFromNow(x):
     return datetime.today() + timedelta(days=x)
@@ -128,8 +130,8 @@ def register():
 
             # TODO: check regexp to see if email is valid
             # TODO: pretty sure that the stuff I have here to get the password/salt won't work...
-            the_salt=db_h.get_x_randoms(64)
-            usr = db_h.User_alch(firstname=request.form.get('firstname'), lastname=request.form.get('lastname'), username=request.form.get('username'), email=request.form.get('email'), salt=the_salt, password=db_h.hash_pass(request.form.get('password')+the_salt), verifiedEmail=db_h.get_x_randoms(16))
+            # the_salt=db_h.get_x_randoms(64)
+            usr = db_h.User_alch(firstname=request.form.get('firstname'), lastname=request.form.get('lastname'), username=request.form.get('username'), email=request.form.get('email'), rawpassword=(request.form.get('password')))
             db_h.alch_db.session.add(usr)
             db_h.alch_db.session.commit()
 
@@ -190,14 +192,15 @@ def createEvent():
     # if db_h.User.usernameAvail(_username):
     if db_h.usernameAvail(_username):
         return redirect(url_for('splashScreen'))
-    usr = db_h.User_alch.query.filter_by(username=username).first()
+    usr = db_h.User_alch.query.filter_by(username=_username).first()
 
     # POST method implies data being passed, trying to create event:
     if request.method == "POST":
         # if doesn't have value for eventName, then still trying to pick a Url
         if not request.form.get('eventName'):
             eventUrl=request.form.get('eventUrl')
-            if db_h.Event.eventUrlAvail(eventUrl):
+            if db_h.eventUrlAvail(eventUrl):
+            # if db_h.Event.eventUrlAvail(eventUrl):
                 # move on to second stage of creation, picking name and stuff
                 # set cookie with eventUrl, temporary, will be destroyed in stage two
                 resp = make_response(render_template('createEvent.html', firstname=usr.firstname, UrlInUse=False, eventUrl=eventUrl))
@@ -212,12 +215,13 @@ def createEvent():
             eventName = request.form.get('eventName')
             eventDesc = request.form.get('eventDesc')
 
-            event = db_h.Event(eventUrl, False)
-            event.eventName = eventName
-            event.eventDesc = eventDesc
-            event.insert()
+            event = db_h.Event_alch(url=eventUrl, name=eventName, desc=eventDesc)
+            db_h.alch_db.session.add(event)
+            db_h.alch_db.session.commit()
 
-            usr.appendToOwnedEventsCSV(eventUrl)
+            usr.ownedEventsCSV += (eventUrl+",")
+            db_h.alch_db.session.commit()
+            # usr.appendToOwnedEventsCSV(eventUrl)
 
             resp = make_response(redirect(url_for('splashScreen')))
             resp.set_cookie('eventUrl', '', expires=0)
@@ -312,24 +316,32 @@ def showEvent(eventUrl):
     _username = request.cookies.get('username')
     # POST method means user clicked the "follow" button, since it's just a blank form
     if request.method == "POST":
-        usr=db_h.User(_username)
-        usr.appendToFollowedEventsCSV(eventUrl)
+        # usr=db_h.User(_username)
+        usr = db_h.User_alch.query.filter_by(username=_username).first()
+        # usr.appendToFollowedEventsCSV(eventUrl)
+        usr.followedEventsCSV += (eventUrl+",")
+        db_h.alch_db.session.commit()
         return redirect(url_for('showEvent', eventUrl=eventUrl))
     userLoggedIn = False
     subscribed = False
     # if they are, show event page with "follow" button
     if _username:
-        if db_h.User.usernameAvail(_username):
+        if db_h.usernameAvail(_username):
             return redirect(url_for('splashScreen'))
-        usr=db_h.User(_username)
+        # usr=db_h.User(_username)
+        usr = db_h.User_alch.query.filter_by(username=_username).first()
         userLoggedIn = True
-        # TODO: put this in database_handling:
-        subscribed = db_h.Event.is_EventUrl_in_EventUrlCSV(eventUrl, usr.followedEventsCSV)
+
+        # FIXME:
+        # TODO: make this dynamic
+        # subscribed = db_h.Event.is_EventUrl_in_EventUrlCSV(eventUrl, usr.followedEventsCSV)
+        subscribed = False
 
     # eventUrl is avail, so event does not exist.  Redirect to splashScreen
-    if db_h.Event.eventUrlAvail(eventUrl):
+    if db_h.eventUrlAvail(eventUrl):
         return redirect(url_for('splashScreen'))
-    event = db_h.Event(eventUrl)
+    # event = db_h.Event(eventUrl)
+    event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
     return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed)
 
 # Hidden URL never shown to user, for testing only and to be removed before production
