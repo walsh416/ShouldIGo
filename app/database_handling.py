@@ -34,7 +34,6 @@ class User_alch(alch_db.Model):
     followedEventsCSV = alch_db.Column(alch_db.String(500), nullable=True)
     verifiedEmail = alch_db.Column(alch_db.String(20), nullable=True)
 
-    # TODO: bring salt and verification stuff back in this file, out of __init__
     def __init__(self, firstname, lastname, username, email, rawpassword):
         super(User_alch, self).__init__()
         self.firstname = firstname
@@ -63,52 +62,27 @@ class User_alch(alch_db.Model):
     # TODO: Refactor this with many-to-many relation between User_alch and Event_alch...
     #           Uses a secondary table with cols of users and rows of events, or vice versa
     def getListOfOwnedEventNames(self):
-        # return []
         urlList = self.ownedEventsCSV.split(",")
         nameList = []
-        # cursor = mysql.connect().cursor()
         for url in urlList:
-        #     # TODO: fix this, obviously
-        #     out = "SELECT * from Event where eventUrl= %s"
-        #     #cursor.execute("SELECT * from Event where eventUrl='" + Url + "'")
-        #     cursor.execute(out,(Url))
-        #     data = cursor.fetchone()
             event = Event_alch.query.filter_by(eventUrl=url).first()
-        #     if data is not None:
             if event is not None:
                 nameList.append(event.eventName)
-        #         eventName = data[1]
-        #         nameList.append(eventName)
         return nameList
 
-    # TODO: Fix as above
     def getListOfFollowedEventNames(self):
-        # return []
         urlList = self.followedEventsCSV.split(",")
         nameList = []
-        # cursor = mysql.connect().cursor()
         for url in urlList:
-        #     # TODO: fix this, obviously
-        #     out = "SELECT * from Event where eventUrl=%s"
-        #     #cursor.execute("SELECT * from Event where eventUrl='" + Url + "'")
-        #     cursor.execute(out,(Url))
-        #     data = cursor.fetchone()
             event = Event_alch.query.filter_by(eventUrl=url).first()
-        #     if data is not None:
             if event is not None:
                 nameList.append(event.eventName)
-        #         eventName = data[1]
-        #         nameList.append(eventName)
         return nameList
 
 def usernameAvail(usernameIn):
     user_count = User_alch.query.filter_by(username=usernameIn).count()
-    # print data
-    # if data is None:
     if user_count==0:
-        # print "RETURNING TRUE"
         return True
-    # print "RETURNING FALSE"
     return False
 
 class Event_alch(alch_db.Model):
@@ -137,118 +111,18 @@ def eventUrlAvail(urlIn):
 def eventUrlCSV_to_eventNameStrList(csvIn):
     urlList = csvIn.split(",")
     nameList = []
-    # cursor = mysql.connect().server()
     for url in urlList:
-        # out = "SELECT * from Event where eventUrl=%s"
-        #cursor.execute("SELECT * from Event where eventUrl='" + url + "'")
-        # cursor.execute(out,(url))
-        # data = cursor.fetchone()
         event = db_h.Event_alch.query.filter_by(eventUrl=url).first()
-        # if data is not None:
         if event is not None:
             nameList.append(event.eventName)
-            # eventName = data[1]
-            # nameList.append(eventName)
     return nameList
 
 def is_EventUrl_in_EventUrlCSV(urlIn, csvIn):
-    # print "looking for url: " + urlIn + " in CSV: " + csvIn
     UrlList = csvIn.split(",")
     for url in UrlList:
         if urlIn==url:
             return True
     return False
-
-# def printUser(self):
-#     print "firstname: " + self.firstname + "\nlastname: " + self.lastname + "\nusername: " + self.username + "\nemail: " + self.email + "\nownedEvents: " + self.ownedEventsCSV + "\nfollowedEvents: " + self.followedEventsCSV
-
-# class Event:
-#     # pullFromDb tells the constructor to query the Event table for info on the event
-#     #       It should be set to false if the event is not yet in the database
-#     def __init__(self, eventUrl, pullFromDb=True):
-#         self.eventUrl = eventUrl
-#         self.eventName = ""
-#         self.eventDesc = ""
-#         self.followers = ""
-#         self.followersList = []
-#         if pullFromDb==True:
-#             cursor = mysql.connect().cursor()
-#             out = "SELECT * from Event where eventUrl =%s"
-#             #cursor.execute("SELECT * from Event where eventUrl ='" + self.eventUrl + "'")
-#             cursor.execute(out,(self.eventUrl))
-#             data = cursor.fetchone()
-#             self.eventName = data[1]
-#             self.eventDesc = data[2]
-#             self.followers = data[3]
-#
-#     @staticmethod
-#     def eventUrlAvail(urlIn):
-#         cursor = mysql.connect().cursor()
-#         out = "SELECT * from Event where eventUrl =%s"
-#         cursor.execute("SELECT * from Event where eventUrl ='" + urlIn + "'")
-#         #cursor.exectue(out,(urlIn))
-#         data = cursor.fetchone()
-#         if data is None:
-#             return True
-#         return False
-#
-#     @staticmethod
-#     def eventUrlCSV_to_eventNameStrList(csvIn):
-#         urlList = csvIn.split(",")
-#         nameList = []
-#         cursor = mysql.connect().server()
-#         for url in urlList:
-#             out = "SELECT * from Event where eventUrl=%s"
-#             #cursor.execute("SELECT * from Event where eventUrl='" + url + "'")
-#             cursor.execute(out,(url))
-#             data = cursor.fetchone()
-#             if data is not None:
-#                 eventName = data[1]
-#                 nameList.append(eventName)
-#         return nameList
-#
-#     @staticmethod
-#     def is_EventUrl_in_EventUrlCSV(urlIn, csvIn):
-#         # print "looking for url: " + urlIn + " in CSV: " + csvIn
-#         UrlList = csvIn.split(",")
-#         for url in UrlList:
-#             if urlIn==url:
-#                 return True
-#         return False
-#
-#     def insert(self):
-#         connection = mysql.connect()
-#         cursor = connection.cursor()
-#         #out = "INSERT INTO Event values(\'" + self.eventUrl + "\',\'" + self.eventName + "\',\'" + self.eventDesc + "\',\'" + self.followers + "\')"
-#         out = "INSERT INTO Event values(%s,%s,%s,%s)"
-#         cursor.execute(out,(self.eventUrl,self.eventName,self.eventDesc,self.followers))
-#         connection.commit()
-#
-#     def getFollowersCSV(self):
-#         toreturn = ""
-#         for event in self.followersList:
-#             toreturn = toreturn + ","
-#         return toreturn
-#
-#     def insertString(self):
-#         # toreturn = "INSERT INTO Event values('" + self.eventUrl + "', '" + self.eventName + "', '" + self.eventDesc + "','')"
-#         toreturn = "INSERT INTO Event values('" + self.eventUrl + "', '" + self.eventName + "', '" + self.eventDesc + "','" + self.getFollowersCSV() + "')"
-#         #toreturn = "INSERT INTO Event values(%s,%s,%s,%s)"
-#         return toreturn
-#
-#     def updateString(self, attribute, value):
-#         toreturn = "UPDATE Event SET " + attribute + "='" + value + ",' WHERE eventUrl='" + self.eventUrl + "'"
-#         return toreturn
-#
-#     def selectString(self, attribute):
-#         toreturn = "SELECT " + attribute + " from Event WHERE eventUrl='" + self.eventUrl + "'"
-
-
-
-
-
-
-
 
 def killDb():
     alch_db.drop_all()

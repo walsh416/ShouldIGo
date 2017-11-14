@@ -23,7 +23,9 @@ mail = Mail(app)
 #             through each users CSV or something... ugh))
 # TODO: validate event URLs (no slashes, no periods, etc)
 
-# TODO: logging in bad username creates NoneType error... fix this.
+# TODO: can still follow event if email not verified by navigating to its URL
+#           But in user home doesn't show list of followed, shows "sorry, please verify"
+#           Change around event templating to hide follow button until verified
 
 # returns datetime object for x days from now (for cookie expiration dates)
 def get_x_daysFromNow(x):
@@ -42,7 +44,6 @@ def splashScreen():
     _username = request.cookies.get('username')
     # if there was a cookie with the key "username":
     if _username:
-        # usr = db_h.User(_username)
         usr = db_h.User_alch.query.filter_by(username=_username).first()
         if usr.verifiedEmail!="0":
             resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
@@ -72,15 +73,10 @@ def splashScreen():
         return resp
     # POST method means script was sent login data by user:
     if request.method == "POST":
-        # usr = db_h.User(request.form.get('username'))
         usr = db_h.User_alch.query.filter_by(username=request.form.get('username')).first()
         print usr
         if usr is None:
             return render_template('login.html', badUser=True)
-        # hashPassIn is the raw password entered by the user plus the salt from the database
-        # _hashPassIn = hash_pass(request.form.get('password') + usr.salt)
-        # # if the password the user entered doesn't match the password in the database:
-        # if _hashPassIn != usr.password:
         if not usr.checkHashPass(request.form.get('password')):
             # keep user at login screen, with "bad password!" shown to user
             return render_template('login.html', badPass=True)
@@ -117,22 +113,14 @@ def register():
             if not db_h.usernameAvail(_userUsername):
                 print _userUsername + " is not available"
                 return render_template('register.html', diffPasswords=False, duplicateUser=True)
-            # usr = db_h.User(_userUsername, False)
-            #
-            # usr.firstname = request.form.get('firstname')
-            # usr.lastname = request.form.get('lastname')
-            # usr.email = request.form.get('email')
-            # usr.assignPassAndSalt(request.form.get('password'))
-            # usr.assignVerifiedEmail()
+
             # # checking valid email against regexp for it
             # validEmailBool = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', usr.email)
             # if validEmailBool == None:
             #     return render_template('register.html', badEmail=True)
-            # usr.insert()
+
 
             # TODO: check regexp to see if email is valid
-            # TODO: pretty sure that the stuff I have here to get the password/salt won't work...
-            # the_salt=db_h.get_x_randoms(64)
             usr = db_h.User_alch(firstname=request.form.get('firstname'), lastname=request.form.get('lastname'), username=request.form.get('username'), email=request.form.get('email'), rawpassword=(request.form.get('password')))
             db_h.alch_db.session.add(usr)
             db_h.alch_db.session.commit()
@@ -144,7 +132,6 @@ def register():
                     )
             msg.body = render_template("registerEmail.txt", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
             msg.html = render_template("registerEmail.html", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
-            # mail.send(msg)
             thr = Thread(target=send_async_email, args=[app, msg])
             thr.start()
             # redirect user to splashScreen
@@ -162,10 +149,8 @@ def register():
         validation=request.args.get('validation')
         if not username:
             return render_template('register.html', diffPasswords=False, duplicateUser=False)
-        # if db_h.User.usernameAvail(username):
         if db_h.usernameAvail(username):
             return redirect(url_for('register'))
-        # usr=db_h.User(username)
 
         # TODO: what if the following query returns a NoneType?
         usr = db_h.User_alch.query.filter_by(username=username).first()
@@ -175,7 +160,6 @@ def register():
             usr.verifiedEmail="0"
             db_h.alch_db.session.commit()
 
-            # usr.updateVerifiedemail()
             # redirect user to splashScreen
             resp = make_response(redirect(url_for('splashScreen')))
             # add cookie with username to expire in 90 days
@@ -191,7 +175,6 @@ def createEvent():
     if not _username:
         return redirect(url_for('splashScreen'))
     # otherwise, pull user data from database:
-    # if db_h.User.usernameAvail(_username):
     if db_h.usernameAvail(_username):
         return redirect(url_for('splashScreen'))
     usr = db_h.User_alch.query.filter_by(username=_username).first()
@@ -202,7 +185,6 @@ def createEvent():
         if not request.form.get('eventName'):
             eventUrl=request.form.get('eventUrl')
             if db_h.eventUrlAvail(eventUrl):
-            # if db_h.Event.eventUrlAvail(eventUrl):
                 # move on to second stage of creation, picking name and stuff
                 # set cookie with eventUrl, temporary, will be destroyed in stage two
                 resp = make_response(render_template('createEvent.html', firstname=usr.firstname, UrlInUse=False, eventUrl=eventUrl))
@@ -223,7 +205,6 @@ def createEvent():
 
             usr.ownedEventsCSV += (eventUrl+",")
             db_h.alch_db.session.commit()
-            # usr.appendToOwnedEventsCSV(eventUrl)
 
             resp = make_response(redirect(url_for('splashScreen')))
             resp.set_cookie('eventUrl', '', expires=0)
@@ -247,7 +228,6 @@ def resendValidationEmail():
         if db_h.usernameAvail(_username):
             return redirect(url_for('splashScreen'))
         # otherwise, pull user data from database:
-        # usr=db_h.User(_username)
         usr = db_h.User_alch.query.filter_by(username=_username).first()
         msg = Message(
                 'Validating %s\'s email!' % usr.firstname,
@@ -264,16 +244,13 @@ def resendValidationEmail():
         # add cookie with username to expire in 90 days
         resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
         return resp
-    # if db_h.User.usernameAvail(username):
     if db_h.usernameAvail(username):
         return redirect(url_for('register'))
-    # usr=db_h.User(username)
     usr = db_h.User_alch.query.filter_by(username=username).first()
     if usr.verifiedEmail == validation:
         # Validation code was good!!  Reset code in table to 1
         usr.verifiedEmail="0"
         db_h.alch_db.session.commit()
-        # usr.updateVerifiedemail()
         # redirect user to splashScreen
         resp = make_response(redirect(url_for('splashScreen')))
         # add cookie with username to expire in 90 days
@@ -291,7 +268,6 @@ def editUser():
     # otherwise, pull user data from database:
     if db_h.usernameAvail(_username):
         return redirect(url_for('splashScreen'))
-    # usr=db_h.User(_username)
     usr = db_h.User_alch.query.filter_by(username=_username).first()
     # TODO: revalidate new email address
     # GET means that this is the first time here, so show page allowing user to edit their info
@@ -305,9 +281,6 @@ def editUser():
     usr.lastname=new_lastname
     usr.email=new_email
     db_h.alch_db.session.commit()
-    # usr.updateFirstname()
-    # usr.updateLastname()
-    # usr.updateEmail()
     # Throw user back to "/" and view the splashScreen/userHome.
     return make_response(redirect(url_for('splashScreen')))
 
@@ -318,9 +291,7 @@ def showEvent(eventUrl):
     _username = request.cookies.get('username')
     # POST method means user clicked the "follow" button, since it's just a blank form
     if request.method == "POST":
-        # usr=db_h.User(_username)
         usr = db_h.User_alch.query.filter_by(username=_username).first()
-        # usr.appendToFollowedEventsCSV(eventUrl)
         usr.followedEventsCSV += (eventUrl+",")
         db_h.alch_db.session.commit()
         return redirect(url_for('showEvent', eventUrl=eventUrl))
@@ -330,20 +301,13 @@ def showEvent(eventUrl):
     if _username:
         if db_h.usernameAvail(_username):
             return redirect(url_for('splashScreen'))
-        # usr=db_h.User(_username)
         usr = db_h.User_alch.query.filter_by(username=_username).first()
         userLoggedIn = True
-
-        # FIXME:
-        # TODO: make this dynamic
-        # subscribed = False
-        # subscribed = db_h.Event.is_EventUrl_in_EventUrlCSV(eventUrl, usr.followedEventsCSV)
         subscribed = db_h.is_EventUrl_in_EventUrlCSV(eventUrl, usr.followedEventsCSV)
 
     # eventUrl is avail, so event does not exist.  Redirect to splashScreen
     if db_h.eventUrlAvail(eventUrl):
         return redirect(url_for('splashScreen'))
-    # event = db_h.Event(eventUrl)
     event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
     return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed)
 
