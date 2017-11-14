@@ -75,6 +75,8 @@ def splashScreen():
         # usr = db_h.User(request.form.get('username'))
         usr = db_h.User_alch.query.filter_by(username=request.form.get('username')).first()
         print usr
+        if usr is None:
+            return render_template('login.html', badUser=True)
         # hashPassIn is the raw password entered by the user plus the salt from the database
         # _hashPassIn = hash_pass(request.form.get('password') + usr.salt)
         # # if the password the user entered doesn't match the password in the database:
@@ -334,8 +336,9 @@ def showEvent(eventUrl):
 
         # FIXME:
         # TODO: make this dynamic
+        # subscribed = False
         # subscribed = db_h.Event.is_EventUrl_in_EventUrlCSV(eventUrl, usr.followedEventsCSV)
-        subscribed = False
+        subscribed = db_h.is_EventUrl_in_EventUrlCSV(eventUrl, usr.followedEventsCSV)
 
     # eventUrl is avail, so event does not exist.  Redirect to splashScreen
     if db_h.eventUrlAvail(eventUrl):

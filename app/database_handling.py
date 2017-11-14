@@ -21,6 +21,7 @@ def hash_pass(rawpassword):
     return str(h.hexdigest())
 
 class User_alch(alch_db.Model):
+    __tablename__="users"
     # TODO: what if they leave firstname/lastname/etc blank?  Should check for valid text in each one in __init__.py
     firstname = alch_db.Column(alch_db.String(50), nullable=False)
     lastname = alch_db.Column(alch_db.String(50), nullable=False)
@@ -59,39 +60,46 @@ class User_alch(alch_db.Model):
     def assignVerifiedEmail(self):
         self.verifiedEmail = get_x_randoms(16)
 
-    # TODO: FIX THIS!!!  Need to use relation between User_alch and Event_alch...
+    # TODO: Refactor this with many-to-many relation between User_alch and Event_alch...
+    #           Uses a secondary table with cols of users and rows of events, or vice versa
     def getListOfOwnedEventNames(self):
-        return []
-        # UrlList = self.ownedEventsCSV.split(",")
-        # nameList = []
+        # return []
+        urlList = self.ownedEventsCSV.split(",")
+        nameList = []
         # cursor = mysql.connect().cursor()
-        # for Url in UrlList:
+        for url in urlList:
         #     # TODO: fix this, obviously
         #     out = "SELECT * from Event where eventUrl= %s"
         #     #cursor.execute("SELECT * from Event where eventUrl='" + Url + "'")
         #     cursor.execute(out,(Url))
         #     data = cursor.fetchone()
+            event = Event_alch.query.filter_by(eventUrl=url).first()
         #     if data is not None:
+            if event is not None:
+                nameList.append(event.eventName)
         #         eventName = data[1]
         #         nameList.append(eventName)
-        # return nameList
+        return nameList
 
     # TODO: Fix as above
     def getListOfFollowedEventNames(self):
-        return []
-        # UrlList = self.followedEventsCSV.split(",")
-        # nameList = []
+        # return []
+        urlList = self.followedEventsCSV.split(",")
+        nameList = []
         # cursor = mysql.connect().cursor()
-        # for Url in UrlList:
+        for url in urlList:
         #     # TODO: fix this, obviously
         #     out = "SELECT * from Event where eventUrl=%s"
         #     #cursor.execute("SELECT * from Event where eventUrl='" + Url + "'")
         #     cursor.execute(out,(Url))
         #     data = cursor.fetchone()
+            event = Event_alch.query.filter_by(eventUrl=url).first()
         #     if data is not None:
+            if event is not None:
+                nameList.append(event.eventName)
         #         eventName = data[1]
         #         nameList.append(eventName)
-        # return nameList
+        return nameList
 
 def usernameAvail(usernameIn):
     user_count = User_alch.query.filter_by(username=usernameIn).count()
@@ -104,6 +112,7 @@ def usernameAvail(usernameIn):
     return False
 
 class Event_alch(alch_db.Model):
+    __tablename__="events"
     eventUrl = alch_db.Column(alch_db.String(50), primary_key=True, nullable=False)
     eventName = alch_db.Column(alch_db.String(200), nullable=False)
     eventDesc = alch_db.Column(alch_db.String(1000), nullable=True)
@@ -125,6 +134,30 @@ def eventUrlAvail(urlIn):
         return True
     return False
 
+def eventUrlCSV_to_eventNameStrList(csvIn):
+    urlList = csvIn.split(",")
+    nameList = []
+    # cursor = mysql.connect().server()
+    for url in urlList:
+        # out = "SELECT * from Event where eventUrl=%s"
+        #cursor.execute("SELECT * from Event where eventUrl='" + url + "'")
+        # cursor.execute(out,(url))
+        # data = cursor.fetchone()
+        event = db_h.Event_alch.query.filter_by(eventUrl=url).first()
+        # if data is not None:
+        if event is not None:
+            nameList.append(event.eventName)
+            # eventName = data[1]
+            # nameList.append(eventName)
+    return nameList
+
+def is_EventUrl_in_EventUrlCSV(urlIn, csvIn):
+    # print "looking for url: " + urlIn + " in CSV: " + csvIn
+    UrlList = csvIn.split(",")
+    for url in UrlList:
+        if urlIn==url:
+            return True
+    return False
 
 # def printUser(self):
 #     print "firstname: " + self.firstname + "\nlastname: " + self.lastname + "\nusername: " + self.username + "\nemail: " + self.email + "\nownedEvents: " + self.ownedEventsCSV + "\nfollowedEvents: " + self.followedEventsCSV
