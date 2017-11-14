@@ -12,8 +12,9 @@
   {% endif %}
   {% if duplicateUser == true %}
   Username already in use, select another!<br>
-  <!-- TODO: take this out: -->
-  ORRRRRR AN ERROR HAPPENED<br>
+  {% endif %}
+  {% if errorHappened == true %}
+  AN ERROR HAPPENED<br>
   {% endif %}
 	Please register below:
 <form method = "POST">

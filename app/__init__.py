@@ -1,15 +1,19 @@
 
 from flask import Flask, render_template, request, redirect, url_for, make_response
 from flaskext.mysql import MySQL
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from flask_mail import Mail, Message
 from threading import Thread
 import hashlib, os, re
 import database_handling as db_h
+from database_handling import alch_db
 
 app = Flask(__name__)
 
 app.config.from_object('config')
+
+alch_db.init_app(app)
 
 mail = Mail(app)
 
@@ -36,7 +40,8 @@ def splashScreen():
     _username = request.cookies.get('username')
     # if there was a cookie with the key "username":
     if _username:
-        usr = db_h.User(_username)
+        # usr = db_h.User(_username)
+        usr = db_h.User_alch.query.filter_by(username=_username).first()
         if usr.verifiedEmail!="0":
             resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
             resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
@@ -65,7 +70,9 @@ def splashScreen():
         return resp
     # POST method means script was sent login data by user:
     if request.method == "POST":
-        usr = db_h.User(request.form.get('username'))
+        # usr = db_h.User(request.form.get('username'))
+        usr = db_h.User_alch.query.filter_by(username=request.form.get('username')).first()
+        print usr
         # hashPassIn is the raw password entered by the user plus the salt from the database
         # _hashPassIn = hash_pass(request.form.get('password') + usr.salt)
         # # if the password the user entered doesn't match the password in the database:
@@ -101,44 +108,46 @@ def register():
         # if passwords do match:
         else:
             # try opening connection to database:
-            try:
-                _userUsername = request.form.get('username')
+            _userUsername = request.form.get('username')
 
-                usr = db_h.User(_userUsername, False)
-
-                usr.firstname = request.form.get('firstname')
-                usr.lastname = request.form.get('lastname')
-                usr.email = request.form.get('email')
-                usr.assignPassAndSalt(request.form.get('password'))
-                usr.assignVerifiedEmail()
-                # checking valid email against regexp for it
-                validEmailBool = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', usr.email)
-                if validEmailBool == None:
-                    return render_template('register.html', badEmail=True)
-                usr.email = request.form.get('email')
-                usr.insert()
-
-                msg = Message(
-                        'Hello, %s!' % usr.firstname,
-                        sender='timsemailforlols@google.com',
-                        recipients=[usr.email]
-                        )
-                msg.body = render_template("registerEmail.txt", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
-                msg.html = render_template("registerEmail.html", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
-                # mail.send(msg)
-                thr = Thread(target=send_async_email, args=[app, msg])
-                thr.start()
-                # redirect user to splashScreen
-                resp = make_response(redirect(url_for('splashScreen')))
-                # add cookie with username to expire in 90 days
-                resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
-                return resp
-            except Exception as e:
-                print e;
-                # TODO: make sure Exception e is 1062 duplicate entry?
-                # TODO: query database for someone with the username already.  If
-                #     returned is not None, then there is someone with that username
+            if not db_h.usernameAvail(_userUsername):
+                print _userUsername + " is not available"
                 return render_template('register.html', diffPasswords=False, duplicateUser=True)
+            # usr = db_h.User(_userUsername, False)
+            #
+            # usr.firstname = request.form.get('firstname')
+            # usr.lastname = request.form.get('lastname')
+            # usr.email = request.form.get('email')
+            # usr.assignPassAndSalt(request.form.get('password'))
+            # usr.assignVerifiedEmail()
+            # # checking valid email against regexp for it
+            # validEmailBool = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', usr.email)
+            # if validEmailBool == None:
+            #     return render_template('register.html', badEmail=True)
+            # usr.insert()
+
+            # TODO: check regexp to see if email is valid
+            # TODO: pretty sure that the stuff I have here to get the password/salt won't work...
+            the_salt=db_h.get_x_randoms(64)
+            usr = db_h.User_alch(firstname=request.form.get('firstname'), lastname=request.form.get('lastname'), username=request.form.get('username'), email=request.form.get('email'), salt=the_salt, password=db_h.hash_pass(request.form.get('password')+the_salt), verifiedEmail=db_h.get_x_randoms(16))
+            db_h.alch_db.session.add(usr)
+            db_h.alch_db.session.commit()
+
+            msg = Message(
+                    'Hello, %s!' % usr.firstname,
+                    sender='timsemailforlols@google.com',
+                    recipients=[usr.email]
+                    )
+            msg.body = render_template("registerEmail.txt", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
+            msg.html = render_template("registerEmail.html", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
+            # mail.send(msg)
+            thr = Thread(target=send_async_email, args=[app, msg])
+            thr.start()
+            # redirect user to splashScreen
+            resp = make_response(redirect(url_for('splashScreen')))
+            # add cookie with username to expire in 90 days
+            resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
+            return resp
     # GET method means user is here for the first time or is confirming email address:
     else:
         # try pulling username and validation code out of GET method
@@ -149,14 +158,20 @@ def register():
         validation=request.args.get('validation')
         if not username:
             return render_template('register.html', diffPasswords=False, duplicateUser=False)
-        if db_h.User.usernameAvail(username):
+        # if db_h.User.usernameAvail(username):
+        if db_h.usernameAvail(username):
             return redirect(url_for('register'))
-        usr=db_h.User(username)
+        # usr=db_h.User(username)
+
+        # TODO: what if the following query returns a NoneType?
+        usr = db_h.User_alch.query.filter_by(username=username).first()
 
         if usr.verifiedEmail == validation:
             # Validation code was good!!  Reset code in table to 0
             usr.verifiedEmail="0"
-            usr.updateVerifiedemail()
+            db_h.alch_db.session.commit()
+
+            # usr.updateVerifiedemail()
             # redirect user to splashScreen
             resp = make_response(redirect(url_for('splashScreen')))
             # add cookie with username to expire in 90 days
@@ -172,9 +187,10 @@ def createEvent():
     if not _username:
         return redirect(url_for('splashScreen'))
     # otherwise, pull user data from database:
-    if db_h.User.usernameAvail(_username):
+    # if db_h.User.usernameAvail(_username):
+    if db_h.usernameAvail(_username):
         return redirect(url_for('splashScreen'))
-    usr=db_h.User(_username)
+    usr = db_h.User_alch.query.filter_by(username=username).first()
 
     # POST method implies data being passed, trying to create event:
     if request.method == "POST":
@@ -222,10 +238,11 @@ def resendValidationEmail():
         # if they are not, redirect to the splashScreen
         if not _username:
             return redirect(url_for('splashScreen'))
-        if db_h.User.usernameAvail(_username):
+        if db_h.usernameAvail(_username):
             return redirect(url_for('splashScreen'))
         # otherwise, pull user data from database:
-        usr=db_h.User(_username)
+        # usr=db_h.User(_username)
+        usr = db_h.User_alch.query.filter_by(username=_username).first()
         msg = Message(
                 'Validating %s\'s email!' % usr.firstname,
                 sender='timsemailforlols@google.com',
@@ -241,13 +258,16 @@ def resendValidationEmail():
         # add cookie with username to expire in 90 days
         resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
         return resp
-    if db_h.User.usernameAvail(username):
+    # if db_h.User.usernameAvail(username):
+    if db_h.usernameAvail(username):
         return redirect(url_for('register'))
-    usr=db_h.User(username)
+    # usr=db_h.User(username)
+    usr = db_h.User_alch.query.filter_by(username=username).first()
     if usr.verifiedEmail == validation:
         # Validation code was good!!  Reset code in table to 1
         usr.verifiedEmail="0"
-        usr.updateVerifiedemail()
+        db_h.alch_db.session.commit()
+        # usr.updateVerifiedemail()
         # redirect user to splashScreen
         resp = make_response(redirect(url_for('splashScreen')))
         # add cookie with username to expire in 90 days
@@ -263,9 +283,10 @@ def editUser():
     if not _username:
         return redirect(url_for('splashScreen'))
     # otherwise, pull user data from database:
-    if db_h.User.usernameAvail(_username):
+    if db_h.usernameAvail(_username):
         return redirect(url_for('splashScreen'))
-    usr=db_h.User(_username)
+    # usr=db_h.User(_username)
+    usr = db_h.User_alch.query.filter_by(username=_username).first()
     # TODO: revalidate new email address
     # GET means that this is the first time here, so show page allowing user to edit their info
     if request.method=="GET":
@@ -277,9 +298,10 @@ def editUser():
     usr.firstname=new_firstname
     usr.lastname=new_lastname
     usr.email=new_email
-    usr.updateFirstname()
-    usr.updateLastname()
-    usr.updateEmail()
+    db_h.alch_db.session.commit()
+    # usr.updateFirstname()
+    # usr.updateLastname()
+    # usr.updateEmail()
     # Throw user back to "/" and view the splashScreen/userHome.
     return make_response(redirect(url_for('splashScreen')))
 

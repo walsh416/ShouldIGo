@@ -2,6 +2,7 @@
 from flask import Flask
 import hashlib, os
 from flaskext.mysql import MySQL
+from flask_sqlalchemy import SQLAlchemy
 # from app import app
 
 # TODO: bring all mysql interaction into here, out of mainOne.py
@@ -9,6 +10,11 @@ from flaskext.mysql import MySQL
 
 app = Flask(__name__)
 app.config.from_object('config')
+
+alch_db = SQLAlchemy(app)
+
+# alch_db = SQLAlchemy()
+# alch_db.init_app(app)
 
 mysql = MySQL()
 mysql.init_app(app)
@@ -20,6 +26,92 @@ def get_x_randoms(x):
 def hash_pass(rawpassword):
     h = hashlib.md5(rawpassword.encode())
     return str(h.hexdigest())
+
+class User_alch(alch_db.Model):
+    # TODO: what if they leave firstname/lastname/etc blank?  Should check for valid text in each one in __init__.py
+    firstname = alch_db.Column(alch_db.String(50), nullable=False)
+    lastname = alch_db.Column(alch_db.String(50), nullable=False)
+    username = alch_db.Column(alch_db.String(50), primary_key=True, nullable=False)
+    password = alch_db.Column(alch_db.String(80), nullable=False)
+    salt = alch_db.Column(alch_db.String(80), nullable=False)
+    # TODO: refactor the CSVs with SQLAlchemy "relationship"s
+    ownedEventsCSV = alch_db.Column(alch_db.String(500), nullable=True)
+    email = alch_db.Column(alch_db.String(80), nullable=False)
+    followedEventsCSV = alch_db.Column(alch_db.String(500), nullable=True)
+    verifiedEmail = alch_db.Column(alch_db.String(20), nullable=True)
+
+    # TODO: bring salt and verification stuff back in this file, out of __init__
+    def __init__(self, firstname, lastname, username, email, salt, password, verifiedEmail):
+        super(User_alch, self).__init__()
+        self.firstname = firstname
+        self.lastname = lastname
+        self.username = username
+        self.email = email
+        self.salt = salt
+        self.password = password
+        self.verifiedEmail = verifiedEmail
+        self.ownedEventsCSV = ""
+        self.followedEventsCSV = ""
+
+    def __repr__(self):
+        return '<User %r>' % self.username
+
+    def checkHashPass(self, rawPassIn):
+        correctPass = hash_pass(rawPassIn + self.salt)
+        return correctPass == self.password
+
+    # TODO: FIX THIS!!!  Need to use relation between User_alch and Event_alch...
+    def getListOfOwnedEventNames(self):
+        return []
+        # UrlList = self.ownedEventsCSV.split(",")
+        # nameList = []
+        # cursor = mysql.connect().cursor()
+        # for Url in UrlList:
+        #     # TODO: fix this, obviously
+        #     out = "SELECT * from Event where eventUrl= %s"
+        #     #cursor.execute("SELECT * from Event where eventUrl='" + Url + "'")
+        #     cursor.execute(out,(Url))
+        #     data = cursor.fetchone()
+        #     if data is not None:
+        #         eventName = data[1]
+        #         nameList.append(eventName)
+        # return nameList
+
+    # TODO: Fix as above
+    def getListOfFollowedEventNames(self):
+        return []
+        # UrlList = self.followedEventsCSV.split(",")
+        # nameList = []
+        # cursor = mysql.connect().cursor()
+        # for Url in UrlList:
+        #     # TODO: fix this, obviously
+        #     out = "SELECT * from Event where eventUrl=%s"
+        #     #cursor.execute("SELECT * from Event where eventUrl='" + Url + "'")
+        #     cursor.execute(out,(Url))
+        #     data = cursor.fetchone()
+        #     if data is not None:
+        #         eventName = data[1]
+        #         nameList.append(eventName)
+        # return nameList
+
+def usernameAvail(usernameIn):
+    data = User_alch.query.filter_by(username=usernameIn).count()
+    # print data
+    # if data is None:
+    if data==0:
+        # print "RETURNING TRUE"
+        return True
+    # print "RETURNING FALSE"
+    return False
+
+class Event_alch(alch_db.Model):
+    eventUrl = alch_db.Column(alch_db.String(50), nullable=False)
+    eventName = alch_db.Column(alch_db.String(200), nullable=False)
+    eventDesc = alch_db.Column(alch_db.String(1000), primary_key=True, nullable=True)
+    followers = alch_db.Column(alch_db.String(1000), nullable=True)
+
+    def __repr__(self):
+        return '<Event Url: %r>' % self.eventUrl
 
 class User:
     # pullFromDb tells the constructor to query the User table for info on the user
@@ -60,16 +152,16 @@ class User:
         # else:
         #     self.insert()
 
-    @staticmethod
-    def usernameAvail(usernameIn):
-        cursor = mysql.connect().cursor()
-        out = "SELECT * from User where username= %s"
-        #cursor.execute("SELECT * from User where username ='" + usernameIn + "'")
-        cursor.execute(out,(usernameIn))
-        data = cursor.fetchone()
-        if data is None:
-            return True
-        return False
+    # @staticmethod
+    # def usernameAvail(usernameIn):
+    #     cursor = mysql.connect().cursor()
+    #     out = "SELECT * from User where username= %s"
+    #     #cursor.execute("SELECT * from User where username ='" + usernameIn + "'")
+    #     cursor.execute(out,(usernameIn))
+    #     data = cursor.fetchone()
+    #     if data is None:
+    #         return True
+    #     return False
 
     def checkHashPass(self, rawPassIn):
         correctPass = hash_pass(rawPassIn + self.salt)
@@ -284,38 +376,39 @@ class Event:
 
 
 
-
-
 def killDb():
-    connectionTemp = mysql.connect()
-    cursorTemp = connectionTemp.cursor()
-    ##########################################################
-    ###### Database notes:
-    ###### verifiedEmail is initially a 16 character random string.
-    ######        Once the user has verified their email, it is updated to "0"
-    ##########################################################
-    out = '''DROP database IF EXISTS userDb;
-    CREATE DATABASE userDb;
-    USE userDb;
-    CREATE TABLE User(
-    firstname VARCHAR(50) NOT NULL,
-    lastname VARCHAR(50) NOT NULL,
-    username VARCHAR(50) NOT NULL,
-    password VARCHAR(80) NOT NULL,
-    salt VARCHAR(80) NOT NULL,
-    ownedEventsCSV VARCHAR(500),
-    email VARCHAR(80) NOT NULL,
-    followedEventsCSV VARCHAR(500),
-    verifiedEmail VARCHAR(20),
-    primary key(username)
-    );
-    CREATE TABLE Event(
-    eventUrl VARCHAR(50) NOT NULL,
-    eventName VARCHAR(200) NOT NULL,
-    eventDesc VARCHAR(1000) NOT NULL,
-    followers VARCHAR(1000) NOT NULL,
-    primary key(eventUrl)
-    );'''
-    cursorTemp.execute(out)
-    connectionTemp.commit()
-    connectionTemp.close()
+    alch_db.create_all()
+
+# def killDb():
+#     connectionTemp = mysql.connect()
+#     cursorTemp = connectionTemp.cursor()
+#     ##########################################################
+#     ###### Database notes:
+#     ###### verifiedEmail is initially a 16 character random string.
+#     ######        Once the user has verified their email, it is updated to "0"
+#     ##########################################################
+#     out = '''DROP database IF EXISTS userDb;
+#     CREATE DATABASE userDb;
+#     USE userDb;
+#     CREATE TABLE User(
+#     firstname VARCHAR(50) NOT NULL,
+#     lastname VARCHAR(50) NOT NULL,
+#     username VARCHAR(50) NOT NULL,
+#     password VARCHAR(80) NOT NULL,
+#     salt VARCHAR(80) NOT NULL,
+#     ownedEventsCSV VARCHAR(500),
+#     email VARCHAR(80) NOT NULL,
+#     followedEventsCSV VARCHAR(500),
+#     verifiedEmail VARCHAR(20),
+#     primary key(username)
+#     );
+#     CREATE TABLE Event(
+#     eventUrl VARCHAR(50) NOT NULL,
+#     eventName VARCHAR(200) NOT NULL,
+#     eventDesc VARCHAR(1000) NOT NULL,
+#     followers VARCHAR(1000) NOT NULL,
+#     primary key(eventUrl)
+#     );'''
+#     cursorTemp.execute(out)
+#     connectionTemp.commit()
+#     connectionTemp.close()
