@@ -45,7 +45,9 @@ class User:
         if pullFromDb==True:
             # TODO: probably surround this with a try/except...
             cursor = mysql.connect().cursor()
-            cursor.execute("SELECT * from User where username='" + self.username + "'")
+            out = "SELECT * from User where username= %s"
+            #cursor.execute("SELECT * from User where username='" + self.username + "'")
+            cursor.execute(out,(self.username))
             data = cursor.fetchone()
             self.firstname = data[0]
             self.lastname = data[1]
@@ -61,7 +63,9 @@ class User:
     @staticmethod
     def usernameAvail(usernameIn):
         cursor = mysql.connect().cursor()
-        cursor.execute("SELECT * from User where username ='" + usernameIn + "'")
+        out = "SELECT * from User where username= %s"
+        #cursor.execute("SELECT * from User where username ='" + usernameIn + "'")
+        cursor.execute(out,(usernameIn))
         data = cursor.fetchone()
         if data is None:
             return True
@@ -73,7 +77,7 @@ class User:
 
     def assignPassAndSalt(self, rawPass):
         self.salt = get_x_randoms(64)
-        self.password = hash_pass(rawPass)
+        self.password = hash_pass(rawPass+self.salt)
 
     def assignVerifiedEmail(self):
         self.verifiedEmail = get_x_randoms(16)
@@ -84,7 +88,9 @@ class User:
         cursor = mysql.connect().cursor()
         for Url in UrlList:
             # TODO: fix this, obviously
-            cursor.execute("SELECT * from Event where eventUrl='" + Url + "'")
+            out = "SELECT * from Event where eventUrl= %s"
+            #cursor.execute("SELECT * from Event where eventUrl='" + Url + "'")
+            cursor.execute(out,(Url))
             data = cursor.fetchone()
             if data is not None:
                 eventName = data[1]
@@ -97,7 +103,9 @@ class User:
         cursor = mysql.connect().cursor()
         for Url in UrlList:
             # TODO: fix this, obviously
-            cursor.execute("SELECT * from Event where eventUrl='" + Url + "'")
+            out = "SELECT * from Event where eventUrl=%s"
+            #cursor.execute("SELECT * from Event where eventUrl='" + Url + "'")
+            cursor.execute(out,(Url))
             data = cursor.fetchone()
             if data is not None:
                 eventName = data[1]
@@ -107,8 +115,11 @@ class User:
     def insert(self):
         connection = mysql.connect()
         cursor = connection.cursor()
-        out = "INSERT INTO User values(\'" + self.firstname + "\',\'" + self.lastname + "\',\'" + self.username + "\',\'" + self.password + "\',\'" + self.salt + "\',\'" + self.getOwnedEventsCSV() + "\',\'" + self.email + "\',\'" + self.getFollowedEventsCSV() + "\',\'" + self.verifiedEmail + "\')"
-        cursor.execute(out)
+        cmd = "INSERT INTO User values(%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        #out = "INSERT INTO User values(\'" + self.firstname + "\',\'" + self.lastname + "\',\'" + self.username + "\',\'" + self.password + "\',\'" + self.salt + "\',\'" + self.getOwnedEventsCSV() + "\',\'" + self.email + "\',\'" + self.getFollowedEventsCSV() + "\',\'" + self.verifiedEmail + "\')"
+        #send = mysql.escape(out)
+        cursor.execute(cmd, (self.firstname,self.lastname,self.username,self.password,self.salt,self.getOwnedEventsCSV(),self.email,self.getFollowedEventsCSV(),self.verifiedEmail))
+        #cursor.execute(out)
         connection.commit()
 
     # def update(self, attribute, value):
@@ -118,41 +129,47 @@ class User:
     def updateFirstname(self):
         connection = mysql.connect()
         cursor = connection.cursor()
-        out = "UPDATE User SET firstname='" + self.firstname + "' WHERE username='" + self.username + "'"
-        cursor.execute(out)
+        #out = "UPDATE User SET firstname='" + self.firstname + "' WHERE username='" + self.username + "'"
+        out = "UPDATE User SET firstname=%s WHERE username=%s"
+        cursor.execute(out,(self.firstname,self.username))
         connection.commit()
     def updateLastname(self):
         connection = mysql.connect()
         cursor = connection.cursor()
-        out = "UPDATE User SET lastname='" + self.lastname + "' WHERE username='" + self.username + "'"
-        cursor.execute(out)
+        #out = "UPDATE User SET lastname='" + self.lastname + "' WHERE username='" + self.username + "'"
+        out = "UPDATE User SET lastname=%s WHERE username=%s"
+        cursor.execute(out,(self.lastname,self.username))
         connection.commit()
     def updateEmail(self):
         connection = mysql.connect()
         cursor = connection.cursor()
-        out = "UPDATE User SET email='" + self.email + "' WHERE username='" + self.username + "'"
-        cursor.execute(out)
+       # out = "UPDATE User SET email='" + self.email + "' WHERE username='" + self.username + "'"
+        out = "UPDATE User SET email=%s WHERE username=%s"
+        cursor.execute(out, (self.email,self.username))
         connection.commit()
     def updateVerifiedemail(self):
         connection = mysql.connect()
         cursor = connection.cursor()
-        out = "UPDATE User SET verifiedEmail='" + self.verifiedEmail + "' WHERE username='" + self.username + "'"
-        cursor.execute(out)
+        #out = "UPDATE User SET verifiedEmail='" + self.verifiedEmail + "' WHERE username='" + self.username + "'"
+        out = "UPDATE User SET verifiedEmail=%s WHERE username=%s"
+        cursor.execute(out,(self.verifiedEmail,self.username))
         connection.commit()
 
     def appendToOwnedEventsCSV(self, newEventUrl):
         self.ownedEventsCSV = self.ownedEventsCSV + newEventUrl + ","
         connection = mysql.connect()
         cursor = connection.cursor()
-        out = "UPDATE User SET ownedEventsCSV='" + self.ownedEventsCSV + "' WHERE username='" + self.username + "'"
-        cursor.execute(out)
+        #out = "UPDATE User SET ownedEventsCSV='" + self.ownedEventsCSV + "' WHERE username='" + self.username + "'"
+        out = "UPDATE User SET ownedEventsCSV=%s WHERE username=%s"
+        cursor.execute(out,(self.ownedEventsCSV,self.username))
         connection.commit()
     def appendToFollowedEventsCSV(self, newEventUrl):
         self.followedEventsCSV = self.followedEventsCSV + newEventUrl + ","
         connection = mysql.connect()
         cursor = connection.cursor()
-        out = "UPDATE User SET followedEventsCSV='" + self.followedEventsCSV + "' WHERE username='" + self.username + "'"
-        cursor.execute(out)
+        #out = "UPDATE User SET followedEventsCSV='" + self.followedEventsCSV + "' WHERE username='" + self.username + "'"
+        out = "UPDATE User SET followedEventsCSV=%s WHERE username=%s"
+        cursor.execute(out,(self.followedEventsCSV,self.username))
         connection.commit()
 
     # TODO: to be implemented when "/deleteEvent" goes live:
@@ -190,7 +207,9 @@ class Event:
         self.followersList = []
         if pullFromDb==True:
             cursor = mysql.connect().cursor()
-            cursor.execute("SELECT * from Event where eventUrl ='" + self.eventUrl + "'")
+            out = "SELECT * from Event where eventUrl =%s"
+            #cursor.execute("SELECT * from Event where eventUrl ='" + self.eventUrl + "'")
+            cursor.execute(out,(self.eventUrl))
             data = cursor.fetchone()
             self.eventName = data[1]
             self.eventDesc = data[2]
@@ -199,7 +218,9 @@ class Event:
     @staticmethod
     def eventUrlAvail(urlIn):
         cursor = mysql.connect().cursor()
+        out = "SELECT * from Event where eventUrl =%s"
         cursor.execute("SELECT * from Event where eventUrl ='" + urlIn + "'")
+        #cursor.exectue(out,(urlIn))
         data = cursor.fetchone()
         if data is None:
             return True
@@ -211,7 +232,9 @@ class Event:
         nameList = []
         cursor = mysql.connect().server()
         for url in urlList:
-            cursor.execute("SELECT * from Event where eventUrl='" + url + "'")
+            out = "SELECT * from Event where eventUrl=%s"
+            #cursor.execute("SELECT * from Event where eventUrl='" + url + "'")
+            cursor.execute(out,(url))
             data = cursor.fetchone()
             if data is not None:
                 eventName = data[1]
@@ -230,8 +253,9 @@ class Event:
     def insert(self):
         connection = mysql.connect()
         cursor = connection.cursor()
-        out = "INSERT INTO Event values(\'" + self.eventUrl + "\',\'" + self.eventName + "\',\'" + self.eventDesc + "\',\'" + self.followers + "\')"
-        cursor.execute(out)
+        #out = "INSERT INTO Event values(\'" + self.eventUrl + "\',\'" + self.eventName + "\',\'" + self.eventDesc + "\',\'" + self.followers + "\')"
+        out = "INSERT INTO Event values(%s,%s,%s,%s)"
+        cursor.execute(out,(self.eventUrl,self.eventName,self.eventDesc,self.followers))
         connection.commit()
 
     def getFollowersCSV(self):
@@ -243,6 +267,7 @@ class Event:
     def insertString(self):
         # toreturn = "INSERT INTO Event values('" + self.eventUrl + "', '" + self.eventName + "', '" + self.eventDesc + "','')"
         toreturn = "INSERT INTO Event values('" + self.eventUrl + "', '" + self.eventName + "', '" + self.eventDesc + "','" + self.getFollowersCSV() + "')"
+        #toreturn = "INSERT INTO Event values(%s,%s,%s,%s)"
         return toreturn
 
     def updateString(self, attribute, value):
