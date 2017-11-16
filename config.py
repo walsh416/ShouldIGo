@@ -10,7 +10,8 @@ MYSQL_DATABASE_DB = "userDb"
 MYSQL_DATABASE_HOST = "localhost"
 
 # URI format: mysql://username:password@server/dbname
-SQLALCHEMY_DATABASE_URI = "mysql://root:@localhost/userDb"
+# SQLALCHEMY_DATABASE_URI = "mysql://root:@localhost/userDb"
+SQLALCHEMY_DATABASE_URI = "mysql+pymysql://walsh416:walsh416pass@walsh416dbinstance.cuo7hfdlcl5g.us-east-2.rds.amazonaws.com/thedatabase"
 # This line stops it from yelling at you, since it's removing the capability in the next release:
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 

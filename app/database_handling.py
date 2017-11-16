@@ -4,13 +4,13 @@ import hashlib, os
 from flaskext.mysql import MySQL
 from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
-app.config.from_object('config')
+application = Flask(__name__)
+application.config.from_object('config')
 
-alch_db = SQLAlchemy(app)
+alch_db = SQLAlchemy(application)
 
 mysql = MySQL()
-mysql.init_app(app)
+mysql.init_app(application)
 
 def get_x_randoms(x):
     return str(hashlib.md5(os.urandom(64).encode("base-64")).hexdigest())[:x]

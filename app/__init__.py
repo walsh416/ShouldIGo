@@ -9,13 +9,13 @@ import hashlib, os, re
 import database_handling as db_h
 from database_handling import alch_db
 
-app = Flask(__name__)
+application = Flask(__name__)
 
-app.config.from_object('config')
+application.config.from_object('config')
 
-alch_db.init_app(app)
+alch_db.init_app(application)
 
-mail = Mail(app)
+mail = Mail(application)
 
 # TODO: allow deletion of events, user accounts, etc
 # TODO: send email to subscribers when an event is updated (given an event,
@@ -32,14 +32,14 @@ def get_x_daysFromNow(x):
     return datetime.today() + timedelta(days=x)
 
 # takes in an email message to send, and sends it on a separate thread so main process doesn't hang
-def send_async_email(app, msg):
-    with app.app_context():
+def send_async_email(application, msg):
+    with application.app_context():
         # print "about to send email"
         mail.send(msg)
         # print "sent email"
 
 # default/index page
-@app.route("/", methods=["GET","POST"])
+@application.route("/", methods=["GET","POST"])
 def splashScreen():
     _username = request.cookies.get('username')
     # if there was a cookie with the key "username":
@@ -89,7 +89,7 @@ def splashScreen():
     else:
         return render_template('login.html', badlogin=False)
 
-@app.route("/logout")
+@application.route("/logout")
 def logout():
     # redirect to index and call function splashScreen
     resp = make_response(redirect(url_for("splashScreen")))
@@ -97,7 +97,7 @@ def logout():
     resp.set_cookie('username', '', expires=0)
     return resp
 
-@app.route("/register", methods=["GET","POST"])
+@application.route("/register", methods=["GET","POST"])
 def register():
     # POST method means data was sent by user
     if request.method == "POST":
@@ -132,7 +132,7 @@ def register():
                     )
             msg.body = render_template("registerEmail.txt", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
             msg.html = render_template("registerEmail.html", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
-            thr = Thread(target=send_async_email, args=[app, msg])
+            thr = Thread(target=send_async_email, args=[application, msg])
             thr.start()
             # redirect user to splashScreen
             resp = make_response(redirect(url_for('splashScreen')))
@@ -167,7 +167,7 @@ def register():
             return resp
         return render_template('register.html', diffPasswords=False, duplicateUser=False)
 
-@app.route("/createEvent", methods=["GET","POST"])
+@application.route("/createEvent", methods=["GET","POST"])
 def createEvent():
     # confirm user is logged in
     _username = request.cookies.get('username')
@@ -213,7 +213,7 @@ def createEvent():
     else:
         return render_template('createEvent.html', firstname=usr.firstname, firstTime=True)
 
-@app.route('/validateEmail')
+@application.route('/validateEmail')
 def resendValidationEmail():
     # TODO: revalidate email address after user edits it
     username=request.args.get('username')
@@ -236,7 +236,7 @@ def resendValidationEmail():
         )
         msg.body = render_template("registerEmail.txt", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
         msg.html = render_template("registerEmail.html", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
-        thr = Thread(target=send_async_email, args=[app, msg])
+        thr = Thread(target=send_async_email, args=[application, msg])
         thr.start()
         # redirect user to splashScreen
         # TODO: add argument to splashScreen to display a "sent another validation email!"
@@ -258,7 +258,7 @@ def resendValidationEmail():
         return resp
 
 # TODO: resend verification email if a new email is entered
-@app.route('/editUser', methods=["GET","POST"])
+@application.route('/editUser', methods=["GET","POST"])
 def editUser():
     # confirm user is logged in
     _username = request.cookies.get('username')
@@ -285,7 +285,7 @@ def editUser():
     return make_response(redirect(url_for('splashScreen')))
 
 # <eventUrl> is a variable that matches with any other URL to check if it's a valid eventUrl
-@app.route("/<eventUrl>", methods=["GET","POST"])
+@application.route("/<eventUrl>", methods=["GET","POST"])
 def showEvent(eventUrl):
     # confirm user is logged in
     _username = request.cookies.get('username')
@@ -313,7 +313,7 @@ def showEvent(eventUrl):
 
 # Hidden URL never shown to user, for testing only and to be removed before production
 # Gives ability to call MySQL code to reset the databases without logging into MySQL
-@app.route('/KILL_DB')
+@application.route('/KILL_DB')
 def killDb():
     db_h.killDb()
     print "################ DB killed ################"
