@@ -1,6 +1,5 @@
 
 from flask import Flask, render_template, request, redirect, url_for, make_response
-from flaskext.mysql import MySQL
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from flask_mail import Mail, Message
