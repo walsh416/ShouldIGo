@@ -1,8 +1,9 @@
 
 from flask import Flask, render_template, request, redirect, url_for, make_response, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, timedelta
 from flask_mail import Mail, Message
+from flask_sslify import SSLify
+from datetime import datetime, timedelta
 from threading import Thread
 import hashlib, os, re
 import database_handling as db_h
@@ -15,6 +16,9 @@ application.config.from_object('config')
 alch_db.init_app(application)
 
 mail = Mail(application)
+
+# if not application.config.RUNNING_LOCALLY:
+sslify = SSLify(application)
 
 # TODO: allow deletion of events, user accounts, etc
 # TODO: send email to subscribers when an event is updated (given an event,
