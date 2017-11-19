@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, request, redirect, url_for, make_response
+from flask import Flask, render_template, request, redirect, url_for, make_response, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from flask_mail import Mail, Message
@@ -36,6 +36,7 @@ def send_async_email(application, msg):
         # print "about to send email"
         mail.send(msg)
         # print "sent email"
+
 
 # default/index page
 @application.route("/", methods=["GET","POST"])
@@ -320,3 +321,7 @@ def killDb():
     resp = make_response(redirect(url_for('splashScreen')))
     resp.set_cookie('username', '', expires=0)
     return resp
+
+@application.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(application.root_path, 'static'),'favicon.ico')
