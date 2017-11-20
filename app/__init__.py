@@ -8,6 +8,7 @@ from threading import Thread
 import hashlib, os, re
 import database_handling as db_h
 from database_handling import alch_db
+from flask import abort
 
 application = Flask(__name__)
 
@@ -319,10 +320,21 @@ def showEvent(eventUrl):
         subscribed = db_h.is_EventUrl_in_EventUrlCSV(eventUrl, usr.followedEventsCSV)
 
     # eventUrl is avail, so event does not exist.  Redirect to splashScreen
+    #EVENTURLHADNLING
     if db_h.eventUrlAvail(eventUrl):
-        return redirect(url_for('splashScreen'))
+        #return redirect(url_for('splashScreen'))
+        return abort(404)
     event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
     return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed)
+
+
+@application.errorhandler(404)
+def page_not_found(e):
+    _username = request.cookies.get('username')
+    if not _username:
+        return render_template('404page_login.html')
+    else:    
+        return render_template('404page_create.html'),404
 
 # Hidden URL never shown to user, for testing only and to be removed before production
 # Gives ability to call MySQL code to reset the databases without logging into MySQL
