@@ -46,12 +46,16 @@ def send_async_email(application, msg):
 # default/index page
 @application.route("/", methods=["GET","POST"])
 def splashScreen():
+    resentValidationEmail=False
+    if request.args.get('resentValidationEmail') is not None:
+        resentValidationEmail = request.args.get('resentValidationEmail')
     _username = request.cookies.get('username')
     # if there was a cookie with the key "username":
     if _username:
         usr = db_h.User_alch.query.filter_by(username=_username).first()
         if usr.verifiedEmail!="0":
-            resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
+            # resentValidationEmail didn't work in the UserHome template unless it was a string variable, not sure why...
+            resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
             resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
             return resp
         # retrieve list of names of events based on their URLs
@@ -72,7 +76,7 @@ def splashScreen():
         _followedEventsZipped = zip(_followedEventsList,_followedEventsUrlsList)
 
         # send user to userHome with appropriate arguments
-        resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, ownedeventszipped=_ownedEventsZipped, followedeventszipped=_followedEventsZipped, verified=True))
+        resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, ownedeventszipped=_ownedEventsZipped, followedeventszipped=_followedEventsZipped, verified=True, resentValidationEmail=resentValidationEmail))
         # (re)set cookie with username to expire 90 days from now
         resp.set_cookie('username', _username, expires=get_x_daysFromNow(90))
         return resp
@@ -125,8 +129,6 @@ def register():
             if validEmailBool == None:
                 return render_template('register.html', badEmail=True)
 
-
-            # TODO: check regexp to see if email is valid
             usr = db_h.User_alch(firstname=request.form.get('firstname'), lastname=request.form.get('lastname'), username=request.form.get('username'), email=request.form.get('email'), rawpassword=(request.form.get('password')))
             db_h.alch_db.session.add(usr)
             db_h.alch_db.session.commit()
@@ -251,7 +253,7 @@ def resendValidationEmail():
         thr.start()
         # redirect user to splashScreen
         # TODO: add argument to splashScreen to display a "sent another validation email!"
-        resp = make_response(redirect(url_for('splashScreen')))
+        resp = make_response(redirect(url_for('splashScreen', resentValidationEmail=True)))
         # add cookie with username to expire in 90 days
         resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
         return resp

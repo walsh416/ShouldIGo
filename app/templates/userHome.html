@@ -5,6 +5,10 @@
 </head>
 <body>
 <h1>Welcome, {{firstname}}!</h1>
+<!-- had to set the boolean to a string variable for some reason... not sure why -->
+{% if resentValidationEmail == 'True' %}
+Just resent your validation email! Check your inbox.<br><br>
+{% endif %}
 Your username is {{username}}<br>
 And your full name is {{firstname}} {{lastname}}<br>
 I'd show you your hashed password, but then I'd have to kill you.<br>
