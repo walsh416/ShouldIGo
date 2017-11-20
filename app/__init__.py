@@ -17,7 +17,8 @@ alch_db.init_app(application)
 
 mail = Mail(application)
 
-# if not application.config.RUNNING_LOCALLY:
+# Only forces HTTPS if DEBUG=False, which should be used on AWS
+# When running locally, trying to force HTTPS breaks it, so set DEBUG=True
 sslify = SSLify(application)
 
 # TODO: allow deletion of events, user accounts, etc
@@ -118,10 +119,11 @@ def register():
                 print _userUsername + " is not available"
                 return render_template('register.html', diffPasswords=False, duplicateUser=True)
 
-            # # checking valid email against regexp for it
-            # validEmailBool = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', usr.email)
-            # if validEmailBool == None:
-            #     return render_template('register.html', badEmail=True)
+            # checking valid email against regexp for it
+            _userEmail = request.form.get('email')
+            validEmailBool = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', _userEmail)
+            if validEmailBool == None:
+                return render_template('register.html', badEmail=True)
 
 
             # TODO: check regexp to see if email is valid
@@ -188,7 +190,12 @@ def createEvent():
         # if doesn't have value for eventName, then still trying to pick a Url
         if not request.form.get('eventName'):
             eventUrl=request.form.get('eventUrl')
-            if db_h.eventUrlAvail(eventUrl):
+            # checking valid url against regexp for it (start of string, one or more letters numbers underscores or dashes, end of string)
+            validUrlBool = re.match('^[a-zA-Z0-9_\-]+$', eventUrl)
+            if validUrlBool == None:
+                # url is not valid (per the regexp), so force them to repick.
+                return render_template('createEvent.html', firstname=usr.firstname, badUrl=True)
+            elif db_h.eventUrlAvail(eventUrl):
                 # move on to second stage of creation, picking name and stuff
                 # set cookie with eventUrl, temporary, will be destroyed in stage two
                 resp = make_response(render_template('createEvent.html', firstname=usr.firstname, UrlInUse=False, eventUrl=eventUrl))
@@ -196,7 +203,7 @@ def createEvent():
                 return resp
             # if event Url is in database, have user select a different one:
             else:
-                return render_template('createEvent.html', firstname=_firstname, UrlInUse=True)
+                return render_template('createEvent.html', firstname=usr.firstname, UrlInUse=True)
         # if have form value for eventName, then already have cookie stored with eventUrl
         else:
             eventUrl = request.cookies.get('eventUrl')

@@ -21,6 +21,8 @@
 First, pick a unique event Url:<br>
 {% elif UrlInUse == true %}
 Sorry, that Url is already in use! Try another one:<br>
+{% elif badUrl == true %}
+Sorry, please only use letters, numbers, dashes, and underscores in your url!<br>
 {% endif %}
 <form method = "POST">
   <input type="text" name="eventUrl"><br>
