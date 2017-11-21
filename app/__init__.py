@@ -330,10 +330,15 @@ def showEvent(eventUrl):
 
 @application.errorhandler(404)
 def page_not_found(e):
+    # TODO: what about like "shouldigo.today/VALID_EVENT_NAME/foo" where it starts off
+    #       validly but then wants a sub-directory or something?
+    #       I don't know what it should do here, but it's something to think about --Tim 11/20
     _username = request.cookies.get('username')
+    # TODO: it'd be dope if both of these had some way to remember the URL, so that when the
+    #       user goes to create an event with that URL, it's already auto-filled
     if not _username:
         return render_template('404page_login.html')
-    else:    
+    else:
         return render_template('404page_create.html'),404
 
 # Hidden URL never shown to user, for testing only and to be removed before production
