@@ -56,7 +56,8 @@ def splashScreen():
     if 'username' in session:
         _username = session['username']
     else:
-        _username = None
+        _username = request.cookies.get('rememberme')
+        # _username = None
     # if there was a cookie with the key "username":
     if _username:
         usr = db_h.User_alch.query.filter_by(username=_username).first()
@@ -105,6 +106,10 @@ def splashScreen():
         resp = make_response(redirect(url_for('splashScreen')))
         # reset username cookie to expire 90 days from now
         # resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
+        # if user checked "remember me" box, set a cookie with their username to expire in 90 days
+        if request.form.get('rememberme'):
+            print "Setting rememberme cookie"
+            resp.set_cookie('rememberme', usr.username, expires=get_x_daysFromNow(90))
         return resp
     # GET method means user is logging in for the first time:
     else:
@@ -118,6 +123,8 @@ def logout():
     resp = make_response(redirect(url_for("splashScreen")))
     # delete username cookie
     # resp.set_cookie('username', '', expires=0)
+    # delete rememberme cookie
+    resp.set_cookie('rememberme', '', expires=0)
     return resp
 
 @application.route("/register", methods=["GET","POST"])
