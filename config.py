@@ -16,7 +16,8 @@ MAIL_USERNAME = 'timsemailforlols@gmail.com'
 # Random one-off passphrase from Google
 MAIL_PASSWORD = 'vqlavnjpsmsytbtx'
 
-
+# Needed to enable session storage
+SECRET_KEY = "}M\xfc;.\xa0?\x99\xbb;\xe8\x96\xca7\x04\xc2K\x06\xb1\xc0JOeoE\xd9\xddz\x81\x16\xa1\x00"
 
 ################## DATABASE INSTRUCTIONS ####################
 #### URI format: mysql://username:password@server/dbname ####
