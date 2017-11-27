@@ -44,6 +44,8 @@ def send_async_email(application, msg):
         # print "sent email"
 
 
+# NOTE: 11/27/17: changed what template this renders, now it just goes to login.html,
+#           and splashScreen.html is never touched.  I think.
 # default/index page
 @application.route("/", methods=["GET","POST"])
 def splashScreen():
@@ -84,7 +86,7 @@ def splashScreen():
     # POST method means script was sent login data by user:
     if request.method == "POST":
         usr = db_h.User_alch.query.filter_by(username=request.form.get('username')).first()
-        print usr
+        # print usr
         if usr is None:
             return render_template('login.html', badUser=True)
         if not usr.checkHashPass(request.form.get('password')):
@@ -111,15 +113,17 @@ def logout():
 def register():
     # POST method means data was sent by user
     if request.method == "POST":
+        print "in POST method of /register"
         # check if first password matches second password
         if request.form.get('password') != request.form.get('passwordconfirm'):
+            print "Bad pass"
             # if not, then have them reenter info
             return render_template('register.html', diffPasswords=True)
         # if passwords do match:
         else:
             # try opening connection to database:
             _userUsername = request.form.get('username')
-
+            print "Passwords match, username is: "+_userUsername
             if not db_h.usernameAvail(_userUsername):
                 print _userUsername + " is not available"
                 return render_template('register.html', diffPasswords=False, duplicateUser=True)
@@ -150,6 +154,7 @@ def register():
             return resp
     # GET method means user is here for the first time or is confirming email address:
     else:
+        print "in GET method of /register"
         # try pulling username and validation code out of GET method
         # TODO: make sure this all works right on initial registration (maybe surround in try/except or something?)
         # TODO: what happens if user clicks to verify email twice?  Goes through properly the first time, and then...?
@@ -157,8 +162,10 @@ def register():
         username=request.args.get('username')
         validation=request.args.get('validation')
         if not username:
+            print "returning render_template(register.html) with no username arg"
             return render_template('register.html', diffPasswords=False, duplicateUser=False)
         if db_h.usernameAvail(username):
+            print "returning redirect for 'register' since username is avail"
             return redirect(url_for('register'))
 
         # TODO: what if the following query returns a NoneType?
@@ -173,7 +180,9 @@ def register():
             resp = make_response(redirect(url_for('splashScreen')))
             # add cookie with username to expire in 90 days
             resp.set_cookie('username', username, expires=get_x_daysFromNow(90))
+            print "Returning to splashScreen with verifiedEmail"
             return resp
+        print "returning bottom render_template(register.html)"
         return render_template('register.html', diffPasswords=False, duplicateUser=False)
 
 @application.route("/createEvent", methods=["GET","POST"])
@@ -286,6 +295,10 @@ def editUser():
     # TODO: revalidate new email address
     # GET means that this is the first time here, so show page allowing user to edit their info
     if request.method=="GET":
+        # firstname=usr.firstname
+        # lastname=usr.lastname
+        # email=usr.email
+        # print "Firstname: "+firstname+", lastmane: "+lastname+", email: "+email
         return render_template('editUser.html', firstname=usr.firstname, lastname=usr.lastname, email=usr.email)
     # POST means that the form has already been submitted, time to execute it
     new_firstname=request.form.get('firstname')
@@ -297,6 +310,11 @@ def editUser():
     db_h.alch_db.session.commit()
     # Throw user back to "/" and view the splashScreen/userHome.
     return make_response(redirect(url_for('splashScreen')))
+
+@application.route('/userEvents')
+def userEvents():
+    # TODO: make this not terrible, duh.  (probably pull old code with "zip"ing the CSVs together from the old userHome stuff)
+    return render_template('userEvents.html')
 
 # <eventUrl> is a variable that matches with any other URL to check if it's a valid eventUrl
 @application.route("/<eventUrl>", methods=["GET","POST"])

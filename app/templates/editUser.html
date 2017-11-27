@@ -1,4 +1,4 @@
-<html>
+<!-- <html>
 <head>
         <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}" />
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
@@ -16,8 +16,99 @@ Enter any updated user information below, then hit submit!
 	<input type="text" name="email" value="{{ email }}"><br>
 	<input type="submit"  value="Submit">
 </form>
-<!-- <button id="register">Register</button> -->
+<!- - <button id="register">Register</button> - ->
 <a href="/">Cancel</a>
 
 </body>
+</html> -->
+
+
+
+<html>
+
+<head>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb"
+	 crossorigin="anonymous">
+	<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Quicksand:300" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Heebo:700" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="../static/styles/style.css" />
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">Home</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <!-- <a class="nav-link" href="userEvents.html">My Events<span class="sr-only">(current)</span></a> -->
+            <!-- TODO: create appRoute call for a /userEvents page -->
+            <a class="nav-link" href="/userEvents">My Events<span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <!-- <a class="nav-link" href="settings.html">Settings</a> -->
+            <!-- TODO: are there more settings we want to include than just what's in editUser?
+                          ...probably stuff like email preferences, etc-->
+            <a class="nav-link" href="/editUser">Settings</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/logout">Log Out</a>
+          </li>
+        </ul>
+        <ul class = "navbar-nav my-2 my-lg-0">
+          <li class="nav=item">
+            <a class="nav-link" href="/createEvent">+ New Event</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+	<div class="container-fluid" id="splashpagewrapper">
+
+		<div class="container" id="titlewrapper">
+			<br>
+			<h1 class="text-center" id="maintitle">Profile and Account Settings</h1>
+
+			<div class="container" id="loginform">
+				<div class="form-group">
+
+					<form method="POST">
+						First name<br>
+						<input type="text" name="firstname" value="{{ firstname }}"><br>
+						<br>
+						Last name<br>
+						<input type="text" name="lastname" value="{{ lastname }}"><br>
+						<br> Email
+						<br>
+						<input type="text" name="email" value="{{ email }}"><br>
+						<br>
+						<input type="submit" class="btn btn-primary" value="Submit">
+						<!-- <a class="btn btn-primary" href="#">Save</a> -->
+                        <a href="/" class="btn btn-secondary">Cancel</a>
+					</form>
+
+				</div>
+			</div>
+			<!-- </form> -->
+
+		</div>
+
+	</div>
+
+	<!-- script imports -->
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+	 crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh"
+	 crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ"
+	 crossorigin="anonymous"></script>
+
+
+</body>
+
 </html>
