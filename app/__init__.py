@@ -408,20 +408,31 @@ def showEvent(eventUrl):
     else:
         _username = None
     # _username = request.cookies.get('username')
+
+    # TODO: any way to reach here without being logged in?  If so, what then?
     # POST method means user clicked the "follow" button, since it's just a blank form
     if request.method == "POST":
         usr = db_h.User_alch.query.filter_by(username=_username).first()
-        usr.followedEventsCSV += (eventUrl+",")
-        db_h.alch_db.session.commit()
+        evnt = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
+        if usr.followsEventUrl(eventUrl):
+            usr.unfollowEvent(eventUrl)
+            evnt.unfollowUser(_username)
+            db_h.alch_db.session.commit()
+        else:
+            usr.followedEventsCSV += (eventUrl+",")
+            evnt.followers += (_username+",")
+            db_h.alch_db.session.commit()
         return redirect(url_for('showEvent', eventUrl=eventUrl))
     userLoggedIn = False
     subscribed = False
+    owner = False
     # if they are, show event page with "follow" button
     if _username:
         if db_h.usernameAvail(_username):
             return redirect(url_for('splashScreen'))
         usr = db_h.User_alch.query.filter_by(username=_username).first()
         userLoggedIn = True
+        owner = usr.ownsEventUrl(eventUrl)
         subscribed = db_h.is_EventUrl_in_EventUrlCSV(eventUrl, usr.followedEventsCSV)
 
     # eventUrl is avail, so event does not exist.  Redirect to splashScreen
@@ -430,7 +441,7 @@ def showEvent(eventUrl):
         #return redirect(url_for('splashScreen'))
         return abort(404)
     event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
-    return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed)
+    return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner)
 
 
 @application.errorhandler(404)

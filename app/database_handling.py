@@ -75,6 +75,28 @@ class User_alch(alch_db.Model):
                 nameList.append(event.eventName)
         return nameList
 
+    def ownsEventUrl(self, urlIn):
+        urlList = self.ownedEventsCSV.split(",")
+        for url in urlList:
+            if urlIn == url:
+                return True
+        return False
+
+    def followsEventUrl(self, urlIn):
+        urlList = self.followedEventsCSV.split(",")
+        for url in urlList:
+            if urlIn == url:
+                return True
+        return False
+
+    def unfollowEvent(self, url):
+        eventList = self.followedEventsCSV.split(",")
+        toSet = ""
+        for event in eventList:
+            if event != url:
+                toSet += (event+",")
+        self.followedEventsCSV = toSet
+
 def usernameAvail(usernameIn):
     user_count = User_alch.query.filter_by(username=usernameIn).count()
     if user_count==0:
@@ -97,6 +119,14 @@ class Event_alch(alch_db.Model):
         self.eventName = name
         self.eventDesc = desc
         self.followers = ""
+
+    def unfollowUser(self, username):
+        userList = self.followers.split(",")
+        toSet = ""
+        for user in userList:
+            if user != username:
+                toSet += (user+",")
+        self.followers = toSet
 
 def eventUrlAvail(urlIn):
     event_count = Event_alch.query.filter_by(eventUrl=urlIn).count()
