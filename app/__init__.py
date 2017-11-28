@@ -64,7 +64,8 @@ def splashScreen():
         if usr.verifiedEmail!="0":
             # resentValidationEmail didn't work in the UserHome template unless it was a string variable, not sure why...
             session['username'] = usr.username
-            resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
+            resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
+            # resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
             # resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
             return resp
         # retrieve list of names of events based on their URLs
@@ -102,6 +103,15 @@ def splashScreen():
             # keep user at login screen, with "bad password!" shown to user
             return render_template('login.html', badPass=True)
         session['username'] = usr.username
+
+        # Can't see home screen unless they have verified their email address
+        if usr.verifiedEmail!="0":
+            # resentValidationEmail didn't work in the UserHome template unless it was a string variable, not sure why...
+            session['username'] = usr.username
+            resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
+            # resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
+            # resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
+            return resp
         # otherwise, password was good, so user can log in and redirect to welcome screen:
         resp = make_response(redirect(url_for('splashScreen')))
         # reset username cookie to expire 90 days from now
@@ -222,6 +232,14 @@ def createEvent():
         session.pop('username', None)
         return redirect(url_for('splashScreen'))
     usr = db_h.User_alch.query.filter_by(username=_username).first()
+
+    if usr.verifiedEmail!="0":
+        # resentValidationEmail didn't work in the UserHome template unless it was a string variable, not sure why...
+        session['username'] = usr.username
+        resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
+        # resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
+        # resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
+        return resp
 
     # POST method implies data being passed, trying to create event:
     if request.method == "POST":
@@ -345,7 +363,16 @@ def editUser():
     new_email=request.form.get('email')
     usr.firstname=new_firstname
     usr.lastname=new_lastname
-    usr.email=new_email
+
+    if usr.email != new_email:
+        usr.email=new_email
+        # resentValidationEmail didn't work in the UserHome template unless it was a string variable, not sure why...
+        session['username'] = usr.username
+        db_h.alch_db.session.commit()
+        resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
+        # resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
+        # resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
+        return resp
     db_h.alch_db.session.commit()
     # Throw user back to "/" and view the splashScreen/userHome.
     return make_response(redirect(url_for('splashScreen')))
@@ -362,6 +389,14 @@ def userEvents():
     # otherwise, pull user data from database:
     if db_h.usernameAvail(_username):
         return redirect(url_for('splashScreen'))
+    usr = db_h.User_alch.query.filter_by(username=_username).first()
+    if usr.verifiedEmail!="0":
+        # resentValidationEmail didn't work in the UserHome template unless it was a string variable, not sure why...
+        session['username'] = usr.username
+        resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
+        # resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
+        # resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
+        return resp
     return render_template('userEvents.html')
 
 # <eventUrl> is a variable that matches with any other URL to check if it's a valid eventUrl
