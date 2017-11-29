@@ -1,2 +1,0 @@
-Dear {{ firstname }},
-Welcome to ConsiderA.party!

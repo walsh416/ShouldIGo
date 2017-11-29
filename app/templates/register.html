@@ -1,0 +1,131 @@
+<!-- <html>
+<head>
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}" />
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+</head>
+<body>
+<h1>Welcome to isThere.today!</h1>
+  {% if diffPasswords == true %}
+  Passwords don't match!<br><br>
+  {% endif %}
+  {% if badEmail == true %}
+  Invalid email address!<br><br>
+  {% endif %}
+  {% if duplicateUser == true %}
+  Username already in use, select another!<br>
+  {% endif %}
+  {% if errorHappened == true %}
+  AN ERROR HAPPENED<br>
+  {% endif %}
+	Please register below:
+<form method = "POST">
+	First name:<br>
+	<input type="text" name="firstname"><br>
+	Last name:<br>
+	<input type="text" name="lastname"><br>
+	Username:<br>
+	<input type="text" name="username"><br>
+	Email:<br>
+	<input type="text" name="email"><br>
+	Password:<br>
+	<input type="password" name="password"><br>
+	Confirm password:<br>
+	<input type="password" name="passwordconfirm"><br>
+	<input type="submit"  value="Register">
+</form>
+<a href="/">Cancel</a>
+
+</body>
+</html> -->
+
+
+<!-- TODO: @Aslan, how do we make the border around each text field not disappear when the cursor is inside it? -->
+
+<html>
+
+<head>
+	<link rel="stylesheet" type="text/css" href="../static/styles/style.css" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+	<link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Quicksand:300" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Heebo:700" rel="stylesheet">
+
+	<link rel="stylesheet" type="text/css" href="isthere.css">
+	<style>
+		#pagewrapper{
+			height: 100vh;
+		}
+	</style>
+</head>
+
+<body>
+	<!--{% if diffPasswords == true %}
+  Passwords don't match!<br><br>
+  {% endif %}
+  {% if badEmail == true %}
+  Invalid email address!<br><br>
+  {% endif %}
+  {% if duplicateUser == true %}
+  Username already in use, select another!<br>
+  ORRRRRR AN ERROR HAPPENED<br>
+  {% endif %}-->
+	<div class="container-fluid middlechunk" id="pagewrapper">
+
+		<div class="container" id="titlewrapper">
+			<br>
+			<h1 class="text-center" id="maintitle">Register</h1>
+
+            <!-- TODO: why was this line here? I took it out because it was redirecting to / instead of register and breaking stuff -->
+			<!-- <form action="/" method="post" name="login"> -->
+				<div class="container" id="loginform">
+                    {% if diffPasswords == true %}
+                    Passwords don't match!<br><br>
+                    {% endif %}
+                    {% if badEmail == true %}
+                    Invalid email address!<br><br>
+                    {% endif %}
+                    {% if duplicateUser == true %}
+                    Username already in use, select another!<br><br>
+                    {% endif %}
+                    {% if errorHappened == true %}
+                    AN ERROR HAPPENED<br><br>
+                    {% endif %}
+                    Please register below:
+					<div class="form-group">
+
+                        <!-- <form method="POST"> -->
+						<form action="/register" method="POST">
+							First name<br>
+							<input type="text" class="form-control" name="firstname"><br>Last Name<br>
+							<input type="text" class="form-control" name="lastname"><br>Username
+							<br>
+							<input type="text" class="form-control" name="username"><br>Email
+							<br>
+							<input type="text" class="form-control" name="email"><br>Password
+							<br>
+							<input type="password" class="form-control" name="password"><br>Confirm password<br>
+							<input type="password" class="form-control" name="passwordconfirm"><br>
+
+                            <input type="submit" class="btn btn-primary" value="Register">
+
+							<a href="/" class="btn btn-secondary">Cancel</a>
+
+						</form>
+
+					</div>
+				</div>
+			<!-- </form> -->
+
+		</div>
+
+	</div>
+	<!-- script imports -->
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+
+</body>
+
+</html>

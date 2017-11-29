@@ -1,0 +1,24 @@
+#splashpagewrapper {
+  background: url(../images/BokehLights3.jpg) no-repeat center center fixed;
+  background-size: cover;
+
+  height: 100vh;
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+}
+
+#loginform {
+  width: 22%;
+  margin: 10px auto;
+  text-align: center;
+}
+
+#splashtitle{
+  font-size: 70px;
+  user-select: none;
+}
+
+#usernameinput{
+  border-radius: 4px 4px 0px 0px !important;
+}

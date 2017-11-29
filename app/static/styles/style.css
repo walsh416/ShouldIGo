@@ -1,0 +1,87 @@
+/*COLORS
+light blue: 90A9FF - 144 169 255
+dark blue: 5368B2 - 83 104 178
+pink: FFBDAA - 255 189 170
+light green - 98CC5F - 152 204 195
+dark green - 89B25C - 137 178 92
+*/
+
+ul, li {
+  list-style-type: none;
+}
+
+h2 {
+  font-family: 'Rustico-Regular', Sans-Serif;
+  font-weight: 700;
+  font-size: 35px;
+}
+
+p {
+  font-family: 'Cabin', Sans-Serif;
+  font-size: 16px;
+}
+
+.button {
+    background-color: #253466; /*main color*/
+    border: none;
+    text-transform: uppercase;
+    font-family: 'Cabin', Sans-Serif;
+    font-weight: 500;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    transition: .3s;
+}
+
+.button:hover{
+    color: white;
+    text-decoration: none;
+    background-color: #172142;
+}
+
+.button:active{
+    color: white;
+    background-color: #101830;
+    transition: .1s;
+}
+
+.title {
+  font-family: 'Rustico-Regular', sans-serif;
+  font-weight: normal;
+  text-transform: uppercase;
+  color: white;
+}
+
+.rustico {
+  font-family: 'Rustico-Regular', Sans-Serif;
+}
+
+.navbar-inner-transparent {
+  background: transparent;
+}
+
+/*FORMS*/
+
+.form-control {
+  border-radius: 0px !important;
+  border: 0 none;
+}
+
+/* remove the shadow when inmput is focused */
+.form-control:focus{
+  box-shadow: none !important;
+  border: 0 none;
+}
+
+/*FONT SCHEME */
+
+@font-face {
+  font-family: 'Rustico-Regular';
+  src: url('../fonts/Rustico-Regular.eot');
+  src: url('../fonts/Rustico-Regular.woff2') format('woff2'), url('../fonts/Rustico-Regular.woff') format('woff'), url('../fonts/Rustico-Regular.ttf') format('truetype'), url('../fonts/Rustico-Regular.svg#Rustico-Regular') format('svg'), url('../fonts/Rustico-Regular.eot?#iefix') format('embedded-opentype');
+  font-weight: normal;
+  font-style: normal;
+}

@@ -1,0 +1,26 @@
+<html>
+<head>
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}" />
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+<h1>{{eventName}} has now been deleted, {{firstname}}!</h1>
+{% if UrlInUse == true %}
+{{eventUrl}} is in use, delete your event!
+<form method = "DELETE">
+	Event name:<br>
+	<input type="text" name="eventName"><br>
+  <!-- textarea can't be self-closing, so needs separate closing tag: -->
+  Enter a description of your event:<br>
+	<input type="submit"  value="Delete">
+</form>
+{% else %}
+<a href="/userHome">Home</a>
+{% if firstTime == false %}
+First, pick an owned event Url:<br>
+{% elif UrlInUse == false %}
+Sorry, that Url is not owned by you! Try another one:<br>
+{% endif %}
+{% endif %}
+</body>
+</html>
