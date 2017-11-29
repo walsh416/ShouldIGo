@@ -52,21 +52,16 @@ def splashScreen():
     resentValidationEmail=False
     if request.args.get('resentValidationEmail') is not None:
         resentValidationEmail = request.args.get('resentValidationEmail')
-    # _username = request.cookies.get('username')
     if 'username' in session:
         _username = session['username']
     else:
         _username = request.cookies.get('rememberme')
-        # _username = None
     # if there was a cookie with the key "username":
     if _username:
         usr = db_h.User_alch.query.filter_by(username=_username).first()
         if usr.verifiedEmail!="0":
-            # resentValidationEmail didn't work in the UserHome template unless it was a string variable, not sure why...
             session['username'] = usr.username
             resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
-            # resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
-            # resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
             return resp
         # retrieve list of names of events based on their URLs
         _ownedEventsList = usr.getListOfOwnedEventNames()
@@ -74,7 +69,6 @@ def splashScreen():
         _ownedEventsUrlsList = usr.ownedEventsCSV.split(",")
         # prepend a slash to each URL, so it can be given straight to the userHome.html template
         for url in _ownedEventsUrlsList:
-            # url = '"/'+url+'"'
             url = '/'+url
         # zip both lists together: creates an equal length list of tuples
         _ownedEventsZipped = zip(_ownedEventsList,_ownedEventsUrlsList)
@@ -109,13 +103,9 @@ def splashScreen():
             # resentValidationEmail didn't work in the UserHome template unless it was a string variable, not sure why...
             session['username'] = usr.username
             resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
-            # resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
-            # resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
             return resp
         # otherwise, password was good, so user can log in and redirect to welcome screen:
         resp = make_response(redirect(url_for('splashScreen')))
-        # reset username cookie to expire 90 days from now
-        # resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
         # if user checked "remember me" box, set a cookie with their username to expire in 90 days
         if request.form.get('rememberme'):
             print "Setting rememberme cookie"
@@ -131,8 +121,6 @@ def logout():
     session.pop('username', None)
     # redirect to index and call function splashScreen
     resp = make_response(redirect(url_for("splashScreen")))
-    # delete username cookie
-    # resp.set_cookie('username', '', expires=0)
     # delete rememberme cookie
     resp.set_cookie('rememberme', '', expires=0)
     return resp
@@ -179,8 +167,6 @@ def register():
             session['username'] = usr.username
             # redirect user to splashScreen
             resp = make_response(redirect(url_for('splashScreen')))
-            # add cookie with username to expire in 90 days
-            # resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
             return resp
     # GET method means user is here for the first time or is confirming email address:
     else:
@@ -209,8 +195,6 @@ def register():
             session['username'] = username
             # redirect user to splashScreen
             resp = make_response(redirect(url_for('splashScreen')))
-            # add cookie with username to expire in 90 days
-            # resp.set_cookie('username', username, expires=get_x_daysFromNow(90))
             print "Returning to splashScreen with verifiedEmail"
             return resp
         print "returning bottom render_template(register.html)"
@@ -223,7 +207,6 @@ def createEvent():
         _username = session['username']
     else:
         _username = None
-    # _username = request.cookies.get('username')
     # if they are not, redirect to the splashScreen
     if not _username:
         return redirect(url_for('splashScreen'))
@@ -237,8 +220,6 @@ def createEvent():
         # resentValidationEmail didn't work in the UserHome template unless it was a string variable, not sure why...
         session['username'] = usr.username
         resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
-        # resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
-        # resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
         return resp
 
     # POST method implies data being passed, trying to create event:
@@ -285,7 +266,6 @@ def createEvent():
 
 @application.route('/validateEmail')
 def resendValidationEmail():
-    # TODO: revalidate email address after user edits it
     username=request.args.get('username')
     validation=request.args.get('validation')
     # here for first time, so send them an email:
@@ -295,7 +275,6 @@ def resendValidationEmail():
             _username = session['username']
         else:
             _username = None
-        # _username = request.cookies.get('username')
         # if they are not, redirect to the splashScreen
         if not _username:
             return redirect(url_for('splashScreen'))
@@ -314,27 +293,21 @@ def resendValidationEmail():
         thr = Thread(target=send_async_email, args=[application, msg])
         thr.start()
         # redirect user to splashScreen
-        # TODO: add argument to splashScreen to display a "sent another validation email!"
         session['username'] = usr.username
         resp = make_response(redirect(url_for('splashScreen', resentValidationEmail=True)))
-        # add cookie with username to expire in 90 days
-        # resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
         return resp
     if db_h.usernameAvail(username):
         return redirect(url_for('register'))
     usr = db_h.User_alch.query.filter_by(username=username).first()
     if usr.verifiedEmail == validation:
-        # Validation code was good!!  Reset code in table to 1
+        # Validation code was good!!  Reset code in table to 0
         usr.verifiedEmail="0"
         db_h.alch_db.session.commit()
         # redirect user to splashScreen
         session['username'] = usr.username
         resp = make_response(redirect(url_for('splashScreen')))
-        # add cookie with username to expire in 90 days
-        # resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
         return resp
 
-# TODO: resend verification email if a new email is entered
 @application.route('/editUser', methods=["GET","POST"])
 def editUser():
     # confirm user is logged in
@@ -342,7 +315,6 @@ def editUser():
         _username = session['username']
     else:
         _username = None
-    # _username = request.cookies.get('username')
     # if they are not, redirect to the splashScreen
     if not _username:
         return redirect(url_for('splashScreen'))
@@ -350,13 +322,8 @@ def editUser():
     if db_h.usernameAvail(_username):
         return redirect(url_for('splashScreen'))
     usr = db_h.User_alch.query.filter_by(username=_username).first()
-    # TODO: revalidate new email address
     # GET means that this is the first time here, so show page allowing user to edit their info
     if request.method=="GET":
-        # firstname=usr.firstname
-        # lastname=usr.lastname
-        # email=usr.email
-        # print "Firstname: "+firstname+", lastmane: "+lastname+", email: "+email
         return render_template('editUser.html', firstname=usr.firstname, lastname=usr.lastname, email=usr.email)
     # POST means that the form has already been submitted, time to execute it
     new_firstname=request.form.get('firstname')
@@ -367,12 +334,10 @@ def editUser():
 
     if usr.email != new_email:
         usr.email=new_email
-        # resentValidationEmail didn't work in the UserHome template unless it was a string variable, not sure why...
+        usr.assignVerifiedEmail()
         session['username'] = usr.username
         db_h.alch_db.session.commit()
-        resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
-        # resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
-        # resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
+        resp = make_response(redirect(url_for('resendValidationEmail')))
         return resp
     db_h.alch_db.session.commit()
     # Throw user back to "/" and view the splashScreen/userHome.
@@ -392,11 +357,8 @@ def userEvents():
         return redirect(url_for('splashScreen'))
     usr = db_h.User_alch.query.filter_by(username=_username).first()
     if usr.verifiedEmail!="0":
-        # resentValidationEmail didn't work in the UserHome template unless it was a string variable, not sure why...
         session['username'] = usr.username
         resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
-        # resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
-        # resp.set_cookie('username', usr.username, expires=get_x_daysFromNow(90))
         return resp
     return render_template('userEvents.html')
 
@@ -415,28 +377,20 @@ def showEvent(eventUrl):
         _username = session['username']
     else:
         _username = None
-    # _username = request.cookies.get('username')
 
     # TODO: any way to reach here without being logged in?  If so, what then?
     # POST method means user clicked the "follow" button, since it's just a blank form
     if request.method == "POST":
         usr = db_h.User_alch.query.filter_by(username=_username).first()
         evnt = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
-#######
         if request.form.get('save'):
             new_eventName = request.form.get('eventName')
             new_eventDesc = request.form.get('eventDesc')
-
             evnt = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
             evnt.eventName=new_eventName
             evnt.eventDesc=new_eventDesc
             db_h.alch_db.session.commit()
-
             evnt.sendEmailToFollowers()
-
-            # resp = make_response(redirect(url_for('splashScreen')))
-            # return resp
-#######
         if request.form.get('unfollow') and usr.followsEventUrl(eventUrl):
             usr.unfollowEvent(eventUrl)
             evnt.unfollowUser(_username)
@@ -462,11 +416,9 @@ def showEvent(eventUrl):
         wantsToEdit=request.args.get('wantsToEdit')
         wantsToDelete=request.args.get('wantsToDelete')
         if owner and bool(wantsToEdit):
-            # event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
             return render_template('editEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner)
         if owner and bool(wantsToDelete):
             # TODO: some sort of javascript pop-up, either confirming they want to delete it or notifying them that they did?
-            # event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
 
             # remove event from all users' followedEventsCSV list, and from owner's ownedEventsCSV list:
             followersList=event.followers.split(',')
@@ -480,14 +432,7 @@ def showEvent(eventUrl):
             db_h.alch_db.session.delete(event)
             db_h.alch_db.session.commit()
             return redirect(url_for('splashScreen'))
-            # return render_template('showEvent.html')
-            # return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner)
-
     # eventUrl is avail, so event does not exist.  Redirect to splashScreen
-    #EVENTURLHADNLING
-    if db_h.eventUrlAvail(eventUrl):
-        #return redirect(url_for('splashScreen'))
-        return abort(404)
     event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
     return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner)
 
@@ -497,7 +442,6 @@ def page_not_found(e):
     # TODO: what about like "shouldigo.today/VALID_EVENT_NAME/foo" where it starts off
     #       validly but then wants a sub-directory or something?
     #       I don't know what it should do here, but it's something to think about --Tim 11/20
-    # _username = request.cookies.get('username')
     if 'username' in session:
         _username = session['username']
     else:
@@ -518,7 +462,6 @@ def killDb():
 
     session.pop('username', None)
     resp = make_response(redirect(url_for('splashScreen')))
-    # resp.set_cookie('username', '', expires=0)
     return resp
 
 @application.route('/favicon.ico')
