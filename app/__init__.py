@@ -275,7 +275,8 @@ def createEvent():
             usr.ownedEventsCSV += (eventUrl+",")
             db_h.alch_db.session.commit()
 
-            resp = make_response(redirect(url_for('splashScreen')))
+            # resp = make_response(redirect(url_for('splashScreen')))
+            resp = make_response(redirect(url_for('showEvent', eventUrl=eventUrl)))
             resp.set_cookie('eventUrl', '', expires=0)
             return resp
     # GET method means user is here for first time, allow to check Url availability:
@@ -459,9 +460,28 @@ def showEvent(eventUrl):
         subscribed = db_h.is_EventUrl_in_EventUrlCSV(eventUrl, usr.followedEventsCSV)
         # If owner, and if they hit "edit" button, comes back with GET method for editing, and allows owner to edit it.
         wantsToEdit=request.args.get('wantsToEdit')
+        wantsToDelete=request.args.get('wantsToDelete')
         if owner and bool(wantsToEdit):
             # event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
             return render_template('editEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner)
+        if owner and bool(wantsToDelete):
+            # TODO: some sort of javascript pop-up, either confirming they want to delete it or notifying them that they did?
+            # event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
+
+            # remove event from all users' followedEventsCSV list, and from owner's ownedEventsCSV list:
+            followersList=event.followers.split(',')
+            for follower in followersList:
+                followerUser = db_h.User_alch.query.filter_by(username=follower).first()
+                if followerUser is not None:
+                    followerUser.unfollowEvent(eventUrl)
+                    followerUser.unownEvent(eventUrl)
+                    db_h.alch_db.session.commit()
+            # delete event itself
+            db_h.alch_db.session.delete(event)
+            db_h.alch_db.session.commit()
+            return redirect(url_for('splashScreen'))
+            # return render_template('showEvent.html')
+            # return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner)
 
     # eventUrl is avail, so event does not exist.  Redirect to splashScreen
     #EVENTURLHADNLING

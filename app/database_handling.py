@@ -102,6 +102,15 @@ class User_alch(alch_db.Model):
                 return True
         return False
 
+    def unownEvent(self, url):
+        eventList = self.ownedEventsCSV.split(",")
+        toSet = ""
+        for event in eventList:
+            if event != url:
+                if event != "":
+                    toSet += (event+",")
+        self.ownedEventsCSV = toSet
+
     def unfollowEvent(self, url):
         eventList = self.followedEventsCSV.split(",")
         toSet = ""
