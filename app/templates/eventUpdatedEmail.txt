@@ -1,0 +1,2 @@
+Dear {{ firstname }},
+{{ eventname }} has been updated!

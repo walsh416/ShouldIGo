@@ -83,19 +83,20 @@ You own this event! Click below to edit it:
         {% if userLoggedIn == true %}
         {% if subscribed == false %}
         <form method = "POST">
-          <input type="submit" value="Follow this event">
+          <input type="submit" name="follow" value="Follow this event">
         </form>
         {% else %}
         <!-- TODO: some way to unfollow? -->
         You already follow this event!
         <form method = "POST">
-          <input type="submit" value="Unfollow this event">
+          <input type="submit" name="unfollow" value="Unfollow this event">
         </form>
         {% endif %}
         {% endif %}
         {% if owner==true %}
         You own this event! Click below to edit it:
-        MAKE A BUTTON HERE LOLZ
+        <p><a href={{ url_for("showEvent", eventUrl=eventUrl, wantsToEdit="True", _external=True )}} class="btn btn-primary">Click me!</a></p>
+
         <!-- <form method = "POST">
           <input type="submit" value="Edit">
         </form> -->

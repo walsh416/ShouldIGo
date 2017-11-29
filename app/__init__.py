@@ -402,6 +402,13 @@ def userEvents():
 # <eventUrl> is a variable that matches with any other URL to check if it's a valid eventUrl
 @application.route("/<eventUrl>", methods=["GET","POST"])
 def showEvent(eventUrl):
+    # TODO: only have one user object and one event object in here, instead of 18 nested ugly ones because Tim got lazy
+    # eventUrl is avail, so event does not exist.  Redirect to splashScreen
+    #EVENTURLHADNLING
+    if db_h.eventUrlAvail(eventUrl):
+        #return redirect(url_for('splashScreen'))
+        return abort(404)
+
     # confirm user is logged in
     if 'username' in session:
         _username = session['username']
@@ -414,11 +421,26 @@ def showEvent(eventUrl):
     if request.method == "POST":
         usr = db_h.User_alch.query.filter_by(username=_username).first()
         evnt = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
-        if usr.followsEventUrl(eventUrl):
+#######
+        if request.form.get('save'):
+            new_eventName = request.form.get('eventName')
+            new_eventDesc = request.form.get('eventDesc')
+
+            evnt = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
+            evnt.eventName=new_eventName
+            evnt.eventDesc=new_eventDesc
+            db_h.alch_db.session.commit()
+
+            evnt.sendEmailToFollowers()
+
+            # resp = make_response(redirect(url_for('splashScreen')))
+            # return resp
+#######
+        if request.form.get('unfollow') and usr.followsEventUrl(eventUrl):
             usr.unfollowEvent(eventUrl)
             evnt.unfollowUser(_username)
             db_h.alch_db.session.commit()
-        else:
+        elif request.form.get('follow') and not usr.followsEventUrl(eventUrl):
             usr.followedEventsCSV += (eventUrl+",")
             evnt.followers += (_username+",")
             db_h.alch_db.session.commit()
@@ -426,14 +448,20 @@ def showEvent(eventUrl):
     userLoggedIn = False
     subscribed = False
     owner = False
-    # if they are, show event page with "follow" button
+    # if they are logged in, show event page with "follow" button
     if _username:
         if db_h.usernameAvail(_username):
             return redirect(url_for('splashScreen'))
         usr = db_h.User_alch.query.filter_by(username=_username).first()
+        event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
         userLoggedIn = True
         owner = usr.ownsEventUrl(eventUrl)
         subscribed = db_h.is_EventUrl_in_EventUrlCSV(eventUrl, usr.followedEventsCSV)
+        # If owner, and if they hit "edit" button, comes back with GET method for editing, and allows owner to edit it.
+        wantsToEdit=request.args.get('wantsToEdit')
+        if owner and bool(wantsToEdit):
+            # event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
+            return render_template('editEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner)
 
     # eventUrl is avail, so event does not exist.  Redirect to splashScreen
     #EVENTURLHADNLING
