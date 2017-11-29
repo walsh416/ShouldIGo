@@ -3,9 +3,9 @@
         <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}" />
 </head>
 <body>
-<h1>Let's delete an event, {{firstname}}!</h1>
+<h1>{{eventName}} has now been deleted, {{firstname}}!</h1>
 {% if UrlInUse == true %}
-{{eventUrl}} is in use, set up the delete your event!
+{{eventUrl}} is in use, delete your event!
 <form method = "DELETE">
 	Event name:<br>
 	<input type="text" name="eventName"><br>
@@ -14,6 +14,7 @@
 	<input type="submit"  value="Delete">
 </form>
 {% else %}
+<a href="/userHome">Home</a>
 {% if firstTime == false %}
 First, pick an owned event Url:<br>
 {% elif UrlInUse == false %}

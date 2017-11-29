@@ -339,8 +339,7 @@ def createEvent():
 		return render_template('createEvent.html', firstname=_firstname, firstTime=True)
 
 
-#in progress
-@app.route("/deleteEvent", methods=["DELETE"])
+@app.route("/deleteEvent", methods=["GET","POST"])
 def deleteEvent():
 	# confirm user is logged in
 	_username = request.cookies.get('username')
@@ -355,13 +354,32 @@ def deleteEvent():
 	# if no user data in table, have user log in again:
 	if data is None:
 		return redirect(url_for('login'))
+	# otherwise, pull rest of user data
 	_firstname = data[0]
 	_lastname = data[1]
+	_eventName = data[2]
 	_ownedEvents=data[5]
 
-	# DELETE method implies data is in table, trying to delete event:
+	# POST method implies data being passed, trying to create event:
 	if request.method == "DELETE":
 		# if doesn't have value for eventName, then still trying to pick a Url
+		if not request.form.get('eventName'):
+			eventUrl=request.form.get('eventUrl')
+			# cursor = mysql.connect().cursor()
+			cursor.execute("SELECT * from Event where eventUrl='" + eventUrl + "'")
+			data = cursor.fetchone()
+			# if eventUrl is not already in the database:
+			if data is None:
+				# move on to second stage of creation, picking name and stuff
+				# set cookie with eventUrl, temporary, will be destroyed in stage two
+				resp = make_response(render_template('createEvent.html', firstname=_firstname, UrlInUse=False, eventUrl=eventUrl))
+				resp.set_cookie('eventUrl',eventUrl, expires=get_x_daysFromNow(2))
+				return resp
+			# if event Url is in database, have user select a different one:
+			else:
+				return render_template('createEvent.html', firstname=_firstname, UrlInUse=True)
+		# if have form value for eventName, then already have cookie stored with eventUrl
+		else:
 			eventUrl = request.cookies.get('eventUrl')
 			eventName = request.form.get('eventName')
 			eventDesc = request.form.get('eventDesc')
@@ -369,7 +387,7 @@ def deleteEvent():
 			# add event to Event table
 			# connection = mysql.connect()
 			# cursor = connection.cursor()
-			out = "DELETE FROM Event values('" + eventUrl + "', '" + eventName + "', '" + eventDesc + "')"
+			out = "DELETE FROM Event values('" + eventUrl + "', '" + eventName + "', '" + eventDesc + "','')"
 			cursor.execute(out)
 			connection.commit()
 
@@ -387,7 +405,57 @@ def deleteEvent():
 			return resp
 	# GET method means user is here for first time, allow to check Url availability:
 	else:
-		return render_template('deleteEvent.html', firstname=_firstname, firstTime=True)
+		return render_template('deleteEvent.html', firstname=_firstname, firstTime=True, eventName= _eventName)
+
+# #in progress
+# @app.route("/deleteEvent", methods=["DELETE"])
+# def deleteEvent():
+# 	# confirm user is logged in
+# 	_username = request.cookies.get('username')
+# 	# if they are not, redirect to the splashScreen
+# 	if not _username:
+# 		return redirect(url_for('splashScreen'))
+# 	# otherwise, pull user data from database:
+# 	connection = mysql.connect()
+# 	cursor = connection.cursor()
+# 	cursor.execute("SELECT * from User where username='" + _username + "'")
+# 	data = cursor.fetchone()
+# 	# if no user data in table, have user log in again:
+# 	if data is None:
+# 		return redirect(url_for('login'))
+# 	_firstname = data[0]
+# 	_lastname = data[1]
+# 	_ownedEvents=data[5]
+
+# 	# DELETE method implies data is in table, trying to delete event:
+# 	if request.method == "DELETE":
+# 		# if doesn't have value for eventName, then still trying to pick a Url
+# 			eventUrl = request.cookies.get('eventUrl')
+# 			eventName = request.form.get('eventName')
+# 			eventDesc = request.form.get('eventDesc')
+
+# 			# add event to Event table
+# 			# connection = mysql.connect()
+# 			# cursor = connection.cursor()
+# 			out = "DELETE FROM Event values('" + eventUrl + "', '" + eventName + "', '" + eventDesc + "')"
+# 			cursor.execute(out)
+# 			connection.commit()
+
+# 			# get old list of ownedEvents from User table
+# 			cursor.execute("SELECT ownedEventsCSV from User where username='" + _username + "'")
+# 			data = cursor.fetchone()
+# 			# append new event to list of old events:
+# 			out = "UPDATE User SET ownedEventsCSV='" + data[0] + eventUrl + ",' WHERE username='" + _username + "'"
+# 			cursor.execute(out)
+# 			connection.commit()
+# 			# print ("Url: "+eventUrl+", name: "+request.form.get('eventName'))
+
+# 			resp = make_response(redirect(url_for('splashScreen')))
+# 			resp.set_cookie('eventUrl', '', expires=0)
+# 			return resp
+# 	# GET method means user is here for first time, allow to check Url availability:
+# 	else:
+# 		return render_template('deleteEvent.html', firstname=_firstname, firstTime=True)
 
 
 @app.route('/validateEmail')
