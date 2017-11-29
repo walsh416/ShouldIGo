@@ -9,3 +9,5 @@
 !.elasticbeanstalk/*.global.yml
 .DS_Store
 *.zip
+config.py
+config.py
