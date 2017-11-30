@@ -253,6 +253,11 @@ def createEvent():
             print("Printing Date Filter")
             print(dateFilter)
 
+            if eventName is None or eventDesc is None:
+                # return "Please fill in all fields!"
+                # TODO: should actually be done in javascript, because here it's buried in a post method and yeah.
+                pass
+
             event = db_h.Event_alch(url=eventUrl, name=eventName, desc=eventDesc)
             db_h.alch_db.session.add(event)
             db_h.alch_db.session.commit()

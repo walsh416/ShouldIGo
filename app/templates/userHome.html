@@ -22,60 +22,64 @@
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <!-- <a class="nav-link" href="userEvents.html">My Events<span class="sr-only">(current)</span></a> -->
-                    <!-- TODO: create appRoute call for a /userEvents page -->
-                    <a class="nav-link" href="/userEvents">My Events<span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <!-- <a class="nav-link" href="settings.html">Settings</a> -->
-                    <!-- TODO: are there more settings we want to include than just what's in editUser?
-                    ...probably stuff like email preferences, etc-->
-                    <a class="nav-link" href="/editUser">Settings</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/logout">Log Out</a>
-                </li>
-            </ul>
-            <ul class = "navbar-nav my-2 my-lg-0">
-                <li class="nav=item">
-                    <a class="nav-link" href="/createEvent">+ New Event</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
+                <!-- <li class="nav-item">
+                <!- - <a class="nav-link" href="userEvents.html">My Events<span class="sr-only">(current)</span></a> - ->
+                <!- - TODO: create appRoute call for a /userEvents page - ->
+                <a class="nav-link" href="/userEvents">My Events<span class="sr-only">(current)</span></a>
+            </li> -->
+            <li class="nav-item">
+                <!-- <a class="nav-link" href="settings.html">Settings</a> -->
+                <!-- TODO: are there more settings we want to include than just what's in editUser?
+                ...probably stuff like email preferences, etc-->
+                <a class="nav-link" href="/editUser">Settings</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/logout">Log Out</a>
+            </li>
+        </ul>
+        <ul class = "navbar-nav my-2 my-lg-0">
+            <li class="nav=item">
+                <a class="nav-link" href="/createEvent">+ New Event</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container-fluid" id="splashpagewrapper">
 
     <div class="col" style="padding:0px;">
-      <div class="col-md-4 list-group" style="padding:0px; overflow-y:auto;">
-        <div class="pagelist list-group">
-            {% if followedeventszipped %}
-            Your followed events are:
-            {% for eventName,eventUrl in followedeventszipped %}
-            <!-- <a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %} -->
-            <a href="{{ eventUrl }}" class="list-button list-group-item list-group-item-action">{{ eventName }}</a>
-            {% endfor %}
-            {% endif %}
-            {% if ownedeventszipped %}
-            <!-- Your owned events are: {{ownedeventszipped}}<br> -->
-            Your owned events are:
-            {% for eventName,eventUrl in ownedeventszipped %}
-            <!-- "if not loop.last" just checks if it's the last element, if not it puts in a comma -->
-            <!-- <a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %} -->
-            <!-- <button type="button" class="list-button list-group-item list-group-item-action">{{ eventName }}</button> -->
-            <a href="{{ eventUrl }}" class="list-button list-group-item list-group-item-action">{{ eventName }}</a>
-            {% endfor %}
-            {% endif %}
+        <div class="col-md-4 list-group" style="padding:0px; overflow-y:auto;">
+            <div class="pagelist list-group">
+                {% if followedeventszipped %}
+                Your followed events are:
+                {% for eventName,eventUrl in followedeventszipped %}
+                <!-- <a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %} -->
+                <a href="{{ eventUrl }}" class="list-button list-group-item list-group-item-action">{{ eventName }}</a>
+                {% endfor %}
+                {% endif %}
+                {% if ownedeventszipped %}
+                <!-- Your owned events are: {{ownedeventszipped}}<br> -->
+                Your owned events are:
+                {% for eventName,eventUrl in ownedeventszipped %}
+                <!-- "if not loop.last" just checks if it's the last element, if not it puts in a comma -->
+                <!-- <a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %} -->
+                <!-- <button type="button" class="list-button list-group-item list-group-item-action">{{ eventName }}</button> -->
+                <a href="{{ eventUrl }}" class="list-button list-group-item list-group-item-action">{{ eventName }}</a>
+                {% endfor %}
+                {% endif %}
+
+            </div>
+        </div>
+        <div class="col-md-8">
 
         </div>
-      </div>
-      <div class="col-md-8">
-          
-      </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
 
 </body>
 

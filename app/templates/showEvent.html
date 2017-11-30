@@ -51,11 +51,11 @@ You own this event! Click below to edit it:
 
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-            <!-- <a class="nav-link" href="userEvents.html">My Events<span class="sr-only">(current)</span></a> -->
-            <!-- TODO: create appRoute call for a /userEvents page -->
+          <!-- <li class="nav-item">
+            <!- - <a class="nav-link" href="userEvents.html">My Events<span class="sr-only">(current)</span></a> - ->
+            <!- - TODO: create appRoute call for a /userEvents page - ->
             <a class="nav-link" href="/userEvents">My Events<span class="sr-only">(current)</span></a>
-          </li>
+          </li> -->
           <li class="nav-item">
             <!-- <a class="nav-link" href="settings.html">Settings</a> -->
             <!-- TODO: are there more settings we want to include than just what's in editUser?
@@ -77,20 +77,19 @@ You own this event! Click below to edit it:
 	<div class="container-fluid" id="splashpagewrapper">
 
         <h1>{{eventName}}</h1>
-        This is your event!<br>
-        Here is its description:<br><br>
         {{eventDesc}}<br><br>
-        <a href="/">Return</a><br><br><br>
+        <!-- <a href="/">Return</a><br><br><br> -->
         {% if userLoggedIn == true %}
         {% if subscribed == false %}
+        Click below to follow this event!
         <form method = "POST">
-          <input type="submit" name="follow" value="Follow this event">
+          <input type="submit" name="follow" value="Follow this event" class="btn btn-primary">
         </form>
         {% else %}
         <!-- TODO: some way to unfollow? -->
         You already follow this event!
         <form method = "POST">
-          <input type="submit" name="unfollow" value="Unfollow this event">
+          <input type="submit" name="unfollow" value="Unfollow this event" class="btn btn-primary">
         </form>
         {% endif %}
         {% endif %}
