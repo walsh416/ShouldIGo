@@ -249,6 +249,7 @@ def createEvent():
             eventName = request.form.get('eventName')
             eventDesc = request.form.get('eventDesc')
             dateFilter = request.form.get('datefilter')
+            # TODO: do something with this... duh.
             print("Printing Date Filter")
             print(dateFilter)
 
