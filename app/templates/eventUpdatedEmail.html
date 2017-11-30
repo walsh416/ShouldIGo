@@ -1,0 +1,14 @@
+<html>
+<head>
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}" />
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+<body>
+<p>Dear {{ firstname }},</p>
+<p>{{ eventname }} has been updated!  Click below to view it!</p>
+<p><a href={{ url_for("showEvent", eventUrl=eventUrl, _external=True )}}>Click me!</a></p>
+<p>Love always,<br>
+  <a href={{ url_for("splashScreen", _external=True)}}>ConsiderA.party</a> support team
+</p>
+</body>
+</html>

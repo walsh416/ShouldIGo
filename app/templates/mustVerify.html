@@ -2,36 +2,45 @@
 <head>
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}" />
 <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-
 </head>
 <body>
-<h1>Let's create an event, {{firstname}}!</h1>
-{% if UrlInUse == false %}
-{{eventUrl}} is not in use, set up the rest of your event!
-<form method = "POST">
-Event name:<br>
-<input type="text" name="eventName"><br>
-<!- - textarea can't be self-closing, so needs separate closing tag: - ->
-Enter a description of your event:<br>
-<textarea rows="5" cols="40" name="eventDesc"></textarea><br>
-<input type="submit"  value="Create">
-</form>
+<h1>Welcome, {{firstname}}!</h1>
+{% if resentValidationEmail == 'True' %}
+Just resent your validation email! Check your inbox.<br><br>
+{% endif %}
+Your username is {{username}}<br>
+And your full name is {{firstname}} {{lastname}}<br>
+I'd show you your hashed password, but then I'd have to kill you.<br>
+<br>
+{% if not verified %}
+You have not yet verified your email!  Click below to resend a validation email:<br>
+<a href={{ url_for("resendValidationEmail")}}>Validate Email</a><br>
+After validating, then you can start creating and following events!
 {% else %}
-{% if firstTime == true %}
-First, pick a unique event Url:<br>
-{% elif UrlInUse == true %}
-Sorry, that Url is already in use! Try another one:<br>
-{% elif badUrl == true %}
-Sorry, please only use letters, numbers, dashes, and underscores in your url!<br>
+{% if followedeventszipped %}
+These are the events you follow:
+{% for eventName,eventUrl in followedeventszipped %}
+<a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %}
+{% endfor %}<br>
+{% else %}
+You do not currently follow any events, explore to find ones you like!<br>
 {% endif %}
-<form method = "POST">
-<input type="text" name="eventUrl"><br>
-<input type="submit" value="Check Url">
-</form>
+{% if ownedeventszipped %}
+Your owned events are:
+{% for eventName,eventUrl in ownedeventszipped %}
+<!- - "if not loop.last" just checks if it's the last element, if not it puts in a comma - ->
+<a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %}
+{% endfor %}<br>
+{% else %}
+You do not currently own any events! Click below to make some!<br>
 {% endif %}
+<br>
+<a href="/createEvent">Create a new event!</a><br>
+{% endif %}
+<a href="/editUser">Edit my user information<br>
+<a href="/logout">Log out</a>
 </body>
 </html> -->
-
 
 <html>
 
@@ -47,7 +56,7 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
 </head>
 
 <body>
-    <title>Create Event - Should I Go?</title>
+    <title>Home - Should I Go?</title>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <!-- <a class="navbar-brand" href="#">Home</a> -->
         <a class="navbar-brand" href="/">Home</a>
@@ -80,33 +89,14 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
         </div>
     </nav>
 
-
-    <h1 class="text-center">CREATE EVENT</h1>
-    {% if UrlInUse == false %}
-    {{eventUrl}} is not in use, set up the rest of your event!
-    <form method = "POST">
-        Event name:<br>
-        <input type="text" name="eventName"><br>
-        Enter a description of your event:<br>
-        <!-- <textarea rows="5" cols="40" name="eventDesc"></textarea><br> -->
-        <input type="text" name="eventDesc">
-        <input type="submit" class="btn btn-primary" value="Create">
-    </form>
-    {% else %}
-    {% if firstTime == true %}
-    First, pick a unique event Url:<br>
-    {% elif UrlInUse == true %}
-    Sorry, that Url is already in use! Try another one:<br>
-    {% elif badUrl == true %}
-    Sorry, please only use letters, numbers, dashes, and underscores in your url!<br>
+    <h1>Welcome, {{firstname}}!</h1>
+    {% if resentValidationEmail == 'True' %}
+    Just resent your validation email! Check your inbox.<br><br>
     {% endif %}
-    <form method = "POST">
-        <input type="text" name="eventUrl"><br>
-        <input type="submit" class="btn btn-primary" value="Check URL">
-    </form>
-    {% endif %}
-
-    <a href="/" class="btn btn-secondary">Cancel</a>
+    <br>
+    You have not yet verified your email!  Click below to resend a validation email:<br>
+    <a href={{ url_for("resendValidationEmail")}}>Validate Email</a><br>
+    After validating, then you can start creating and following events!
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>

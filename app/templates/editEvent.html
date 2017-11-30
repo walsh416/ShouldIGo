@@ -47,7 +47,7 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
 </head>
 
 <body>
-    <title>Create Event - Should I Go?</title>
+    <title>Edit {{ eventName }} - Should I Go?</title>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <!-- <a class="navbar-brand" href="#">Home</a> -->
         <a class="navbar-brand" href="/">Home</a>
@@ -81,32 +81,18 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
     </nav>
 
 
-    <h1 class="text-center">CREATE EVENT</h1>
-    {% if UrlInUse == false %}
-    {{eventUrl}} is not in use, set up the rest of your event!
+    <h1 class="text-center">Edit EVENT</h1>
     <form method = "POST">
         Event name:<br>
-        <input type="text" name="eventName"><br>
+        <input type="text" name="eventName" value="{{ eventName }}"><br>
         Enter a description of your event:<br>
         <!-- <textarea rows="5" cols="40" name="eventDesc"></textarea><br> -->
-        <input type="text" name="eventDesc">
-        <input type="submit" class="btn btn-primary" value="Create">
+        <input type="text" name="eventDesc" value="{{ eventDesc }}">
+        <input type="submit" class="btn btn-primary" value="Save" name="save">
     </form>
-    {% else %}
-    {% if firstTime == true %}
-    First, pick a unique event Url:<br>
-    {% elif UrlInUse == true %}
-    Sorry, that Url is already in use! Try another one:<br>
-    {% elif badUrl == true %}
-    Sorry, please only use letters, numbers, dashes, and underscores in your url!<br>
-    {% endif %}
-    <form method = "POST">
-        <input type="text" name="eventUrl"><br>
-        <input type="submit" class="btn btn-primary" value="Check URL">
-    </form>
-    {% endif %}
 
-    <a href="/" class="btn btn-secondary">Cancel</a>
+    <!-- <a href="/" class="btn btn-secondary">Cancel</a> -->
+    <a href={{ url_for("showEvent", eventUrl=eventUrl, _external=True )}} class="btn btn-secondary">Cancel</a>
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>

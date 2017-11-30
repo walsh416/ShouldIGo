@@ -1,12 +1,18 @@
 
-from flask import Flask
+from flask import Flask, render_template
 import hashlib, os
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail, Message
+from threading import Thread
+
+
 
 application = Flask(__name__)
 application.config.from_object('config')
 
 alch_db = SQLAlchemy(application)
+
+mail = Mail(application)
 
 def get_x_randoms(x):
     return str(hashlib.md5(os.urandom(64).encode("base-64")).hexdigest())[:x]
@@ -15,6 +21,13 @@ def get_x_randoms(x):
 def hash_pass(rawpassword):
     h = hashlib.md5(rawpassword.encode())
     return str(h.hexdigest())
+
+# takes in an email message to send, and sends it on a separate thread so main process doesn't hang
+def send_async_email(application, msg):
+    with application.app_context():
+        # print "about to send email"
+        mail.send(msg)
+        # print "sent email"
 
 class User_alch(alch_db.Model):
     __tablename__="users"
@@ -75,6 +88,38 @@ class User_alch(alch_db.Model):
                 nameList.append(event.eventName)
         return nameList
 
+    def ownsEventUrl(self, urlIn):
+        urlList = self.ownedEventsCSV.split(",")
+        for url in urlList:
+            if urlIn == url:
+                return True
+        return False
+
+    def followsEventUrl(self, urlIn):
+        urlList = self.followedEventsCSV.split(",")
+        for url in urlList:
+            if urlIn == url:
+                return True
+        return False
+
+    def unownEvent(self, url):
+        eventList = self.ownedEventsCSV.split(",")
+        toSet = ""
+        for event in eventList:
+            if event != url:
+                if event != "":
+                    toSet += (event+",")
+        self.ownedEventsCSV = toSet
+
+    def unfollowEvent(self, url):
+        eventList = self.followedEventsCSV.split(",")
+        toSet = ""
+        for event in eventList:
+            if event != url:
+                if event != "":
+                    toSet += (event+",")
+        self.followedEventsCSV = toSet
+
 def usernameAvail(usernameIn):
     user_count = User_alch.query.filter_by(username=usernameIn).count()
     if user_count==0:
@@ -97,6 +142,32 @@ class Event_alch(alch_db.Model):
         self.eventName = name
         self.eventDesc = desc
         self.followers = ""
+
+    def unfollowUser(self, username):
+        userList = self.followers.split(",")
+        toSet = ""
+        for user in userList:
+            if user != username:
+                if user != "":
+                    toSet += (user+",")
+        self.followers = toSet
+
+    # To be called when an event is edited/updated
+    def sendEmailToFollowers(self):
+        userList = self.followers.split(",")
+        for user in userList:
+            usr = User_alch.query.filter_by(username=user).first()
+            if usr is not None:
+                msg = Message(
+                        '%s has been updated!' % self.eventName,
+                        sender='timsemailforlols@google.com',
+                        recipients=[usr.email]
+                        )
+                msg.body = render_template("eventUpdatedEmail.txt", firstname=usr.firstname, eventname=self.eventName, eventurl=self.eventUrl)
+                msg.html = render_template("eventUpdatedEmail.html", firstname=usr.firstname, eventname=self.eventName, eventurl=self.eventUrl)
+                # TODO: currently, this starts a new thread for each user.  Should it instead start one new thread, and iterate through users there?  Basically, what happens if there are 100 users?  Will it currently try to start 100 threads, choke, and die?  (Total immediacy of the emails is also less important here than in the verification section)
+                thr = Thread(target=send_async_email, args=[application, msg])
+                thr.start()
 
 def eventUrlAvail(urlIn):
     event_count = Event_alch.query.filter_by(eventUrl=urlIn).count()
