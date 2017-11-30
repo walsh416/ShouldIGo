@@ -248,6 +248,9 @@ def createEvent():
             eventUrl = request.cookies.get('eventUrl')
             eventName = request.form.get('eventName')
             eventDesc = request.form.get('eventDesc')
+            dateFilter = request.form.get('datefilter')
+            print("Printing Date Filter")
+            print(dateFilter)
 
             event = db_h.Event_alch(url=eventUrl, name=eventName, desc=eventDesc)
             db_h.alch_db.session.add(event)
