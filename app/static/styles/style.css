@@ -21,6 +21,14 @@ p {
   font-size: 16px;
 }
 
+.list-button{
+  min-height: 50px;
+  height: 50px;
+  border-radius: 0px !important;
+  text-align: center;
+  outline:none !important;
+}
+
 .button {
     background-color: #253466; /*main color*/
     border: none;
@@ -74,6 +82,10 @@ p {
 .form-control:focus{
   box-shadow: none !important;
   border: 0 none;
+}
+
+.pagelist{
+  height:91.5%;
 }
 
 /*FONT SCHEME */

@@ -1,47 +1,3 @@
-<!-- <html>
-<head>
-<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}" />
-<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-</head>
-<body>
-<h1>Welcome, {{firstname}}!</h1>
-{% if resentValidationEmail == 'True' %}
-Just resent your validation email! Check your inbox.<br><br>
-{% endif %}
-Your username is {{username}}<br>
-And your full name is {{firstname}} {{lastname}}<br>
-I'd show you your hashed password, but then I'd have to kill you.<br>
-<br>
-{% if not verified %}
-You have not yet verified your email!  Click below to resend a validation email:<br>
-<a href={{ url_for("resendValidationEmail")}}>Validate Email</a><br>
-After validating, then you can start creating and following events!
-{% else %}
-{% if followedeventszipped %}
-These are the events you follow:
-{% for eventName,eventUrl in followedeventszipped %}
-<a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %}
-{% endfor %}<br>
-{% else %}
-You do not currently follow any events, explore to find ones you like!<br>
-{% endif %}
-{% if ownedeventszipped %}
-Your owned events are:
-{% for eventName,eventUrl in ownedeventszipped %}
-<!- - "if not loop.last" just checks if it's the last element, if not it puts in a comma - ->
-<a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %}
-{% endfor %}<br>
-{% else %}
-You do not currently own any events! Click below to make some!<br>
-{% endif %}
-<br>
-<a href="/createEvent">Create a new event!</a><br>
-{% endif %}
-<a href="/editUser">Edit my user information<br>
-<a href="/logout">Log out</a>
-</body>
-</html> -->
-
 <html>
 
 <head>
@@ -88,19 +44,29 @@ You do not currently own any events! Click below to make some!<br>
         </div>
     </nav>
 
-    <h1>Welcome, {{firstname}}!</h1>
-    {% if resentValidationEmail == 'True' %}
-    Just resent your validation email! Check your inbox.<br><br>
-    {% endif %}
-    Your username is {{username}}<br>
-    And your full name is {{firstname}} {{lastname}}<br>
-    I'd show you your hashed password, but then I'd have to kill you.<br>
-    <br>
-    {% if not verified %}
-    You have not yet verified your email!  Click below to resend a validation email:<br>
-    <a href={{ url_for("resendValidationEmail")}}>Validate Email</a><br>
-    After validating, then you can start creating and following events!
-    {% endif %}
+    <div class="col" style="padding:0px;">
+      <div class="col-md-4 list-group" style="padding:0px; overflow-y:auto;">
+        <div class="pagelist list-group">
+          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
+          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
+          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
+          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
+          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
+          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
+          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
+          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
+          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
+          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
+          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
+          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
+          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
+          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
+
+        </div>
+      </div>
+      <div class="col-md-8">
+      </div>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
