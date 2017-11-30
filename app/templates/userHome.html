@@ -48,24 +48,28 @@
     <div class="col" style="padding:0px;">
       <div class="col-md-4 list-group" style="padding:0px; overflow-y:auto;">
         <div class="pagelist list-group">
-          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
-          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
-          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
-          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
-          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
-          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
-          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
-          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
-          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
-          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
-          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
-          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
-          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
-          <button type="button" class="list-button list-group-item list-group-item-action"> EVENT 1 </button>
+            {% if followedeventszipped %}
+            Your followed events are:
+            {% for eventName,eventUrl in followedeventszipped %}
+            <!-- <a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %} -->
+            <a href="{{ eventUrl }}" class="list-button list-group-item list-group-item-action">{{ eventName }}</a>
+            {% endfor %}
+            {% endif %}
+            {% if ownedeventszipped %}
+            <!-- Your owned events are: {{ownedeventszipped}}<br> -->
+            Your owned events are:
+            {% for eventName,eventUrl in ownedeventszipped %}
+            <!-- "if not loop.last" just checks if it's the last element, if not it puts in a comma -->
+            <!-- <a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %} -->
+            <!-- <button type="button" class="list-button list-group-item list-group-item-action">{{ eventName }}</button> -->
+            <a href="{{ eventUrl }}" class="list-button list-group-item list-group-item-action">{{ eventName }}</a>
+            {% endfor %}
+            {% endif %}
 
         </div>
       </div>
       <div class="col-md-8">
+          
       </div>
     </div>
 
