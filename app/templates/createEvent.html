@@ -137,11 +137,22 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
                     Event name:<br>
                     <input type="text" name="eventName" size=22><br>
                     Enter a description of your event:<br>
+                <form method = "POST">
+                    <!-- Event name:<br> -->
+                    <!-- TODO: make this not ugly and mismatched... -->
+                    Pick an event name: <br>
+                    <input type="text" name="eventName" placeholder="Event name"><br>
+                    <!-- Enter a description of your event:<br> -->
                     <!-- <textarea rows="5" cols="40" name="eventDesc"></textarea><br> -->
-                    <input type="text" name="eventDesc" size==22><br>
+                    <!-- <input type="text" name="eventDesc" size==22><br> -->
+                    Enter your event's description:<br>
+                    <!-- TODO: can add "required" (without quotes) to end of textarea declaration to force input, but it only works for textarea,
+                                    not input text as well (so it doesn't work with event name).  Instead need some sort of ajaxy thing, probably-->
+                    <textarea class="form-control" name="eventDesc" rows="3" placeholder="Event description"></textarea>
                     What time do you want your event to be active?<br>
                     <input type="text" name="datefilter" value="" size=22/><br>
                     <input type="submit" class="btn btn-primary" value="Create">
+                    <a href="/" class="btn btn-secondary">Cancel</a>
                 </form>
                 {% else %}
                 {% if firstTime == true %}
@@ -155,10 +166,11 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
                     <input type="text" name="eventUrl"><br>
                     <div style="height:3px;"></div>
                     <input type="submit" class="btn btn-primary" value="Check URL">
+                    <a href="/" class="btn btn-secondary">Cancel</a>
                 </form>
                 {% endif %}
 
-                <a href="/" class="btn btn-secondary">Cancel</a>
+                <!-- <a href="/" class="btn btn-secondary">Cancel</a> -->
             </div>
         </div>
     </div>
