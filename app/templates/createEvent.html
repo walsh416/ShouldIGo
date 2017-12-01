@@ -49,6 +49,41 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
 
     <style>
     </style>
+
+                <script type='text/javascript'>
+                    function checkFields() {
+                     
+                    var flag = 1;
+                     
+                    if(document.getElementsByName('eventName')[0].value.replace(/\s/g,"") == "")
+                    {
+                    alert('Please fill out an Event Name!');
+                    return false;
+                    };
+                     
+                    if(document.getElementsByName('eventDesc')[0].value.replace(/\s/g,"") == "") {
+                    alert('Please fill out an event description!');
+                    return false;
+                    };
+                     
+                    if(document.getElementsByName('datefilter')[0].value.replace(/\s/g,"") == "") {
+                    alert('Please fill out dates!');
+                    return false;
+                    };
+                     
+                    if(flag == 0) {
+                    return false;
+                    } else {
+                    return true;
+                    };
+                     
+                    };
+            </script>
+
+
+
+
+
 </head>
 
 <body>
@@ -98,7 +133,7 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
 
                 {% if UrlInUse == false %}
                 {{eventUrl}} is not in use, set up the rest of your event!
-                <form method = "POST">
+                <form method = "POST" onsubmit='if(checkFields()) {} else { return false; };'>
                     Event name:<br>
                     <input type="text" name="eventName" size=22><br>
                     Enter a description of your event:<br>
