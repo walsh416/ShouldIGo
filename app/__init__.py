@@ -432,6 +432,7 @@ def showEvent(eventUrl):
             evnt = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
             evnt.eventName=new_eventName
             evnt.eventDesc=new_eventDesc
+            evnt.clearRsvps()
             db_h.alch_db.session.commit()
             evnt.sendEmailToFollowers()
         if request.form.get('unfollow') and usr.followsEventUrl(eventUrl):
