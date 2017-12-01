@@ -46,7 +46,26 @@
 </nav>
 
 <div class="container-fluid" id="splashpagewrapper">
+    {% if verified == false %}
+    <div class="container" id="titlewrapper">
+        <br>
+        <h1 class="text-center" id="maintitle">Welcome, {{ firstname }}!</h1>
 
+        <div class="container">
+            <div class="form-group">
+                <!-- <h1>Welcome, {{firstname}}!</h1> -->
+                {% if resentValidationEmail == 'True' %}
+                Just resent your validation email! Check your inbox.<br><br>
+                {% endif %}
+                <br>
+                You have not yet verified your email!  Click below to resend a validation email:<br>
+                <a href={{ url_for("resendValidationEmail")}}>Validate Email</a><br><br>
+                After validating, then you can start creating and following events!
+
+            </div>
+        </div>
+    </div>
+    {% elif (followedeventszipped or ownedeventszipped) %}
     <div class="col" style="padding:0px;">
         <div class="col-md-4 list-group" style="padding:0px; overflow-y:auto;">
             <div class="pagelist list-group">
@@ -74,6 +93,21 @@
 
         </div>
     </div>
+    {% else %}
+    <div class="container" id="titlewrapper">
+        <br>
+        <h1 class="text-center" id="maintitle">Welcome, {{ firstname }}!</h1>
+
+        <div class="container">
+            <div class="form-group">
+                <!-- <h1>Welcome, {{firstname}}!</h1> -->
+                You do not yet own or follow any events!<br>
+                Click <a href="/createEvent">+ New Event</a> in the top right to get started.
+
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
 </div>
 

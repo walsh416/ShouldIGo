@@ -44,11 +44,14 @@ def send_async_email(application, msg):
         # print "sent email"
 
 
-# NOTE: 11/27/17: changed what template this renders, now it just goes to login.html,
+# NOTE: 11/27/17: changed what template this renders, now it just goes to login.html or userhome.html,
 #           and splashScreen.html is never touched.  I think.
 # default/index page
 @application.route("/", methods=["GET","POST"])
 def splashScreen():
+    # TODO: if they don't follow or own any events, but have validated their email, then this
+    #           screen is just blank with the navbar at the top.  That's sad.
+    #           Instead, it'd be dope to at least have
     resentValidationEmail=False
     if request.args.get('resentValidationEmail') is not None:
         resentValidationEmail = request.args.get('resentValidationEmail')
@@ -61,7 +64,8 @@ def splashScreen():
         usr = db_h.User_alch.query.filter_by(username=_username).first()
         if usr.verifiedEmail!="0":
             session['username'] = usr.username
-            resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
+            # resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
+            resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
             return resp
         # retrieve list of names of events based on their URLs
         _ownedEventsList = usr.getListOfOwnedEventNames()
@@ -146,7 +150,7 @@ def register():
 
             # checking valid email against regexp for it
             _userEmail = request.form.get('email')
-            validEmailBool = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', _userEmail)
+            validEmailBool = re.match('^[_a-z0-9-\+]+(\.[_a-z0-9-\+]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', _userEmail)
             if validEmailBool == None:
                 return render_template('register.html', badEmail=True)
 
