@@ -106,7 +106,8 @@ def splashScreen():
         if usr.verifiedEmail!="0":
             # resentValidationEmail didn't work in the UserHome template unless it was a string variable, not sure why...
             session['username'] = usr.username
-            resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
+            resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
+            # resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
             return resp
         # otherwise, password was good, so user can log in and redirect to welcome screen:
         resp = make_response(redirect(url_for('splashScreen')))
@@ -223,7 +224,8 @@ def createEvent():
     if usr.verifiedEmail!="0":
         # resentValidationEmail didn't work in the UserHome template unless it was a string variable, not sure why...
         session['username'] = usr.username
-        resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
+        resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
+        # resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
         return resp
 
     # POST method implies data being passed, trying to create event:
@@ -397,7 +399,8 @@ def userEvents():
     usr = db_h.User_alch.query.filter_by(username=_username).first()
     if usr.verifiedEmail!="0":
         session['username'] = usr.username
-        resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
+        resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
+        # resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
         return resp
     return render_template('userEvents.html')
 

@@ -12,9 +12,11 @@ MAIL_USE_TLS=False
 # MAIL_PORT=587,
 # MAIL_USE_SSL=False,
 # MAIL_USE_TSL=True,
-MAIL_USERNAME = 'timsemailforlols@gmail.com'
+# MAIL_USERNAME = 'timsemailforlols@gmail.com'
+MAIL_USERNAME = 'shouldigotoday@gmail.com'
 # Random one-off passphrase from Google
-MAIL_PASSWORD = 'vqlavnjpsmsytbtx'
+# MAIL_PASSWORD = 'vqlavnjpsmsytbtx'
+MAIL_PASSWORD = 'defaropdhempnyun'
 
 # Needed to enable session storage
 SECRET_KEY = "}M\xfc;.\xa0?\x99\xbb;\xe8\x96\xca7\x04\xc2K\x06\xb1\xc0JOeoE\xd9\xddz\x81\x16\xa1\x00"
