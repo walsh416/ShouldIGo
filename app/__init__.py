@@ -488,8 +488,23 @@ def showEvent(eventUrl):
             db_h.alch_db.session.commit()
             return redirect(url_for('splashScreen'))
         going = event.getUsersRSVP(usr.username)
-        print "going = "+going
-        return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner, going=going)
+        yesUsers=[]
+        for username in event.yesGoingCSV.split(","):
+            if username is not None and username != "":
+                user = db_h.User_alch.query.filter_by(username=username).first()
+                yesUsers.append(user.firstname+" "+user.lastname)
+        maybeUsers=[]
+        for username in event.maybeGoingCSV.split(","):
+            if username is not None and username != "":
+                user = db_h.User_alch.query.filter_by(username=username).first()
+                maybeUsers.append(user.firstname+" "+user.lastname)
+        noUsers=[]
+        for username in event.noGoingCSV.split(","):
+            if username is not None and username != "":
+                user = db_h.User_alch.query.filter_by(username=username).first()
+                noUsers.append(user.firstname+" "+user.lastname)
+
+        return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner, going=going, yesUsers=yesUsers, maybeUsers=maybeUsers, noUsers=noUsers)
 
 
     # eventUrl is avail, so event does not exist.  Redirect to splashScreen
@@ -501,7 +516,6 @@ def showEvent(eventUrl):
     #           newlines, which 'style="white-space: pre-wrap;"' takes care of in the HTML
     # prettyEventDesc = event.eventDesc.replace("\r\n","<br>\n")
     # print "print repr(prettyEventDesc) : "+repr(prettyEventDesc)
-    # TODO: also add textarea stuff from create event to edit event
     return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner)
     # return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=prettyEventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner)
 

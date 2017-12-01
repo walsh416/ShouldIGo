@@ -109,6 +109,28 @@ You own this event! Click below to edit it:
                 <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-secondary">Not Going</a>
             </div></p>
         {% endif %}
+        {% if yesUsers %}
+        Yes users:
+        {% for user in yesUsers %}
+        {{ user }}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+        <br>
+        {% endif %}
+        {% if maybeUsers %}
+        Maybe users:
+        {% for user in maybeUsers %}
+        {{ user }}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+        <br>
+        {% endif %}
+        {% if noUsers %}
+        No users:
+        {% for user in noUsers %}
+        {{ user }}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+        <br>
+        {% endif %}
+
         {% if subscribed == false %}
         Click below to follow this event!
         <form method = "POST">
