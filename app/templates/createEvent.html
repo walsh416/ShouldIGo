@@ -133,16 +133,19 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
 
                 {% if UrlInUse == false %}
                 {{eventUrl}} is not in use, set up the rest of your event!
+
                 <form method = "POST" onsubmit='if(checkFields()) {} else { return false; };'>
                     Event name:<br>
                     <input type="text" name="eventName" size=22><br>
                     Enter a description of your event:<br>
+
                 <form method = "POST">
                     <!-- Event name:<br> -->
                     <!-- TODO: make this not ugly and mismatched... -->
                     Pick an event name: <br>
                     <input type="text" name="eventName" placeholder="Event name"><br>
                     <!-- Enter a description of your event:<br> -->
+
                     <!-- <textarea rows="5" cols="40" name="eventDesc"></textarea><br> -->
                     <!-- <input type="text" name="eventDesc" size==22><br> -->
                     Enter your event's description:<br>
