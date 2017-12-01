@@ -95,9 +95,9 @@ You own this event! Click below to edit it:
         {% endif %}
         {% endif %}
         {% if owner==true %}
-        You own this event! Click below to edit it:
+        You own this event! Click below to edit or delete it:
         <p><a href={{ url_for("showEvent", eventUrl=eventUrl, wantsToEdit="True", _external=True )}} class="btn btn-primary">Edit</a>
-        <a href={{ url_for("showEvent", eventUrl=eventUrl, wantsToDelete="True", _external=True )}} class="btn btn-primary">Delete</a>
+        <a href={{ url_for("showEvent", eventUrl=eventUrl, wantsToDelete="True", _external=True )}} class="btn btn-primary" style="background-color: red;border-color: red;">Delete</a>
         </p>
 
         <!-- <form method = "POST">
