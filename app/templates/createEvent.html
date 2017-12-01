@@ -90,7 +90,8 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
                 <div class="container" id="eventform">
                     <div class="form-group">
 
-                        {% if UrlInUse == false %} {{eventUrl}} is not in use, set up the rest of your event!
+                        {% if UrlInUse == false %}
+                        {{eventUrl}} is not in use, set up the rest of your event!
                         <form method="POST">
                             <!-- Event name:<br> -->
                             <!-- TODO: make this not ugly and mismatched... -->
@@ -102,22 +103,20 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
                             Enter your event's description:<br>
                             <!-- TODO: can add "required" (without quotes) to end of textarea declaration to force input, but it only works for textarea,
                                     not input text as well (so it doesn't work with event name).  Instead need some sort of ajaxy thing, probably-->
-                            <textarea class="form-control" name="eventDesc" rows="3" placeholder="Event description"></textarea> What time do you want your event to be active?<br>
+                            <!-- <textarea class="form-control" name="eventDesc" rows="3" placeholder="Event description"></textarea> What time do you want your event to be active?<br>
                             <input type="text" name="datefilter" value="" size=22/><br>
                             <input type="submit" class="btn btn-primary" value="Create">
                         </form>
-                        {% else %} {% if firstTime == true %} First, pick a unique event Url:<br> {% elif UrlInUse == true %} Sorry, that Url is already in use! Try another one:<br> {% elif badUrl == true %} Sorry, please only use letters, numbers, dashes,
-                        and underscores in your url!<br> {% endif %}
                         <form method="POST">
                             <input type="text" name="eventUrl"><br>
                             <div style="height:3px;"></div>
                             <input type="submit" class="btn btn-primary" value="Check URL">
                         </form>
-                        {% endif %}
 
                         <a href="/" class="btn btn-secondary">Cancel</a>
                     </div>
-                </div>
+                </div> -->
+
                     <textarea class="form-control" name="eventDesc" rows="3" placeholder="Event description"></textarea>
                     What time do you want your event to be active?<br>
                     <input type="text" name="datefilter" value="" size=22/><br>
