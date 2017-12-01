@@ -118,6 +118,29 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
                         <a href="/" class="btn btn-secondary">Cancel</a>
                     </div>
                 </div>
+                    <textarea class="form-control" name="eventDesc" rows="3" placeholder="Event description"></textarea>
+                    What time do you want your event to be active?<br>
+                    <input type="text" name="datefilter" value="" size=22/><br>
+                    <input type="submit" class="btn btn-primary" value="Create">
+                    <a href="/" class="btn btn-secondary">Cancel</a>
+                </form>
+                {% else %}
+                {% if firstTime == true %}
+                First, pick a unique event Url:<br>
+                {% elif UrlInUse == true %}
+                Sorry, that Url is already in use! Try another one:<br>
+                {% elif badUrl == true %}
+                Sorry, please only use letters, numbers, dashes, and underscores in your url!<br>
+                {% endif %}
+                <form method = "POST">
+                    <input type="text" name="eventUrl"><br>
+                    <div style="height:3px;"></div>
+                    <input type="submit" class="btn btn-primary" value="Check URL">
+                    <a href="/" class="btn btn-secondary">Cancel</a>
+                </form>
+                {% endif %}
+
+                <!-- <a href="/" class="btn btn-secondary">Cancel</a> -->
             </div>
         </div>
     </div>

@@ -253,6 +253,7 @@ def createEvent():
             eventName = request.form.get('eventName')
             eventDesc = request.form.get('eventDesc')
             dateFilter = request.form.get('datefilter')
+            # TODO: force input in eventName and eventDesc
             # TODO: do something with this... duh.
             print("Printing Date Filter")
             print(dateFilter)
@@ -322,6 +323,10 @@ def resendValidationEmail():
         resp = make_response(redirect(url_for('splashScreen')))
         return resp
 
+    # Allow users to delete their accounts.
+    #
+    # Remove their name from all followersCSV lists for events that they follow, remove their events from all followedEventsCSV lists for users that used to follow their events, delete their events, and then delete their account.
+
 @application.route('/editUser', methods=["GET","POST"])
 def editUser():
     # confirm user is logged in
@@ -338,6 +343,26 @@ def editUser():
     usr = db_h.User_alch.query.filter_by(username=_username).first()
     # GET means that this is the first time here, so show page allowing user to edit their info
     if request.method=="GET":
+        deleteUser = request.args.get('wantsToDelete')
+        if bool(deleteUser):
+            # unfollow all events:
+            for eventUrl in usr.followedEventsCSV.split(","):
+                event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
+                if event is not None:
+                    event.unfollowUser(usr.username)
+            # Remove owned events from other people's followedEventsCSV:
+            for eventUrl in usr.ownedEventsCSV.split(","):
+                event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
+                if event is not None:
+                    for username in event.followers.split(","):
+                        user = db_h.User_alch.query.filter_by(username=username).first()
+                        if user is not None:
+                            user.unfollowEvent(eventUrl)
+                    db_h.alch_db.session.delete(event)
+            # Delete actual user entry
+            db_h.alch_db.session.delete(usr)
+            db_h.alch_db.session.commit()
+            return redirect(url_for('logout'))
         return render_template('editUser.html', firstname=usr.firstname, lastname=usr.lastname, email=usr.email)
     # POST means that the form has already been submitted, time to execute it
     new_firstname=request.form.get('firstname')
@@ -379,6 +404,8 @@ def userEvents():
 # <eventUrl> is a variable that matches with any other URL to check if it's a valid eventUrl
 @application.route("/<eventUrl>", methods=["GET","POST"])
 def showEvent(eventUrl):
+    # TODO: remove deleted event from ownedEventsCSV
+
     # TODO: only have one user object and one event object in here, instead of 18 nested ugly ones because Tim got lazy
     # eventUrl is avail, so event does not exist.  Redirect to splashScreen
     #EVENTURLHADNLING
@@ -440,8 +467,9 @@ def showEvent(eventUrl):
                 followerUser = db_h.User_alch.query.filter_by(username=follower).first()
                 if followerUser is not None:
                     followerUser.unfollowEvent(eventUrl)
-                    followerUser.unownEvent(eventUrl)
+                    # followerUser.unownEvent(eventUrl)
                     db_h.alch_db.session.commit()
+            usr.unownEvent(eventUrl)
             # delete event itself
             db_h.alch_db.session.delete(event)
             db_h.alch_db.session.commit()

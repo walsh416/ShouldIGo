@@ -87,6 +87,67 @@ You own this event! Click below to edit it:
 		<p><a href={{ url_for( "showEvent", eventUrl=eventUrl, wantsToEdit="True" , _external=True )}} class="btn btn-primary">Edit</a>
 			<a href={{ url_for( "showEvent", eventUrl=eventUrl, wantsToDelete="True" , _external=True )}} class="btn btn-primary">Delete</a>
 		</p>
+<body>
+    <title>{{ eventName }} - Should I Go?</title>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <!-- <a class="navbar-brand" href="#">Home</a> -->
+        <a class="navbar-brand" href="/">Home</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+      </button>
+      {% if userLoggedIn == true %}
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <!-- <li class="nav-item">
+            <!- - <a class="nav-link" href="userEvents.html">My Events<span class="sr-only">(current)</span></a> - ->
+            <!- - TODO: create appRoute call for a /userEvents page - ->
+            <a class="nav-link" href="/userEvents">My Events<span class="sr-only">(current)</span></a>
+          </li> -->
+          <li class="nav-item">
+            <!-- <a class="nav-link" href="settings.html">Settings</a> -->
+            <!-- TODO: are there more settings we want to include than just what's in editUser?
+                          ...probably stuff like email preferences, etc-->
+            <a class="nav-link" href="/editUser">Settings</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/logout">Log Out</a>
+          </li>
+        </ul>
+        <ul class = "navbar-nav my-2 my-lg-0">
+          <li class="nav=item">
+            <a class="nav-link" href="/createEvent">+ New Event</a>
+          </li>
+        </ul>
+      </div>
+      {% endif %}
+
+    </nav>
+
+	<div class="container-fluid" id="splashpagewrapper">
+
+        <h1>{{eventName}}</h1>
+        <!-- pre-wrap asks it to render the whitespace exactly as it is in the raw text, so it preserves new lines -->
+        <div style="white-space: pre-wrap;">{{eventDesc}}</div><br><br>
+        <!-- <a href="/">Return</a><br><br><br> -->
+        {% if userLoggedIn == true %}
+        {% if subscribed == false %}
+        Click below to follow this event!
+        <form method = "POST">
+          <input type="submit" name="follow" value="Follow this event" class="btn btn-primary">
+        </form>
+        {% else %}
+        <!-- TODO: some way to unfollow? -->
+        You already follow this event!
+        <form method = "POST">
+          <input type="submit" name="unfollow" value="Unfollow this event" class="btn btn-primary">
+        </form>
+        {% endif %}
+        {% endif %}
+        {% if owner==true %}
+        You own this event! Click below to edit or delete it:
+        <p><a href={{ url_for("showEvent", eventUrl=eventUrl, wantsToEdit="True", _external=True )}} class="btn btn-primary">Edit</a>
+        <!-- <a href={{ url_for("showEvent", eventUrl=eventUrl, wantsToDelete="True", _external=True )}} class="btn btn-primary" style="background-color: red;border-color: red;">Delete</a> -->
+        </p>
 
 		<!-- <form method = "POST">
           <input type="submit" value="Edit">
