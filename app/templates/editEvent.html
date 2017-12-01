@@ -92,10 +92,10 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
 
                 <form method = "POST">
                     Event name:<br>
-                    <input type="text" name="eventName" value="{{ eventName }}"><br>
-                    Enter a description of your event:<br>
-                    <!-- <textarea rows="5" cols="40" name="eventDesc"></textarea><br> -->
-                    <input type="text" name="eventDesc" value="{{ eventDesc }}">
+                    <input type="text" name="eventName" placeholder="Event name" value="{{ eventName }}"><br>
+                    Event description:<br>
+                    <textarea class="form-control" name="eventDesc" rows="3" placeholder="Event description">{{ eventDesc }}</textarea>
+
                     <input type="submit" class="btn btn-primary" value="Save" name="save">
                 </form>
 

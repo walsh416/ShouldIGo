@@ -74,14 +74,14 @@ p {
 /*FORMS*/
 
 .form-control {
-  border-radius: 0px !important;
-  border: 0 none;
+  /*border-radius: 0px !important;*/
+  /*border: 0 none;*/
 }
 
 /* remove the shadow when inmput is focused */
 .form-control:focus{
-  box-shadow: none !important;
-  border: 0 none;
+  /*box-shadow: none !important;
+  border: 0 none;*/
 }
 
 .pagelist{

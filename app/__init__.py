@@ -5,7 +5,7 @@ from flask_mail import Mail, Message
 from flask_sslify import SSLify
 from datetime import datetime, timedelta
 from threading import Thread
-import hashlib, os, re
+import hashlib, os, re, cgi
 import database_handling as db_h
 from database_handling import alch_db
 from flask import abort
@@ -252,6 +252,7 @@ def createEvent():
             # TODO: do something with this... duh.
             print("Printing Date Filter")
             print(dateFilter)
+            print "print repr(eventDesc) : "+repr(eventDesc)
 
             if eventName is None or eventDesc is None:
                 # return "Please fill in all fields!"
@@ -443,7 +444,16 @@ def showEvent(eventUrl):
             return redirect(url_for('splashScreen'))
     # eventUrl is avail, so event does not exist.  Redirect to splashScreen
     event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
+    # print "print repr(eventDesc) : "+repr(event.eventDesc)
+    # TODO: make sure display works nicely for new lines, &, <, >, etc (shitty html stuff)
+    #           But keep \n and whatnot safe in database so can display properly on "edit event"
+    #       ----> pretty sure flask does this all automatically, just need to worry about
+    #           newlines, which 'style="white-space: pre-wrap;"' takes care of in the HTML
+    # prettyEventDesc = event.eventDesc.replace("\r\n","<br>\n")
+    # print "print repr(prettyEventDesc) : "+repr(prettyEventDesc)
+    # TODO: also add textarea stuff from create event to edit event
     return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner)
+    # return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=prettyEventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner)
 
 
 @application.errorhandler(404)

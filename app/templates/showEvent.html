@@ -77,7 +77,8 @@ You own this event! Click below to edit it:
 	<div class="container-fluid" id="splashpagewrapper">
 
         <h1>{{eventName}}</h1>
-        {{eventDesc}}<br><br>
+        <!-- pre-wrap asks it to render the whitespace exactly as it is in the raw text, so it preserves new lines -->
+        <div style="white-space: pre-wrap;">{{eventDesc}}</div><br><br>
         <!-- <a href="/">Return</a><br><br><br> -->
         {% if userLoggedIn == true %}
         {% if subscribed == false %}
