@@ -404,7 +404,9 @@ def userEvents():
 # <eventUrl> is a variable that matches with any other URL to check if it's a valid eventUrl
 @application.route("/<eventUrl>", methods=["GET","POST"])
 def showEvent(eventUrl):
-    # TODO: remove deleted event from ownedEventsCSV
+    # RSVP-ing: Each event has CSVs of usernames that are going, maybe going, and not going.
+    # CSVs are wiped clean when an event is updated (manually or by schedule)
+    # Adding your name to one CSV removes it from the others (can't be both going and not going, ex)
 
     # TODO: only have one user object and one event object in here, instead of 18 nested ugly ones because Tim got lazy
     # eventUrl is avail, so event does not exist.  Redirect to splashScreen
@@ -456,6 +458,17 @@ def showEvent(eventUrl):
         # If owner, and if they hit "edit" button, comes back with GET method for editing, and allows owner to edit it.
         wantsToEdit=request.args.get('wantsToEdit')
         wantsToDelete=request.args.get('wantsToDelete')
+        goingReq=request.args.get('going')
+        if goingReq is not None:
+            # if goingReq=="yes":
+            #     event.rsvp(usr.username, "yes")
+            # elif goingReq=="maybe":
+            #     event.rsvp(usr.username, "maybe")
+            # elif goingReq=="no":
+            #     event.rsvp(usr.username, "no")
+            print "goingReq = "+goingReq
+            event.rsvp(usr.username, goingReq)
+            db_h.alch_db.session.commit()
         if owner and bool(wantsToEdit):
             return render_template('editEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner)
         if owner and bool(wantsToDelete):
@@ -474,6 +487,11 @@ def showEvent(eventUrl):
             db_h.alch_db.session.delete(event)
             db_h.alch_db.session.commit()
             return redirect(url_for('splashScreen'))
+        going = event.getUsersRSVP(usr.username)
+        print "going = "+going
+        return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner, going=going)
+
+
     # eventUrl is avail, so event does not exist.  Redirect to splashScreen
     event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
     # print "print repr(eventDesc) : "+repr(event.eventDesc)

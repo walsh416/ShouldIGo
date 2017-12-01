@@ -83,6 +83,32 @@ You own this event! Click below to edit it:
         <div style="white-space: pre-wrap;">{{eventDesc}}</div><br><br>
         <!-- <a href="/">Return</a><br><br><br> -->
         {% if userLoggedIn == true %}
+        {% if going == "yes" %}
+            <!-- Yes button is blue, others grey/secondary -->
+            <p><div class="btn-group" role="group">
+                <a href={{ url_for("showEvent", eventUrl=eventUrl, going="yes", _external=True )}} class="btn btn-primary">I'm Going</a>
+                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="maybe", _external=True )}} class="btn btn-secondary">Maybe Going</a>
+                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-secondary">Not Going</a>
+            </div></p>
+        {% elif going == "maybe" %}
+            <p><div class="btn-group" role="group">
+                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="yes", _external=True )}} class="btn btn-secondary">I'm Going</a>
+                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="maybe", _external=True )}} class="btn btn-primary">Maybe Going</a>
+                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-secondary">Not Going</a>
+            </div></p>
+        {% elif going == "no" %}
+            <p><div class="btn-group" role="group">
+                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="yes", _external=True )}} class="btn btn-secondary">I'm Going</a>
+                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="maybe", _external=True )}} class="btn btn-secondary">Maybe Going</a>
+                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-primary">Not Going</a>
+            </div></p>
+        {% else %}
+            <p><div class="btn-group" role="group">
+                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="yes", _external=True )}} class="btn btn-secondary">I'm Going</a>
+                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="maybe", _external=True )}} class="btn btn-secondary">Maybe Going</a>
+                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-secondary">Not Going</a>
+            </div></p>
+        {% endif %}
         {% if subscribed == false %}
         Click below to follow this event!
         <form method = "POST">
