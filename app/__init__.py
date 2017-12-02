@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, request, redirect, url_for, make_response, send_from_directory, session, escape
+from flask import Flask, render_template, request, redirect, url_for, make_response, send_from_directory, session, escape, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
 from flask_sslify import SSLify
@@ -8,7 +8,6 @@ from threading import Thread
 import hashlib, os, re, cgi
 import database_handling as db_h
 from database_handling import alch_db
-from flask import abort
 
 application = Flask(__name__)
 
@@ -22,15 +21,7 @@ mail = Mail(application)
 # When running locally, trying to force HTTPS breaks it, so set DEBUG=True
 sslify = SSLify(application)
 
-# TODO: allow deletion of events, user accounts, etc
-# TODO: send email to subscribers when an event is updated (given an event,
-#             figuring out who is subscribed to it is gonna be ugly (searching
-#             through each users CSV or something... ugh))
-# TODO: validate event URLs (no slashes, no periods, etc)
-
-# TODO: can still follow event if email not verified by navigating to its URL
-#           But in user home doesn't show list of followed, shows "sorry, please verify"
-#           Change around event templating to hide follow button until verified
+protectedUrls = ["login","lougout","register","createEvent","validateEmail","editUser"]
 
 # returns datetime object for x days from now (for cookie expiration dates)
 def get_x_daysFromNow(x):
@@ -49,9 +40,6 @@ def send_async_email(application, msg):
 # default/index page
 @application.route("/", methods=["GET","POST"])
 def splashScreen():
-    # TODO: if they don't follow or own any events, but have validated their email, then this
-    #           screen is just blank with the navbar at the top.  That's sad.
-    #           Instead, it'd be dope to at least have
     resentValidationEmail=False
     if request.args.get('resentValidationEmail') is not None:
         resentValidationEmail = request.args.get('resentValidationEmail')
@@ -64,7 +52,6 @@ def splashScreen():
         usr = db_h.User_alch.query.filter_by(username=_username).first()
         if usr.verifiedEmail!="0":
             session['username'] = usr.username
-            # resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
             resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
             return resp
         # retrieve list of names of events based on their URLs
@@ -86,13 +73,10 @@ def splashScreen():
         session['username'] = usr.username
         # send user to userHome with appropriate arguments
         resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, ownedeventszipped=_ownedEventsZipped, followedeventszipped=_followedEventsZipped, verified=True, resentValidationEmail=resentValidationEmail))
-        # (re)set cookie with username to expire 90 days from now
-        # resp.set_cookie('username', _username, expires=get_x_daysFromNow(90))
         return resp
     # POST method means script was sent login data by user:
     if request.method == "POST":
         usr = db_h.User_alch.query.filter_by(username=request.form.get('username')).first()
-        # print usr
         if usr is None:
             session.pop('username', None)
             return render_template('login.html', badUser=True)
@@ -104,10 +88,8 @@ def splashScreen():
 
         # Can't see home screen unless they have verified their email address
         if usr.verifiedEmail!="0":
-            # resentValidationEmail didn't work in the UserHome template unless it was a string variable, not sure why...
             session['username'] = usr.username
             resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
-            # resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
             return resp
         # otherwise, password was good, so user can log in and redirect to welcome screen:
         resp = make_response(redirect(url_for('splashScreen')))
@@ -148,17 +130,14 @@ def register():
             if not db_h.usernameAvail(_userUsername):
                 print _userUsername + " is not available"
                 return render_template('register.html', diffPasswords=False, duplicateUser=True)
-
             # checking valid email against regexp for it
             _userEmail = request.form.get('email')
             validEmailBool = re.match('^[_a-z0-9-\+]+(\.[_a-z0-9-\+]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', _userEmail)
             if validEmailBool == None:
                 return render_template('register.html', badEmail=True)
-
             usr = db_h.User_alch(firstname=request.form.get('firstname'), lastname=request.form.get('lastname'), username=request.form.get('username'), email=request.form.get('email'), rawpassword=(request.form.get('password')))
             db_h.alch_db.session.add(usr)
             db_h.alch_db.session.commit()
-
             msg = Message(
                     'Hello, %s!' % usr.firstname,
                     sender='timsemailforlols@google.com',
@@ -168,7 +147,6 @@ def register():
             msg.html = render_template("registerEmail.html", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
             thr = Thread(target=send_async_email, args=[application, msg])
             thr.start()
-
             session['username'] = usr.username
             # redirect user to splashScreen
             resp = make_response(redirect(url_for('splashScreen')))
@@ -220,14 +198,11 @@ def createEvent():
         session.pop('username', None)
         return redirect(url_for('splashScreen'))
     usr = db_h.User_alch.query.filter_by(username=_username).first()
-
     if usr.verifiedEmail!="0":
         # resentValidationEmail didn't work in the UserHome template unless it was a string variable, not sure why...
         session['username'] = usr.username
         resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
-        # resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
         return resp
-
     # POST method implies data being passed, trying to create event:
     if request.method == "POST":
         # if doesn't have value for eventName, then still trying to pick a Url
@@ -325,10 +300,6 @@ def resendValidationEmail():
         resp = make_response(redirect(url_for('splashScreen')))
         return resp
 
-    # Allow users to delete their accounts.
-    #
-    # Remove their name from all followersCSV lists for events that they follow, remove their events from all followedEventsCSV lists for users that used to follow their events, delete their events, and then delete their account.
-
 @application.route('/editUser', methods=["GET","POST"])
 def editUser():
     # confirm user is logged in
@@ -384,25 +355,25 @@ def editUser():
     # Throw user back to "/" and view the splashScreen/userHome.
     return make_response(redirect(url_for('splashScreen')))
 
-@application.route('/userEvents')
-def userEvents():
-    # TODO: make this not terrible, duh.  (probably pull old code with "zip"ing the CSVs together from the old userHome stuff)
-    if 'username' in session:
-        _username = session['username']
-    else:
-        _username = None
-    if not _username:
-        return redirect(url_for('splashScreen'))
-    # otherwise, pull user data from database:
-    if db_h.usernameAvail(_username):
-        return redirect(url_for('splashScreen'))
-    usr = db_h.User_alch.query.filter_by(username=_username).first()
-    if usr.verifiedEmail!="0":
-        session['username'] = usr.username
-        resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
-        # resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
-        return resp
-    return render_template('userEvents.html')
+# @application.route('/userEvents')
+# def userEvents():
+#     # TODO: make this not terrible, duh.  (probably pull old code with "zip"ing the CSVs together from the old userHome stuff)
+#     if 'username' in session:
+#         _username = session['username']
+#     else:
+#         _username = None
+#     if not _username:
+#         return redirect(url_for('splashScreen'))
+#     # otherwise, pull user data from database:
+#     if db_h.usernameAvail(_username):
+#         return redirect(url_for('splashScreen'))
+#     usr = db_h.User_alch.query.filter_by(username=_username).first()
+#     if usr.verifiedEmail!="0":
+#         session['username'] = usr.username
+#         resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
+#         # resp = make_response(render_template('mustVerify.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False))
+#         return resp
+#     return render_template('userEvents.html')
 
 # <eventUrl> is a variable that matches with any other URL to check if it's a valid eventUrl
 @application.route("/<eventUrl>", methods=["GET","POST"])
@@ -412,20 +383,15 @@ def showEvent(eventUrl):
     # Adding your name to one CSV removes it from the others (can't be both going and not going, ex)
 
     # TODO: only have one user object and one event object in here, instead of 18 nested ugly ones because Tim got lazy
-    # eventUrl is avail, so event does not exist.  Redirect to splashScreen
-    #EVENTURLHADNLING
-    if db_h.eventUrlAvail(eventUrl):
-        #return redirect(url_for('splashScreen'))
-        return abort(404)
 
+    # eventUrl is avail, so event does not exist.  Redirect to splashScreen
+    if db_h.eventUrlAvail(eventUrl):
+        return abort(404)
     # confirm user is logged in
     if 'username' in session:
         _username = session['username']
     else:
         _username = None
-
-    # TODO: any way to reach here without being logged in?  If so, what then?
-    # POST method means user clicked the "follow" button, since it's just a blank form
     if request.method == "POST":
         usr = db_h.User_alch.query.filter_by(username=_username).first()
         evnt = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
@@ -464,12 +430,6 @@ def showEvent(eventUrl):
         wantsToDelete=request.args.get('wantsToDelete')
         goingReq=request.args.get('going')
         if goingReq is not None:
-            # if goingReq=="yes":
-            #     event.rsvp(usr.username, "yes")
-            # elif goingReq=="maybe":
-            #     event.rsvp(usr.username, "maybe")
-            # elif goingReq=="no":
-            #     event.rsvp(usr.username, "no")
             print "goingReq = "+goingReq
             event.rsvp(usr.username, goingReq)
             db_h.alch_db.session.commit()
@@ -507,28 +467,12 @@ def showEvent(eventUrl):
             if username is not None and username != "":
                 user = db_h.User_alch.query.filter_by(username=username).first()
                 noUsers.append(user.firstname+" "+user.lastname)
-
         return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner, going=going, yesUsers=yesUsers, maybeUsers=maybeUsers, noUsers=noUsers)
-
-
-    # eventUrl is avail, so event does not exist.  Redirect to splashScreen
     event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
-    # print "print repr(eventDesc) : "+repr(event.eventDesc)
-    # TODO: make sure display works nicely for new lines, &, <, >, etc (shitty html stuff)
-    #           But keep \n and whatnot safe in database so can display properly on "edit event"
-    #       ----> pretty sure flask does this all automatically, just need to worry about
-    #           newlines, which 'style="white-space: pre-wrap;"' takes care of in the HTML
-    # prettyEventDesc = event.eventDesc.replace("\r\n","<br>\n")
-    # print "print repr(prettyEventDesc) : "+repr(prettyEventDesc)
     return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner)
-    # return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=prettyEventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner)
-
 
 @application.errorhandler(404)
 def page_not_found(e):
-    # TODO: what about like "shouldigo.today/VALID_EVENT_NAME/foo" where it starts off
-    #       validly but then wants a sub-directory or something?
-    #       I don't know what it should do here, but it's something to think about --Tim 11/20
     if 'username' in session:
         _username = session['username']
     else:

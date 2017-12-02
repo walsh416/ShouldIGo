@@ -79,20 +79,6 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
             <h1 class="text-center" id="maintitle">Edit Event</h1>
 
             <div class="container" id="eventform">
-                <div class="form-group">
-
-
-                    <form method="POST">
-                        Event name:<br>
-                        <input type="text" name="eventName" placeholder="Event name" value="{{ eventName }}"><br> Event description:<br>
-                        <textarea class="form-control" name="eventDesc" rows="3" placeholder="Event description">{{ eventDesc }}</textarea>
-
-                        <input type="submit" class="btn btn-primary" value="Save" name="save">
-                    </form>
-
-                    <!-- <a href="/" class="btn btn-secondary">Cancel</a> -->
-                    <a href={{ url_for( "showEvent", eventUrl=eventUrl, _external=True )}} class="btn btn-secondary">Cancel</a>
-                </div>
                 <form method = "POST">
                     Event name:<br>
                     <input type="text" name="eventName" placeholder="Event name" value="{{ eventName }}"><br>
