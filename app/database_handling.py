@@ -5,8 +5,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
 from threading import Thread
 
-
-
 application = Flask(__name__)
 application.config.from_object('config')
 
@@ -248,37 +246,3 @@ def is_EventUrl_in_EventUrlCSV(urlIn, csvIn):
 def killDb():
     alch_db.drop_all()
     alch_db.create_all()
-
-# def killDb():
-#     connectionTemp = mysql.connect()
-#     cursorTemp = connectionTemp.cursor()
-#     ##########################################################
-#     ###### Database notes:
-#     ###### verifiedEmail is initially a 16 character random string.
-#     ######        Once the user has verified their email, it is updated to "0"
-#     ##########################################################
-#     out = '''DROP database IF EXISTS userDb;
-#     CREATE DATABASE userDb;
-#     USE userDb;
-#     CREATE TABLE User(
-#     firstname VARCHAR(50) NOT NULL,
-#     lastname VARCHAR(50) NOT NULL,
-#     username VARCHAR(50) NOT NULL,
-#     password VARCHAR(80) NOT NULL,
-#     salt VARCHAR(80) NOT NULL,
-#     ownedEventsCSV VARCHAR(500),
-#     email VARCHAR(80) NOT NULL,
-#     followedEventsCSV VARCHAR(500),
-#     verifiedEmail VARCHAR(20),
-#     primary key(username)
-#     );
-#     CREATE TABLE Event(
-#     eventUrl VARCHAR(50) NOT NULL,
-#     eventName VARCHAR(200) NOT NULL,
-#     eventDesc VARCHAR(1000) NOT NULL,
-#     followers VARCHAR(1000) NOT NULL,
-#     primary key(eventUrl)
-#     );'''
-#     cursorTemp.execute(out)
-#     connectionTemp.commit()
-#     connectionTemp.close()
