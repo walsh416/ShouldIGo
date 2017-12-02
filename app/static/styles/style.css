@@ -92,6 +92,10 @@ p {
   height:91.5%;
 }
 
+.nav-btn-floor{
+    height: 3px;
+}
+
 /*FONT SCHEME */
 
 @font-face {

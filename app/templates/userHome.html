@@ -11,7 +11,9 @@
     <div class="container main-container">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <!-- <a class="navbar-brand" href="#">Home</a> -->
-            <a class="navbar-brand" href="/"><span class="fa fa-home" style="font-size:1.5em;"></a>
+            <a class="navbar-brand" href="/">
+                <span class="fa fa-home" style="font-size:1.5em;"></span>
+            </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
             </button>
@@ -21,17 +23,20 @@
                     <li class="nav-item">
                         <!-- TODO: are there more settings we want to include than just what's in editUser?
             ...probably stuff like email preferences, etc-->
-                        <a class="nav-link" href="/editUser"><span class="fa fa-user" style="font-size:1.5em;"></span></a>
+                        <a class="nav-link" href="/editUser" data-btn-target="settings-btn-floor"><span class="fa fa-user" style="font-size:1.5em;"></span></a>
+                        <div class="nav-btn-floor bg-dark" id="settings-btn-floor"></div>
                     </li>
                     <li class="nav-item">
                         <!-- <a class="nav-link" href="/logout">Log Out</a> -->
-                        <a class="nav-link" href="/logout"><span class="fa fa-power-off" style="font-size:1.5em;"></span></a>
+                        <a class="nav-link" href="/logout"  data-btn-target="logout-btn-floor"><span class="fa fa-power-off" style="font-size:1.5em;"></span></a>
+                        <div class="nav-btn-floor bg-dark" id="logout-btn-floor"></div>
                     </li>
                 </ul>
                 <ul class="navbar-nav my-2 my-lg-0">
                     <li class="nav-item">
                         <!-- <a class="nav-link" href="/createEvent">+ New Event</a> -->
-                        <a class="nav-link" href="/createEvent"><span class="fa fa-plus" style="font-size:1.5em;"></span></a>
+                        <a class="nav-link" href="/createEvent" data-btn-target="addevent-btn-floor"><span class="fa fa-plus" style="font-size:1.5em;"></span></a>
+                        <div class="nav-btn-floor bg-dark" id="addevent-btn-floor"></div>
                     </li>
                 </ul>
             </div>
@@ -90,6 +95,23 @@
 
         </div>
     </div>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $(".nav-link").mouseenter(function(){
+                $floor = $("#" + $(this).attr('data-btn-target'));
+                $floor.removeClass("bg-dark");
+                $floor.addClass("bg-light");
+            }).mouseleave(function(){
+                $floor = $("#" + $(this).attr('data-btn-target'));
+                $floor.removeClass("bg-light");
+                $floor.addClass("bg-dark");
+            });
+        });
+
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
