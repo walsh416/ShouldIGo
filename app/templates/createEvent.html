@@ -50,35 +50,7 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
     <style>
     </style>
 
-                <script type='text/javascript'>
-                    function checkFields() {
-                     
-                    var flag = 1;
-                     
-                    if(document.getElementsByName('eventName')[0].value.replace(/\s/g,"") == "")
-                    {
-                    alert('Please fill out an Event Name!');
-                    return false;
-                    };
-                     
-                    if(document.getElementsByName('eventDesc')[0].value.replace(/\s/g,"") == "") {
-                    alert('Please fill out an event description!');
-                    return false;
-                    };
-                     
-                    if(document.getElementsByName('datefilter')[0].value.replace(/\s/g,"") == "") {
-                    alert('Please fill out dates!');
-                    return false;
-                    };
-                     
-                    if(flag == 0) {
-                    return false;
-                    } else {
-                    return true;
-                    };
-                     
-                    };
-            </script>
+                <script type='text/javascript' src="{{url_for('static', filename='CheckFields.js')}}"></script>
 
 
 
@@ -133,13 +105,13 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
 
                 {% if UrlInUse == false %}
                 {{eventUrl}} is not in use, set up the rest of your event!
-
+                <!--
                 <form method = "POST" onsubmit='if(checkFields()) {} else { return false; };'>
                     Event name:<br>
                     <input type="text" name="eventName" size=22><br>
-                    Enter a description of your event:<br>
+                    Enter a description of your event:<br> -->
 
-                <form method = "POST">
+                <form method = "POST" onsubmit='if(checkFields()) {} else { return false; }''>
                     <!-- Event name:<br> -->
                     <!-- TODO: make this not ugly and mismatched... -->
                     Pick an event name: <br>
@@ -184,26 +156,7 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
 
 <!-- script for date and time picking-->
-<script type="text/javascript">
-$(function() {
-
-    $('input[name="datefilter"]').daterangepicker({
-        autoUpdateInput: false,
-        locale: {
-            cancelLabel: 'Clear'
-        }
-    });
-
-    $('input[name="datefilter"]').on('apply.daterangepicker', function(ev, picker) {
-        $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-    });
-
-    $('input[name="datefilter"]').on('cancel.daterangepicker', function(ev, picker) {
-        $(this).val('');
-    });
-
-});
-</script>
+<script type="text/javascript" src="{{url_for('static', filename='DateFilter.js')}}"</script>
 
 <!-- Use for time ranges
 <script type="text/javascript">

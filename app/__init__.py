@@ -134,12 +134,12 @@ def register():
     # POST method means data was sent by user
     if request.method == "POST":
         print "in POST method of /register"
-        # check if first password matches second password
+        #check if first password matches second password
         if request.form.get('password') != request.form.get('passwordconfirm'):
             print "Bad pass"
-            # if not, then have them reenter info
+             # if not, then have them reenter info
             return render_template('register.html', diffPasswords=True)
-        # if passwords do match:
+        # # if passwords do match:
         else:
             # try opening connection to database:
             _userUsername = request.form.get('username')
@@ -154,24 +154,24 @@ def register():
             if validEmailBool == None:
                 return render_template('register.html', badEmail=True)
 
-            usr = db_h.User_alch(firstname=request.form.get('firstname'), lastname=request.form.get('lastname'), username=request.form.get('username'), email=request.form.get('email'), rawpassword=(request.form.get('password')))
-            db_h.alch_db.session.add(usr)
-            db_h.alch_db.session.commit()
+        usr = db_h.User_alch(firstname=request.form.get('firstname'), lastname=request.form.get('lastname'), username=request.form.get('username'), email=request.form.get('email'), rawpassword=(request.form.get('password')))
+        db_h.alch_db.session.add(usr)
+        db_h.alch_db.session.commit()
 
-            msg = Message(
-                    'Hello, %s!' % usr.firstname,
-                    sender='timsemailforlols@google.com',
-                    recipients=[usr.email]
-                    )
-            msg.body = render_template("registerEmail.txt", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
-            msg.html = render_template("registerEmail.html", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
-            thr = Thread(target=send_async_email, args=[application, msg])
-            thr.start()
+        msg = Message(
+                'Hello, %s!' % usr.firstname,
+                sender='timsemailforlols@google.com',
+                recipients=[usr.email]
+                )
+        msg.body = render_template("registerEmail.txt", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
+        msg.html = render_template("registerEmail.html", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
+        thr = Thread(target=send_async_email, args=[application, msg])
+        thr.start()
 
-            session['username'] = usr.username
-            # redirect user to splashScreen
-            resp = make_response(redirect(url_for('splashScreen')))
-            return resp
+        session['username'] = usr.username
+        # redirect user to splashScreen
+        resp = make_response(redirect(url_for('splashScreen')))
+        return resp
     # GET method means user is here for the first time or is confirming email address:
     else:
         print "in GET method of /register"
