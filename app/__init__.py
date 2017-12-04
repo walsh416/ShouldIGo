@@ -112,6 +112,93 @@ def logout():
     resp.set_cookie('rememberme', '', expires=0)
     return resp
 
+@application.route("/forgotpassword", methods=["GET","POST"])
+def forgotpassword():
+    # POST method means data was sent by user
+    # return render_template('forgotpassword.html')
+    if request.method == "POST":
+        print "in POST method of /forgotpassword"
+        # checking valid email against regexp for it
+        _userEmail = request.form.get('email')
+
+        validEmailBool = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', _userEmail)
+        if validEmailBool == None:
+            return render_template('forgotpassword.html', badEmail=True)
+        # usr = db_h.User_alch(email=request.form.get('email'))
+        usr = db_h.User_alch.query.filter_by(email=_userEmail).first()
+
+        msg = Message(
+                'Hello, %s!' % usr.firstname,
+                sender='timsemailforlols@google.com',
+                recipients=[request.form.get('email')]
+                )
+        msg.body = render_template("changeforgotpassword.txt", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
+        msg.html = render_template("changeForgotPassword.html", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail )
+        thr = Thread(target=send_async_email, args=[application, msg])          
+        thr.start()
+        resp = make_response(redirect(url_for('splashScreen')))
+        return resp
+    else:
+        print "in GET method of /forgotpassword"
+        # try pulling username and validation code out of GET method
+        # TODO: make sure this all works right on initial registration (maybe surround in try/except or something?)
+        # TODO: what happens if user clicks to verify email twice?  Goes through properly the first time, and then...?
+        #                 Maybe check if username already has validation==1 or not?
+        email=request.args.get('email')
+
+        # TODO: what if the following query returns a NoneType?
+        usr = db_h.User_alch.query.filter_by(email=email).first()
+
+        print "returning bottom render_template(forgotpassword.html)"
+        return render_template('forgotpassword.html')
+
+
+
+
+
+
+
+@application.route('/newPassword', methods=["GET","POST"])
+def newPassword():
+    print "hello"
+    # confirm user is logged in
+    username=request.args.get('username')
+    print username
+    # usr = db_h.User_alch.query.filter_by(username = username).first()
+    # print usr.username
+
+    if username is not None:
+        session['newPass_username'] = username
+        usr = db_h.User_alch.query.filter_by(username = username).first()
+    else:
+        usr = db_h.User_alch.query.filter_by(username = session['newPass_username']).first()
+
+
+    # print usr.username
+    # print usr.password
+    # TODO: revalidate new email address
+    # GET means that this is the first time here, so show page allowing user to edit their info
+    if request.method=="GET":
+        # firstname=usr.firstname
+        # lastname=usr.lastname
+        # email=usr.email
+        # print "Firstname: "+firstname+", lastmane: "+lastname+", email: "+email
+        # password=request.args.get('password')
+        return render_template('newPassword.html', password= usr.password)
+    else:
+        # POST means that the form has already been submitted, time to execute it
+        new_password=request.form.get('password')
+        print new_password
+        usr.assignPassAndSalt(new_password)
+        db_h.alch_db.session.commit()
+        session.pop('newPass_username', None)
+        # Throw user back to "/" and view the splashScreen/userHome.
+        return make_response(redirect(url_for('splashScreen')))
+
+
+
+
+
 @application.route("/register", methods=["GET","POST"])
 def register():
     # POST method means data was sent by user
@@ -126,7 +213,7 @@ def register():
         else:
             # try opening connection to database:
             _userUsername = request.form.get('username')
-            print "Passwords match, username is: "+_userUsername
+            print "Passwords match, username is: "+ _userUsername
             if not db_h.usernameAvail(_userUsername):
                 print _userUsername + " is not available"
                 return render_template('register.html', diffPasswords=False, duplicateUser=True)
@@ -255,6 +342,7 @@ def createEvent():
     # GET method means user is here for first time, allow to check Url availability:
     else:
         return render_template('createEvent.html', firstname=usr.firstname, firstTime=True)
+
 
 @application.route('/validateEmail')
 def resendValidationEmail():
