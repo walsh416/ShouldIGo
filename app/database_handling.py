@@ -41,6 +41,7 @@ class User_alch(alch_db.Model):
     email = alch_db.Column(alch_db.String(80), nullable=False)
     followedEventsCSV = alch_db.Column(alch_db.String(500), nullable=True)
     verifiedEmail = alch_db.Column(alch_db.String(20), nullable=True)
+    # resetPass = alch_db.Column(alch_db.String(80), nullable=False)
 
     def __init__(self, firstname, lastname, username, email, rawpassword):
         super(User_alch, self).__init__()
@@ -52,6 +53,7 @@ class User_alch(alch_db.Model):
         self.assignVerifiedEmail()
         self.ownedEventsCSV = ""
         self.followedEventsCSV = ""
+        self.resetPass = get_x_randoms(16)
 
     def __repr__(self):
         return '<User %r>\n\tfirstname: %r\n\tlastname: %r\n\temail: %r\n\townedevents: %r\n\tfollowedevents: %r' % (self.username, self.firstname, self.lastname, self.email, self.ownedEventsCSV, self.followedEventsCSV)
@@ -66,6 +68,9 @@ class User_alch(alch_db.Model):
 
     def assignVerifiedEmail(self):
         self.verifiedEmail = get_x_randoms(16)
+
+    def assignResetPass(self):
+        self.resetPass = get_x_randoms(16)
 
     # TODO: Refactor this with many-to-many relation between User_alch and Event_alch...
     #           Uses a secondary table with cols of users and rows of events, or vice versa
@@ -131,7 +136,6 @@ def emailAvail(emailIn):
         return True
     return False
 
-# TODO: come back to secret/password protected events!!
 class Event_alch(alch_db.Model):
     __tablename__="events"
     eventUrl = alch_db.Column(alch_db.String(50), primary_key=True, nullable=False)

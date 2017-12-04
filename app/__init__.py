@@ -140,29 +140,24 @@ def forgotpassword():
         return resp
     else:
         print "in GET method of /forgotpassword"
-        # try pulling username and validation code out of GET method
-        # TODO: make sure this all works right on initial registration (maybe surround in try/except or something?)
-        # TODO: what happens if user clicks to verify email twice?  Goes through properly the first time, and then...?
-        #                 Maybe check if username already has validation==1 or not?
         email=request.args.get('email')
+        resetPass=request.args.get('resetPass')
 
         # TODO: what if the following query returns a NoneType?
         usr = db_h.User_alch.query.filter_by(email=email).first()
 
         print "returning bottom render_template(forgotpassword.html)"
-        return render_template('forgotpassword.html')
-
-
-
-
-
-
+        if usr.resetPass == resetPass:
+            return render_template('forgotpassword.html')
+        else:
+            return render_template('forgotpassword.html', badReset=True)
 
 @application.route('/newPassword', methods=["GET","POST"])
 def newPassword():
     print "hello"
     # confirm user is logged in
     username=request.args.get('username')
+    # resetPass=request.args.get('resetPass')
     print username
     # usr = db_h.User_alch.query.filter_by(username = username).first()
     # print usr.username
@@ -173,18 +168,8 @@ def newPassword():
     else:
         usr = db_h.User_alch.query.filter_by(username = session['newPass_username']).first()
 
-
-    # print usr.username
-    # print usr.password
-    # TODO: revalidate new email address
-    # GET means that this is the first time here, so show page allowing user to edit their info
     if request.method=="GET":
-        # firstname=usr.firstname
-        # lastname=usr.lastname
-        # email=usr.email
-        # print "Firstname: "+firstname+", lastmane: "+lastname+", email: "+email
-        # password=request.args.get('password')
-        return render_template('newPassword.html', password= usr.password)
+        return render_template('newPassword.html')
     else:
         # POST means that the form has already been submitted, time to execute it
         new_password=request.form.get('password')
@@ -194,10 +179,6 @@ def newPassword():
         session.pop('newPass_username', None)
         # Throw user back to "/" and view the splashScreen/userHome.
         return make_response(redirect(url_for('splashScreen')))
-
-
-
-
 
 @application.route("/register", methods=["GET","POST"])
 def register():
