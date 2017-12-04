@@ -21,8 +21,6 @@ mail = Mail(application)
 # When running locally, trying to force HTTPS breaks it, so set DEBUG=True
 sslify = SSLify(application)
 
-# protectedUrls = ["login","lougout","register","createEvent","validateEmail","editUser"]
-
 # returns datetime object for x days from now (for cookie expiration dates)
 def get_x_daysFromNow(x):
     return datetime.today() + timedelta(days=x)
@@ -314,7 +312,7 @@ def createEvent():
                 # TODO: should actually be done in javascript, because here it's buried in a post method and yeah.
                 pass
 
-            event = db_h.Event_alch(url=eventUrl, name=eventName, desc=eventDesc, password=password)
+            event = db_h.Event_alch(url=eventUrl, name=eventName, desc=eventDesc, username=usr.username, password=password)
             db_h.alch_db.session.add(event)
             db_h.alch_db.session.commit()
 
@@ -405,7 +403,15 @@ def editUser():
                         user = db_h.User_alch.query.filter_by(username=username).first()
                         if user is not None:
                             user.unfollowEvent(eventUrl)
-                    db_h.alch_db.session.delete(event)
+                    for username in event.ownersCSV.split(","):
+                        newOwners = ""
+                        # user = db_h.User_alch.query.filter_by(username=username).first()
+                        if username is not None and username != "":
+                            if username != usr.username:
+                                newOwners += (username + ",")
+                        event.ownersCSV = newOwners
+                    if event.ownersCSV == "" or event.ownersCSV is None:
+                        db_h.alch_db.session.delete(event)
             # Delete actual user entry
             db_h.alch_db.session.delete(usr)
             db_h.alch_db.session.commit()
@@ -473,6 +479,7 @@ def showEvent(eventUrl):
             new_eventName = request.form.get('eventName')
             new_eventDesc = request.form.get('eventDesc')
             new_password = request.form.get('password')
+            add_owner = request.form.get('add_owner')
             evnt = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
             evnt.eventName=new_eventName
             evnt.eventDesc=new_eventDesc
@@ -481,7 +488,14 @@ def showEvent(eventUrl):
             else:
                 evnt.password=""
                 evnt.salt=""
+            if add_owner is not None and add_owner != "":
+                if not db_h.usernameAvail(add_owner):
+                    new_owner = db_h.User_alch.query.filter_by(username=add_owner).first()
+                    new_owner.ownedEventsCSV += (evnt.eventUrl + ",")
+                    evnt.ownersCSV += (new_owner.username + ",")
+                    db_h.alch_db.session.commit()
             evnt.clearRsvps()
+            evnt.clearComments()
             db_h.alch_db.session.commit()
             evnt.sendEmailToFollowers()
             return redirect(url_for('showEvent', eventUrl=eventUrl))
@@ -534,7 +548,12 @@ def showEvent(eventUrl):
                     followerUser.unfollowEvent(eventUrl)
                     # followerUser.unownEvent(eventUrl)
                     db_h.alch_db.session.commit()
-            usr.unownEvent(eventUrl)
+            for owner in event.ownersCSV.split(','):
+                ownerUser = db_h.User_alch.query.filter_by(username=owner).first()
+                if ownerUser is not None:
+                    print owner + " is unowning event"
+                    ownerUser.unownEvent(event.eventUrl)
+            # usr.unownEvent(eventUrl)
             # delete event itself
             db_h.alch_db.session.delete(event)
             db_h.alch_db.session.commit()

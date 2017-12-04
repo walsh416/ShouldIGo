@@ -88,6 +88,9 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
                     If you want to add or update your event's password, enter it below:<br>
                     <input type="text" name="password" placeholder="Password (optional)"><br><br>
 
+                    To add another owner who can edit this event, type in their username here:<br>
+                    <input type="text" name="add_owner" placeholder="Add owner (optional)"><br><br>
+
                     <input type="submit" class="btn btn-primary" value="Save" name="save">
                     <a href={{ url_for("showEvent", eventUrl=eventUrl, _external=True )}} class="btn btn-secondary">Cancel</a>
                 </form>

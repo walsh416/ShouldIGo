@@ -86,41 +86,49 @@
                     <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="maybe", _external=True )}} class="btn btn-secondary">Maybe Going</a>
                     <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-secondary">Not Going</a>
                 </div></p>
-
                 {% endif %}
-                {% if yesUsers %}
-                Yes users:
+
+                Users who said yes:
+                {% if not yesUsers %}
+                <i>No one yet, keep checking!</i>
+                {% endif %}
                 {% for user in yesUsers %}
                 {{ user }}{% if not loop.last %}, {% endif %}
                 {% endfor %}
                 <br>
+                Users who said maybe:
+                {% if not maybeUsers %}
+                <i>No one yet</i>
                 {% endif %}
-                {% if maybeUsers %}
-                Maybe users:
                 {% for user in maybeUsers %}
                 {{ user }}{% if not loop.last %}, {% endif %}
                 {% endfor %}
                 <br>
+                Users who said no:
+                {% if not noUsers %}
+                <i>No one yet</i>
                 {% endif %}
-                {% if noUsers %}
-                No users:
                 {% for user in noUsers %}
                 {{ user }}{% if not loop.last %}, {% endif %}
                 {% endfor %}
-                <br>
-                {% endif %}
-                {% for username,comment,time in comments %}
-                <!-- TODO: SOS @aslan can you make this not look like crap? -->
-                {{ username }} -- {{ time }}<br>
-                {{ comment }}<br>
-                {% if not loop.last %}
-                --------------------------------------<br><br>
-                {% endif %}
-                {% endfor %}
+                <br><br><br>
+
+
                 <form method="POST">
                     <textarea class="form-control" name="comment" rows="3" placeholder="Add your comment here!"></textarea>
                     <input type="submit" class="btn btn-primary" value="Submit">
                 </form>
+                <!-- TODO: what if there are lots of comments?  Some sort of an ajax-y "load more" button? -->
+                {% for username,comment,time in comments %}
+                <!-- TODO: SOS @aslan can you make this not look like crap? -->
+                {{ username }} -- {{ time }}<br>
+                {{ comment }}<br>
+
+                <!-- the curlybrace-pound sign thing comments out jinja2 code -->
+                {#{% if not loop.last %}#}
+                --------------------------------------<br><br>
+                {#{% endif %}#}
+                {% endfor %}
                 {% if subscribed == false %}
                 Click below to follow this event!
                 <form method = "POST">
