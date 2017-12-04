@@ -128,12 +128,12 @@ def forgotpassword():
         usr = db_h.User_alch.query.filter_by(email=_userEmail).first()
 
         msg = Message(
-                'Hello, %s!' % usr.firstname,
+                'Password reset for %s' % usr.firstname,
                 sender='timsemailforlols@google.com',
                 recipients=[request.form.get('email')]
                 )
-        msg.body = render_template("changeforgotpassword.txt", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
-        msg.html = render_template("changeForgotPassword.html", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail )
+        msg.body = render_template("changeforgotpassword.txt", firstname=usr.firstname, username=usr.username, resetPass=usr.resetPass)
+        msg.html = render_template("changeForgotPassword.html", firstname=usr.firstname, username=usr.username, resetPass=usr.resetPass)
         thr = Thread(target=send_async_email, args=[application, msg])
         thr.start()
         resp = make_response(redirect(url_for('splashScreen')))
@@ -141,16 +141,12 @@ def forgotpassword():
     else:
         print "in GET method of /forgotpassword"
         email=request.args.get('email')
-        resetPass=request.args.get('resetPass')
 
         # TODO: what if the following query returns a NoneType?
         usr = db_h.User_alch.query.filter_by(email=email).first()
 
         print "returning bottom render_template(forgotpassword.html)"
-        if usr.resetPass == resetPass:
-            return render_template('forgotpassword.html')
-        else:
-            return render_template('forgotpassword.html', badReset=True)
+        return render_template('forgotpassword.html')
 
 @application.route('/newPassword', methods=["GET","POST"])
 def newPassword():
@@ -163,6 +159,7 @@ def newPassword():
     # print usr.username
 
     if username is not None:
+        session['newPass_reset'] = request.args.get('resetPass')
         session['newPass_username'] = username
         usr = db_h.User_alch.query.filter_by(username = username).first()
     else:
@@ -173,12 +170,16 @@ def newPassword():
     else:
         # POST means that the form has already been submitted, time to execute it
         new_password=request.form.get('password')
-        print new_password
-        usr.assignPassAndSalt(new_password)
-        db_h.alch_db.session.commit()
-        session.pop('newPass_username', None)
-        # Throw user back to "/" and view the splashScreen/userHome.
-        return make_response(redirect(url_for('splashScreen')))
+        if usr.resetPass == session['newPass_reset']:
+            usr.assignPassAndSalt(new_password)
+            usr.assignResetPass()
+            db_h.alch_db.session.commit()
+            session.pop('newPass_username', None)
+            session.pop('newPass_reset', None)
+            # Throw user back to "/" and view the splashScreen/userHome.
+            return make_response(redirect(url_for('splashScreen')))
+        else:
+            return render_template('newPassword.html', badReset=True)
 
 @application.route("/register", methods=["GET","POST"])
 def register():

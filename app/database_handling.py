@@ -41,7 +41,7 @@ class User_alch(alch_db.Model):
     email = alch_db.Column(alch_db.String(80), nullable=False)
     followedEventsCSV = alch_db.Column(alch_db.String(500), nullable=True)
     verifiedEmail = alch_db.Column(alch_db.String(20), nullable=True)
-    # resetPass = alch_db.Column(alch_db.String(80), nullable=False)
+    resetPass = alch_db.Column(alch_db.String(80), nullable=False)
 
     def __init__(self, firstname, lastname, username, email, rawpassword):
         super(User_alch, self).__init__()
