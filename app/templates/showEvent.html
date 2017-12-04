@@ -67,18 +67,21 @@
                     <a href={{ url_for("showEvent", eventUrl=eventUrl, going="yes", _external=True )}} class="btn btn-primary">I'm Going</a>
                     <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="maybe", _external=True )}} class="btn btn-secondary">Maybe Going</a>
                     <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-secondary">Not Going</a>
+                    <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="clear", _external=True )}} class="btn btn-secondary">Clear RSVP</a>
                 </div></p>
                 {% elif going == "maybe" %}
                 <p><div class="btn-group" role="group">
                     <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="yes", _external=True )}} class="btn btn-secondary">I'm Going</a>
                     <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="maybe", _external=True )}} class="btn btn-primary">Maybe Going</a>
                     <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-secondary">Not Going</a>
+                    <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="clear", _external=True )}} class="btn btn-secondary">Clear RSVP</a>
                 </div></p>
                 {% elif going == "no" %}
                 <p><div class="btn-group" role="group">
                     <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="yes", _external=True )}} class="btn btn-secondary">I'm Going</a>
                     <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="maybe", _external=True )}} class="btn btn-secondary">Maybe Going</a>
                     <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-primary">Not Going</a>
+                    <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="clear", _external=True )}} class="btn btn-secondary">Clear RSVP</a>
                 </div></p>
                 {% else %}
                 <p><div class="btn-group" role="group">
