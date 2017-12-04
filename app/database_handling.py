@@ -124,6 +124,7 @@ def usernameAvail(usernameIn):
         return True
     return False
 
+# TODO: come back to secret/password protected events!!
 class Event_alch(alch_db.Model):
     __tablename__="events"
     eventUrl = alch_db.Column(alch_db.String(50), primary_key=True, nullable=False)
@@ -133,11 +134,13 @@ class Event_alch(alch_db.Model):
     yesGoingCSV = alch_db.Column(alch_db.String(1000), nullable=True)
     maybeGoingCSV = alch_db.Column(alch_db.String(1000), nullable=True)
     noGoingCSV = alch_db.Column(alch_db.String(1000), nullable=True)
+    # password = alch_db.Column(alch_db.String(80), nullable=False)
+    # salt = alch_db.Column(alch_db.String(80), nullable=False)
 
     def __repr__(self):
         return '<Event Url: %r>' % self.eventUrl
 
-    def __init__(self, url, name, desc):
+    def __init__(self, url, name, desc, pass=""):
         super(Event_alch, self).__init__()
         self.eventUrl = url
         self.eventName = name
@@ -146,6 +149,15 @@ class Event_alch(alch_db.Model):
         self.yesGoingCSV = ""
         self.maybeGoingCSV = ""
         self.noGoingCSV = ""
+        self.assignPassAndSalt(pass)
+
+    # def checkHashPass(self, rawPassIn):
+    #     correctPass = hash_pass(rawPassIn + self.salt)
+    #     return correctPass == self.password
+    #
+    # def assignPassAndSalt(self, rawPass):
+    #     self.salt = get_x_randoms(64)
+    #     self.password = hash_pass(rawPass+self.salt)
 
     def unfollowUser(self, username):
         userList = self.followers.split(",")
@@ -222,8 +234,12 @@ class Event_alch(alch_db.Model):
 
 
 def eventUrlAvail(urlIn):
+    protectedUrls = ["login","lougout","register","createEvent","validateEmail","editUser"]
     event_count = Event_alch.query.filter_by(eventUrl=urlIn).count()
     if event_count == 0:
+        for url in protectedUrls:
+            if urlIn.lower() == url.lower():
+                return False
         return True
     return False
 

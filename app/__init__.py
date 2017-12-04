@@ -21,7 +21,7 @@ mail = Mail(application)
 # When running locally, trying to force HTTPS breaks it, so set DEBUG=True
 sslify = SSLify(application)
 
-protectedUrls = ["login","lougout","register","createEvent","validateEmail","editUser"]
+# protectedUrls = ["login","lougout","register","createEvent","validateEmail","editUser"]
 
 # returns datetime object for x days from now (for cookie expiration dates)
 def get_x_daysFromNow(x):
@@ -134,7 +134,7 @@ def forgotpassword():
                 )
         msg.body = render_template("changeforgotpassword.txt", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail)
         msg.html = render_template("changeForgotPassword.html", firstname=usr.firstname, username=usr.username, validation=usr.verifiedEmail )
-        thr = Thread(target=send_async_email, args=[application, msg])          
+        thr = Thread(target=send_async_email, args=[application, msg])
         thr.start()
         resp = make_response(redirect(url_for('splashScreen')))
         return resp
