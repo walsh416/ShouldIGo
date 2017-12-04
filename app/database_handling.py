@@ -180,9 +180,11 @@ class Event_alch(alch_db.Model):
     def addComment(self, username, comment):
         # CSV with "user~~comment~~time~$~" format
         # fullComment = username + "~~" + comment + "~~" + datetime.now().strftime('%m-%d-%Y at %H:%M')
+        print "In addComment, setting time as: " + datetime.now().strftime('%A, %b %d at %I:%M %p')
         fullComment = username + "~~" + comment + "~~" + datetime.now().strftime('%A, %b %d at %I:%M %p')
         # Puts most recent comment at start of list (so at top of comments)
-        self.commentsCSV = fullComment + "~$~" + self.commentsCSV
+        self.commentsCSV = self.commentsCSV + fullComment + "~$~"
+        # self.commentsCSV = fullComment + "~$~" + self.commentsCSV
 
     def returnComments(self):
         toReturn = []

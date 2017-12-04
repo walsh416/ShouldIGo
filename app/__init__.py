@@ -46,8 +46,8 @@ def splashScreen():
     else:
         _username = request.cookies.get('rememberme')
     # if there was a cookie with the key "username":
-    if _username:
-        usr = db_h.User_alch.query.filter_by(username=_username).first()
+    usr = db_h.User_alch.query.filter_by(username=_username).first()
+    if usr is not None:
         if usr.verifiedEmail!="0":
             session['username'] = usr.username
             resp = make_response(render_template('userHome.html', username=usr.username, firstname=usr.firstname, lastname=usr.lastname, verified=False, resentValidationEmail=str(resentValidationEmail)))
