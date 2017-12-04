@@ -42,4 +42,3 @@ SQLALCHEMY_DATABASE_URI = "mysql://root:@127.0.0.1/userDb"
 # DEBUG = False
 # SQLALCHEMY_DATABASE_URI = "mysql+pymysql://walsh416:walsh416pass@walsh416dbinstance.cuo7hfdlcl5g.us-east-2.rds.amazonaws.com/thedatabase"
 #####################################################
->>>>>>> 165424d1fbfc571132f1d76db9cf57be0848cfa2

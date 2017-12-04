@@ -134,13 +134,14 @@ class Event_alch(alch_db.Model):
     yesGoingCSV = alch_db.Column(alch_db.String(1000), nullable=True)
     maybeGoingCSV = alch_db.Column(alch_db.String(1000), nullable=True)
     noGoingCSV = alch_db.Column(alch_db.String(1000), nullable=True)
-    # password = alch_db.Column(alch_db.String(80), nullable=False)
-    # salt = alch_db.Column(alch_db.String(80), nullable=False)
+    password = alch_db.Column(alch_db.String(80), nullable=False)
+    salt = alch_db.Column(alch_db.String(80), nullable=False)
 
     def __repr__(self):
         return '<Event Url: %r>' % self.eventUrl
 
-    def __init__(self, url, name, desc, pass=""):
+    # def __init__(self, url, name, desc):
+    def __init__(self, url, name, desc, password=None):
         super(Event_alch, self).__init__()
         self.eventUrl = url
         self.eventName = name
@@ -149,15 +150,25 @@ class Event_alch(alch_db.Model):
         self.yesGoingCSV = ""
         self.maybeGoingCSV = ""
         self.noGoingCSV = ""
-        self.assignPassAndSalt(pass)
+        # print password
+        if password is not None and password != "":
+            # print "not none: "+repr(password)
+            self.assignPassAndSalt(password)
+        else:
+            self.password=""
+            self.salt=""
 
-    # def checkHashPass(self, rawPassIn):
-    #     correctPass = hash_pass(rawPassIn + self.salt)
-    #     return correctPass == self.password
-    #
-    # def assignPassAndSalt(self, rawPass):
-    #     self.salt = get_x_randoms(64)
-    #     self.password = hash_pass(rawPass+self.salt)
+    def checkHashPass(self, rawPassIn):
+        if rawPassIn is None or rawPassIn=="":
+            if self.password is None or self.password=="":
+                return True
+            return False
+        correctPass = hash_pass(rawPassIn + self.salt)
+        return correctPass == self.password
+
+    def assignPassAndSalt(self, rawPass):
+        self.salt = get_x_randoms(64)
+        self.password = hash_pass(rawPass+self.salt)
 
     def unfollowUser(self, username):
         userList = self.followers.split(",")

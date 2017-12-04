@@ -316,6 +316,7 @@ def createEvent():
             eventUrl = request.cookies.get('eventUrl')
             eventName = request.form.get('eventName')
             eventDesc = request.form.get('eventDesc')
+            password = request.form.get('password')
             dateFilter = request.form.get('datefilter')
             # TODO: force input in eventName and eventDesc
             # TODO: do something with this... duh.
@@ -328,7 +329,7 @@ def createEvent():
                 # TODO: should actually be done in javascript, because here it's buried in a post method and yeah.
                 pass
 
-            event = db_h.Event_alch(url=eventUrl, name=eventName, desc=eventDesc)
+            event = db_h.Event_alch(url=eventUrl, name=eventName, desc=eventDesc, password=password)
             db_h.alch_db.session.add(event)
             db_h.alch_db.session.commit()
 
@@ -486,21 +487,29 @@ def showEvent(eventUrl):
         if request.form.get('save'):
             new_eventName = request.form.get('eventName')
             new_eventDesc = request.form.get('eventDesc')
+            new_password = request.form.get('password')
             evnt = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
             evnt.eventName=new_eventName
             evnt.eventDesc=new_eventDesc
+            if new_password is not None and new_password!="":
+                evnt.assignPassAndSalt(new_password)
+            else:
+                evnt.password=""
+                evnt.salt=""
             evnt.clearRsvps()
             db_h.alch_db.session.commit()
             evnt.sendEmailToFollowers()
+            return redirect(url_for('showEvent', eventUrl=eventUrl))
         if request.form.get('unfollow') and usr.followsEventUrl(eventUrl):
             usr.unfollowEvent(eventUrl)
             evnt.unfollowUser(_username)
             db_h.alch_db.session.commit()
+            return redirect(url_for('showEvent', eventUrl=eventUrl))
         elif request.form.get('follow') and not usr.followsEventUrl(eventUrl):
             usr.followedEventsCSV += (eventUrl+",")
             evnt.followers += (_username+",")
             db_h.alch_db.session.commit()
-        return redirect(url_for('showEvent', eventUrl=eventUrl))
+            return redirect(url_for('showEvent', eventUrl=eventUrl))
     userLoggedIn = False
     subscribed = False
     owner = False
@@ -512,6 +521,7 @@ def showEvent(eventUrl):
         event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
         userLoggedIn = True
         owner = usr.ownsEventUrl(eventUrl)
+        follower = usr.followsEventUrl(eventUrl)
         subscribed = db_h.is_EventUrl_in_EventUrlCSV(eventUrl, usr.followedEventsCSV)
         # If owner, and if they hit "edit" button, comes back with GET method for editing, and allows owner to edit it.
         wantsToEdit=request.args.get('wantsToEdit')
@@ -555,9 +565,21 @@ def showEvent(eventUrl):
             if username is not None and username != "":
                 user = db_h.User_alch.query.filter_by(username=username).first()
                 noUsers.append(user.firstname+" "+user.lastname)
-        return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner, going=going, yesUsers=yesUsers, maybeUsers=maybeUsers, noUsers=noUsers)
+        correctPass = event.checkHashPass(request.form.get('password'))
+        if owner or follower:
+            correctPass = True
+        badPass = False
+        if correctPass == False and request.form.get('password') is not None:
+            badPass = True
+        return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner, going=going, yesUsers=yesUsers, maybeUsers=maybeUsers, noUsers=noUsers, correctPass=correctPass, badPass=badPass)
     event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
-    return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner)
+    print request.form.get('password')
+    correctPass = event.checkHashPass(request.form.get('password'))
+    badPass = False
+    if correctPass == False and request.form.get('password') is not None:
+        badPass = True
+    print badPass
+    return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner, correctPass=correctPass, badPass=badPass)
 
 @application.errorhandler(404)
 def page_not_found(e):
