@@ -1,2 +1,2 @@
 Dear {{ firstname }},
-Welcome to ConsiderA.party!
+Welcome to Should I Go!
