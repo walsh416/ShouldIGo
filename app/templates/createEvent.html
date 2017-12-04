@@ -7,9 +7,9 @@
     <!-- date range picker stuff-->
     <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
     <script type='text/javascript' src="{{url_for('static', filename='CheckFields.js')}}"></script>
-  
 
-    
+
+
     <style>
     </style>
 </head>
@@ -57,12 +57,19 @@
                     <div class="form-group">
 
                         {% if UrlInUse == false %}
-                        {{eventUrl}} is not in use, set up the rest of your event!
-                        <form method="POST" onsubmit='if(checkFields()) {} else { return false; }'' >
+                        <i><b>{{eventUrl}}</b></i> is not in use, set up the rest of your event!
+                        <form method="POST" onsubmit='if(checkFields()) {} else { return false; }' >
                             <!-- Event name:<br> -->
                             <!-- TODO: make this not ugly and mismatched... -->
-                            Pick an event name: <br>
-                            <input type="text" name="eventName" placeholder="Event name"><br>
+                            <label for="eventName">Pick an event name:</label>
+                            <input type="text" id="eventName" name="eventName" class="form-control" aria-describedby="eventNameHelp">
+                            <div id ="nameCounter" style="font:15px Arial; text-align:right;">50 Character Limit</div>
+                            <!-- <small id="eventNameHelp" class="form-text text-muted">
+                                Names should be less than 50 characters, and contain only letters, numbers, underscores, and dashes
+                            </small> -->
+                            <!-- Pick an event name: <br>
+                            <input type="text" name="eventName" placeholder="Event name"><br> -->
+
                             <!-- Enter a description of your event:<br> -->
                             <!-- <textarea rows="5" cols="40" name="eventDesc"></textarea><br> -->
                             <!-- <input type="text" name="eventDesc" size==22><br> -->
@@ -85,9 +92,9 @@
 
 
                     <textarea id="eventDesc" class="form-control" name="eventDesc" rows="3" placeholder="Event description" maxlength="1000"></textarea>
-                    <div id ="textcounter" style="font:15px Arial; text-align:right;">1000 Character Limit</div>
+                    <div id ="descCounter" style="font:15px Arial; text-align:right;">1000 Character Limit</div>
 
-                    
+
                     If you want your event to be hidden behind a password, enter it below:<br>
                     <input type="text" name="password" placeholder="Password (optional)"><br><br>
 
@@ -96,16 +103,21 @@
                     <input type="submit" class="btn btn-primary" value="Create">
                     <a href="/" class="btn btn-secondary">Cancel</a>
                 </form>
+
                 {% else %}
-                {% if firstTime == true %}
-                First, pick a unique event Url:<br>
-                {% elif UrlInUse == true %}
-                Sorry, that Url is already in use! Try another one:<br>
-                {% elif badUrl == true %}
-                Sorry, please only use letters, numbers, dashes, and underscores in your url!<br>
-                {% endif %}
                 <form method = "POST">
-                    <input type="text" name="eventUrl"><br>
+                {% if firstTime == true %}
+                <label for="eventUrl">First, pick a unique event Url:</label>
+                {% elif UrlInUse == true %}
+                <label for="eventUrl">Sorry, that Url is already in use! Try another one:</label>
+                {% elif badUrl == true %}
+                <label for="eventUrl">Sorry, please only use letters, numbers, dashes, and underscores in your url!</label>
+                {% endif %}
+                    <input type="text" id="eventUrl" name="eventUrl" class="form-control" aria-describedby="eventUrlHelp" maxlength="50">
+                    <div id ="urlCounter" style="font:15px Arial; text-align:right;">50 Character Limit</div>
+                    <small id="eventUrlHelp" class="form-text text-muted">
+                        URLs should be less than 50 characters, and contain only letters, numbers, underscores, and dashes
+                    </small>
                     <div style="height:3px;"></div>
                     <input type="submit" class="btn btn-primary" value="Check URL">
                     <a href="/" class="btn btn-secondary">Cancel</a>
@@ -168,23 +180,44 @@ format: 'MM/DD/YYYY h:mm A'
     <script>
     $(document).ready(function() {
         $('#eventDesc').on('input propertychange', function() {
-            CharLimit(this, 1000);
+            CharLimit(this, 1000, 0);
+        });
+        $('#eventUrl').on('input propertychange', function() {
+            CharLimit(this, 50, 1);
+        });
+        $('#eventName').on('input propertychange', function() {
+            CharLimit(this, 50, 2);
         });
     });
 
-    function CharLimit(input, maxChar) {
+    function CharLimit(input, maxChar, field) {
          var len = $(input).val().length;
-         $('#textcounter').text(maxChar - len + ' characters remaining');
-        
-        if (len > maxChar) {
-             $(input).val($(input).val().substring(0, maxChar));
-             $('#textcounter').text(0 + ' characters remaining');
-         }
+         if (field == 0){
+             if (len > maxChar) {
+                  $(input).val($(input).val().substring(0, maxChar));
+                  $('#descCounter').text(0 + ' characters remaining');
+              }
+             $('#descCounter').text(maxChar - len + ' characters remaining');
+        }
+        if (field == 1){
+            if (len > maxChar) {
+                 $(input).val($(input).val().substring(0, maxChar));
+                 $('#urlCounter').text(0 + ' characters remaining');
+             }
+             $('#urlCounter').text(maxChar - len + ' characters remaining');
+        }
+        if (field == 2){
+            if (len > maxChar) {
+                 $(input).val($(input).val().substring(0, maxChar));
+                 $('#nameCounter').text(0 + ' characters remaining');
+             }
+             $('#nameCounter').text(maxChar - len + ' characters remaining');
+        }
     }
     </script>
 
 </body>
-    
+
 
 
 

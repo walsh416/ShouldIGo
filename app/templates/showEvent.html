@@ -120,6 +120,7 @@
                 </form>
                 <!-- TODO: what if there are lots of comments?  Some sort of an ajax-y "load more" button? -->
                 {% for username,comment,time in comments %}
+                --------------------------------------<br>
                 <!-- TODO: SOS @aslan can you make this not look like crap? -->
                 {{ username }} -- {{ time }}<br>
                 {{ comment }}<br>
@@ -130,7 +131,7 @@
                 {#{% endif %}#}
                 {% endfor %}
                 {% if subscribed == false %}
-                Click below to follow this event!
+                Click below to recieve updates about this event!
                 <form method = "POST">
                     <input type="submit" name="follow" value="Follow this event" class="btn btn-primary">
                 </form>
