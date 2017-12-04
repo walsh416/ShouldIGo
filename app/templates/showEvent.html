@@ -86,6 +86,7 @@
                     <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="maybe", _external=True )}} class="btn btn-secondary">Maybe Going</a>
                     <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-secondary">Not Going</a>
                 </div></p>
+
                 {% endif %}
                 {% if yesUsers %}
                 Yes users:
@@ -108,7 +109,18 @@
                 {% endfor %}
                 <br>
                 {% endif %}
-
+                {% for username,comment,time in comments %}
+                <!-- TODO: SOS @aslan can you make this not look like crap? -->
+                {{ username }} -- {{ time }}<br>
+                {{ comment }}<br>
+                {% if not loop.last %}
+                --------------------------------------<br><br>
+                {% endif %}
+                {% endfor %}
+                <form method="POST">
+                    <textarea class="form-control" name="comment" rows="3" placeholder="Add your comment here!"></textarea>
+                    <input type="submit" class="btn btn-primary" value="Submit">
+                </form>
                 {% if subscribed == false %}
                 Click below to follow this event!
                 <form method = "POST">

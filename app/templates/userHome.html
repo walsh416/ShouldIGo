@@ -15,14 +15,14 @@
                 <span class="fa fa-home" style="font-size:1.5em;"></span>
             </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+                <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
                         <!-- TODO: are there more settings we want to include than just what's in editUser?
-            ...probably stuff like email preferences, etc-->
+                        ...probably stuff like email preferences, etc-->
                         <a class="nav-link" href="/editUser" data-btn-target="settings-btn-floor"><span class="fa fa-user" style="font-size:1.5em;"></span></a>
                         <div class="nav-btn-floor bg-dark" id="settings-btn-floor"></div>
                     </li>
@@ -99,17 +99,17 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
     <script type="text/javascript">
-        $(document).ready(function(){
-            $(".nav-link").mouseenter(function(){
-                $floor = $("#" + $(this).attr('data-btn-target'));
-                $floor.removeClass("bg-dark");
-                $floor.addClass("bg-light");
-            }).mouseleave(function(){
-                $floor = $("#" + $(this).attr('data-btn-target'));
-                $floor.removeClass("bg-light");
-                $floor.addClass("bg-dark");
-            });
+    $(document).ready(function(){
+        $(".nav-link").mouseenter(function(){
+            $floor = $("#" + $(this).attr('data-btn-target'));
+            $floor.removeClass("bg-dark");
+            $floor.addClass("bg-light");
+        }).mouseleave(function(){
+            $floor = $("#" + $(this).attr('data-btn-target'));
+            $floor.removeClass("bg-light");
+            $floor.addClass("bg-dark");
         });
+    });
 
     </script>
 

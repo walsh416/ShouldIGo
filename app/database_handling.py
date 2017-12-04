@@ -4,6 +4,7 @@ import hashlib, os
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
 from threading import Thread
+from datetime import datetime
 
 application = Flask(__name__)
 application.config.from_object('config')
@@ -142,6 +143,7 @@ class Event_alch(alch_db.Model):
     noGoingCSV = alch_db.Column(alch_db.String(1000), nullable=True)
     password = alch_db.Column(alch_db.String(80), nullable=False)
     salt = alch_db.Column(alch_db.String(80), nullable=False)
+    commentsCSV = alch_db.Column(alch_db.String(10000), nullable=True)
 
     def __repr__(self):
         return '<Event Url: %r>' % self.eventUrl
@@ -163,6 +165,24 @@ class Event_alch(alch_db.Model):
         else:
             self.password=""
             self.salt=""
+        self.commentsCSV = ""
+
+    def addComment(self, username, comment):
+        # CSV with "user~~comment~~time~$~" format
+        fullComment = username + "~~" + comment + "~~" + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        self.commentsCSV += (fullComment + "~$~")
+
+    def returnComments(self):
+        toReturn = []
+        for rawComment in self.commentsCSV.split("~$~"):
+            if rawComment is not None and rawComment!= "":
+                commentArr = []
+                for commentSection in rawComment.split("~~"):
+                    if commentSection is not None and commentSection != "":
+                        commentArr.append(commentSection)
+                # TODO: what if commentArr is still []?
+                toReturn.append(commentArr)
+        return toReturn
 
     def checkHashPass(self, rawPassIn):
         if rawPassIn is None or rawPassIn=="":

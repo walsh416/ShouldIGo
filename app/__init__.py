@@ -513,6 +513,11 @@ def showEvent(eventUrl):
             evnt.followers += (_username+",")
             db_h.alch_db.session.commit()
             return redirect(url_for('showEvent', eventUrl=eventUrl))
+        if request.form.get('comment'):
+            # TODO: comments can't have tilde (~) character
+            new_comment = request.form.get('comment')
+            evnt.addComment(usr.username, new_comment)
+            db_h.alch_db.session.commit()
     userLoggedIn = False
     subscribed = False
     owner = False
@@ -574,7 +579,7 @@ def showEvent(eventUrl):
         badPass = False
         if correctPass == False and request.form.get('password') is not None:
             badPass = True
-        return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner, going=going, yesUsers=yesUsers, maybeUsers=maybeUsers, noUsers=noUsers, correctPass=correctPass, badPass=badPass)
+        return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner, going=going, yesUsers=yesUsers, maybeUsers=maybeUsers, noUsers=noUsers, correctPass=correctPass, badPass=badPass, comments=event.returnComments())
     event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
     print request.form.get('password')
     correctPass = event.checkHashPass(request.form.get('password'))
