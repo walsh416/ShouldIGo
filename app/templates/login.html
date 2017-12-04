@@ -1,30 +1,3 @@
-<!-- <html>
-<head>
-	<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}" />
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-
-</head>
-<body>
-<h1>Welcome to ConsiderA.party!</h1>
-{% if badUser == true %}
-Username does not exist, please try again.<br><br>
-{% endif %}
-
-{% if badPass == true %}
-Password does not match, please try again.<br><br>
-{% endif %}
-
-Please login below:
-<form action="/" method = "POST">
-	Username:<br>
-	<input type="text" name="username"><br>
-	Password:<br>
-	<input type="password" name="password"><br>
-	<input type="submit" value = "login">
-	</form>
-<a href="/register">Register</a><br>
-</body>
-</html> -->
 
 <!doctype html>
 
@@ -80,28 +53,21 @@ Please login below:
                 {% endif %}
                 <input class="button rounded-bottom" style="width:100%;" type="submit" id="loginbtn" value="login">
                 <div style="color:#ffffff;">
-                    <input type="checkbox" name="rememberme" value="yes" style="color:#ffffff;">Remember me?<br>
+                    <label><input type="checkbox" name="rememberme" value="yes" style="color:#ffffff;">Remember me?</label>
                 </div>
                 <!-- <input type="checkbox" name="rememberme" value="yes" style="color:#ffffff;">Remember me?<br> -->
                 <a href="/register" style="color:#ffffff;text-decoration:underline;">Register</a><br>
-                <a href="/" style="color:#ffffff;text-decoration:underline;">Forgot Password</a>
+                <a href="/forgotpassword" style="color:#ffffff;text-decoration:underline;">Forgot Password</a>
                 <!-- <a class="button rounded-bottom" style="width:100%;" href="userHome.html" id="loginbtn">Login</a> -->
             </form>
             <!-- TODO: fix this registration ability to be how we want it (scrolling vs diff page vs ??)-->
             <br><br>
-            <!-- <a class="button rounded-bottom" style="width:100%;" href="/register" id="registerbtn">Register</a> -->
+
+            <!-- <a class="button rounded-bottom" style="width:100%;" href="/register" id="registerbtn">Register</a>
+            <a class="button rounded-bottom" style="width:100%;" href="/forgotpassword" id="forgotpassword">Forgot Password</a> -->
 
         </div>
 
-
-
-
-        <!-- REGISTER SCROLL -->
-        <!-- <div>
-        <a href="#register">
-        <img src="../static/images/scrollicon.png" style="">
-    </a>
-</div> -->
 
 <!-- script imports -->
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>

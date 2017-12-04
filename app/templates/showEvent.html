@@ -1,159 +1,158 @@
-<!-- <html>
-<head>
-  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}" />
-  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-</head>
-<body>
-<h1>{{eventName}}</h1>
-This is your event!<br>
-Here is its description:<br><br>
-{{eventDesc}}<br><br>
-<a href="/">Return</a><br><br><br>
-{% if userLoggedIn == true %}
-{% if subscribed == false %}
-<form method = "POST">
-  <input type="submit" value="Follow this event">
-</form>
-{% else %}
-<!- - TODO: some way to unfollow? - ->
-You already follow this event!
-{% endif %}
-{% endif %}
-<!- - {% if owner==true %}
-You own this event! Click below to edit it:
-<form method = "POST">
-  <input type="submit" value="Edit">
-</form>
-{% endif %} - ->
-</body>
-</html> -->
-
 <html>
 
 <head>
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}" />
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='font-awesome-4.7.0/css/font-awesome.min.css') }}" />
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='font-awesome-4.7.0/css/font-awesome.min.css') }}" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
 </head>
 
 <body class="bg-dark">
-	<title>{{ eventName }} - Should I Go?</title>
-	<div class="container main-container">
-	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-		<!-- <a class="navbar-brand" href="#">Home</a> -->
-		<a class="navbar-brand" href="/"><span class="fa fa-home" style="font-size:1.5em;"></a>
-		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-		<span class="navbar-toggler-icon"></span>
-		</button>
+    <title>{{ eventName }} - Should I Go?</title>
+    <div class="container main-container">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <!-- <a class="navbar-brand" href="#">Home</a> -->
+            <a class="navbar-brand" href="/"><span class="fa fa-home" style="font-size:1.5em;"></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-		<div class="collapse navbar-collapse" id="navbarSupportedContent">
-			<ul class="navbar-nav mr-auto">
-				<li class="nav-item">
-					<!-- TODO: are there more settings we want to include than just what's in editUser?
-		...probably stuff like email preferences, etc-->
-					<a class="nav-link" href="/editUser"><span class="fa fa-user" style="font-size:1.5em;"></span></a>
-				</li>
-				<li class="nav-item">
-					<!-- <a class="nav-link" href="/logout">Log Out</a> -->
-					<a class="nav-link" href="/logout"><span class="fa fa-power-off" style="font-size:1.5em;"></span></a>
-				</li>
-			</ul>
-			<ul class="navbar-nav my-2 my-lg-0">
-				<li class="nav-item">
-					<!-- <a class="nav-link" href="/createEvent">+ New Event</a> -->
-					<a class="nav-link" href="/createEvent"><span class="fa fa-plus" style="font-size:1.5em;"></span></a>
-				</li>
-			</ul>
-		</div>
-	</nav>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item">
+                            <!-- TODO: are there more settings we want to include than just what's in editUser?
+                            ...probably stuff like email preferences, etc-->
+                            <a class="nav-link" href="/editUser"><span class="fa fa-user" style="font-size:1.5em;"></span></a>
+                        </li>
+                        <li class="nav-item">
+                            <!-- <a class="nav-link" href="/logout">Log Out</a> -->
+                            <a class="nav-link" href="/logout"><span class="fa fa-power-off" style="font-size:1.5em;"></span></a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav my-2 my-lg-0">
+                        <li class="nav-item">
+                            <!-- <a class="nav-link" href="/createEvent">+ New Event</a> -->
+                            <a class="nav-link" href="/createEvent"><span class="fa fa-plus" style="font-size:1.5em;"></span></a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
 
-	<div class="container-fluid" id="splashpagewrapper">
+            <div class="container-fluid" id="splashpagewrapper">
 
-        <h1>{{eventName}}</h1>
-        <!-- pre-wrap asks it to render the whitespace exactly as it is in the raw text, so it preserves new lines -->
-        <div style="white-space: pre-wrap;">{{eventDesc}}</div><br><br>
-        <!-- <a href="/">Return</a><br><br><br> -->
-        {% if userLoggedIn == true %}
-        {% if going == "yes" %}
-            <!-- Yes button is blue, others grey/secondary -->
-            <p><div class="btn-group" role="group">
-                <a href={{ url_for("showEvent", eventUrl=eventUrl, going="yes", _external=True )}} class="btn btn-primary">I'm Going</a>
-                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="maybe", _external=True )}} class="btn btn-secondary">Maybe Going</a>
-                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-secondary">Not Going</a>
-            </div></p>
-        {% elif going == "maybe" %}
-            <p><div class="btn-group" role="group">
-                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="yes", _external=True )}} class="btn btn-secondary">I'm Going</a>
-                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="maybe", _external=True )}} class="btn btn-primary">Maybe Going</a>
-                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-secondary">Not Going</a>
-            </div></p>
-        {% elif going == "no" %}
-            <p><div class="btn-group" role="group">
-                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="yes", _external=True )}} class="btn btn-secondary">I'm Going</a>
-                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="maybe", _external=True )}} class="btn btn-secondary">Maybe Going</a>
-                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-primary">Not Going</a>
-            </div></p>
-        {% else %}
-            <p><div class="btn-group" role="group">
-                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="yes", _external=True )}} class="btn btn-secondary">I'm Going</a>
-                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="maybe", _external=True )}} class="btn btn-secondary">Maybe Going</a>
-                <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-secondary">Not Going</a>
-            </div></p>
-        {% endif %}
-        {% if yesUsers %}
-        Yes users:
-        {% for user in yesUsers %}
-        {{ user }}{% if not loop.last %}, {% endif %}
-        {% endfor %}
-        <br>
-        {% endif %}
-        {% if maybeUsers %}
-        Maybe users:
-        {% for user in maybeUsers %}
-        {{ user }}{% if not loop.last %}, {% endif %}
-        {% endfor %}
-        <br>
-        {% endif %}
-        {% if noUsers %}
-        No users:
-        {% for user in noUsers %}
-        {{ user }}{% if not loop.last %}, {% endif %}
-        {% endfor %}
-        <br>
-        {% endif %}
+                {% if correctPass == false %}
+                <br><br>
+                <div class="container text-center" id="titlewrapper">
+                    <!-- <div class="container" style="width:70%;" id="loginform"> -->
+                    <!-- <div class="container"> -->
+                    {% if badPass == true %}
+                    Sorry, that password is incorrect!
+                    {% endif %}
+                    <form action="/{{eventUrl}}" method="POST">
+                        This event is password protected!  Please enter the password below:<br><br>
+                        <input type="text" name="password" placeholder="Password"><br><br>
+                        <input class="btn btn-primary" type="submit" id="passbtn" value="View Event">
+                    </form>
 
-        {% if subscribed == false %}
-        Click below to follow this event!
-        <form method = "POST">
-          <input type="submit" name="follow" value="Follow this event" class="btn btn-primary">
-        </form>
-        {% else %}
-        <!-- TODO: some way to unfollow? -->
-        You already follow this event!
-        <form method = "POST">
-          <input type="submit" name="unfollow" value="Unfollow this event" class="btn btn-primary">
-        </form>
-        {% endif %}
-        {% endif %}
-        {% if owner==true %}
-        You own this event! Click below to edit or delete it:
-        <p><a href={{ url_for("showEvent", eventUrl=eventUrl, wantsToEdit="True", _external=True )}} class="btn btn-primary">Edit</a>
-        <!-- <a href={{ url_for("showEvent", eventUrl=eventUrl, wantsToDelete="True", _external=True )}} class="btn btn-primary" style="background-color: red;border-color: red;">Delete</a> -->
-        </p>
+                </div>
+                {% else %}
 
-		<!-- <form method = "POST">
-          <input type="submit" value="Edit">
-        </form> -->
-		{% endif %}
+                <h1>{{eventName}}</h1>
+                <!-- pre-wrap asks it to render the whitespace exactly as it is in the raw text, so it preserves new lines -->
+                <div style="white-space: pre-wrap;">{{eventDesc}}</div><br><br>
+                <!-- <a href="/">Return</a><br><br><br> -->
+                {% if userLoggedIn == true %}
+                {% if going == "yes" %}
+                <!-- Yes button is blue, others grey/secondary -->
+                <p><div class="btn-group" role="group">
+                    <a href={{ url_for("showEvent", eventUrl=eventUrl, going="yes", _external=True )}} class="btn btn-primary">I'm Going</a>
+                    <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="maybe", _external=True )}} class="btn btn-secondary">Maybe Going</a>
+                    <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-secondary">Not Going</a>
+                </div></p>
+                {% elif going == "maybe" %}
+                <p><div class="btn-group" role="group">
+                    <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="yes", _external=True )}} class="btn btn-secondary">I'm Going</a>
+                    <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="maybe", _external=True )}} class="btn btn-primary">Maybe Going</a>
+                    <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-secondary">Not Going</a>
+                </div></p>
+                {% elif going == "no" %}
+                <p><div class="btn-group" role="group">
+                    <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="yes", _external=True )}} class="btn btn-secondary">I'm Going</a>
+                    <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="maybe", _external=True )}} class="btn btn-secondary">Maybe Going</a>
+                    <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-primary">Not Going</a>
+                </div></p>
+                {% else %}
+                <p><div class="btn-group" role="group">
+                    <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="yes", _external=True )}} class="btn btn-secondary">I'm Going</a>
+                    <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="maybe", _external=True )}} class="btn btn-secondary">Maybe Going</a>
+                    <a href={{ url_for("showEvent", eventUrl=eventUrl,  going="no", _external=True )}} class="btn btn-secondary">Not Going</a>
+                </div></p>
 
+                {% endif %}
+                {% if yesUsers %}
+                Yes users:
+                {% for user in yesUsers %}
+                {{ user }}{% if not loop.last %}, {% endif %}
+                {% endfor %}
+                <br>
+                {% endif %}
+                {% if maybeUsers %}
+                Maybe users:
+                {% for user in maybeUsers %}
+                {{ user }}{% if not loop.last %}, {% endif %}
+                {% endfor %}
+                <br>
+                {% endif %}
+                {% if noUsers %}
+                No users:
+                {% for user in noUsers %}
+                {{ user }}{% if not loop.last %}, {% endif %}
+                {% endfor %}
+                <br>
+                {% endif %}
+                {% for username,comment,time in comments %}
+                <!-- TODO: SOS @aslan can you make this not look like crap? -->
+                {{ username }} -- {{ time }}<br>
+                {{ comment }}<br>
+                {% if not loop.last %}
+                --------------------------------------<br><br>
+                {% endif %}
+                {% endfor %}
+                <form method="POST">
+                    <textarea class="form-control" name="comment" rows="3" placeholder="Add your comment here!"></textarea>
+                    <input type="submit" class="btn btn-primary" value="Submit">
+                </form>
+                {% if subscribed == false %}
+                Click below to follow this event!
+                <form method = "POST">
+                    <input type="submit" name="follow" value="Follow this event" class="btn btn-primary">
+                </form>
+                {% else %}
+                <!-- TODO: some way to unfollow? -->
+                You already follow this event!
+                <form method = "POST">
+                    <input type="submit" name="unfollow" value="Unfollow this event" class="btn btn-primary">
+                </form>
+                {% endif %}
+                {% endif %}
+                {% if owner==true %}
+                You own this event! Click below to edit or delete it:
+                <p><a href={{ url_for("showEvent", eventUrl=eventUrl, wantsToEdit="True", _external=True )}} class="btn btn-primary">Edit</a>
+                    <!-- <a href={{ url_for("showEvent", eventUrl=eventUrl, wantsToDelete="True", _external=True )}} class="btn btn-primary" style="background-color: red;border-color: red;">Delete</a> -->
+                </p>
 
-	</div>
-</div>
+                <!-- <form method = "POST">
+                <input type="submit" value="Edit">
+            </form> -->
+            {% endif %}
+            {% endif %}
 
-	<!-- script imports -->
-	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+        </div>
+    </div>
+
+    <!-- script imports -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
 
 
 </body>

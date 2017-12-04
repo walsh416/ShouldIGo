@@ -85,6 +85,9 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
                     Event description:<br>
                     <textarea class="form-control" name="eventDesc" rows="3" placeholder="Event description">{{ eventDesc }}</textarea><br>
 
+                    If you want to add or update your event's password, enter it below:<br>
+                    <input type="text" name="password" placeholder="Password (optional)"><br><br>
+
                     <input type="submit" class="btn btn-primary" value="Save" name="save">
                     <a href={{ url_for("showEvent", eventUrl=eventUrl, _external=True )}} class="btn btn-secondary">Cancel</a>
                 </form>

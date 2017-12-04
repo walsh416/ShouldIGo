@@ -4,6 +4,7 @@ import hashlib, os
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
 from threading import Thread
+from datetime import datetime
 
 application = Flask(__name__)
 application.config.from_object('config')
@@ -40,6 +41,7 @@ class User_alch(alch_db.Model):
     email = alch_db.Column(alch_db.String(80), nullable=False)
     followedEventsCSV = alch_db.Column(alch_db.String(500), nullable=True)
     verifiedEmail = alch_db.Column(alch_db.String(20), nullable=True)
+    resetPass = alch_db.Column(alch_db.String(80), nullable=False)
 
     def __init__(self, firstname, lastname, username, email, rawpassword):
         super(User_alch, self).__init__()
@@ -51,6 +53,7 @@ class User_alch(alch_db.Model):
         self.assignVerifiedEmail()
         self.ownedEventsCSV = ""
         self.followedEventsCSV = ""
+        self.resetPass = get_x_randoms(16)
 
     def __repr__(self):
         return '<User %r>\n\tfirstname: %r\n\tlastname: %r\n\temail: %r\n\townedevents: %r\n\tfollowedevents: %r' % (self.username, self.firstname, self.lastname, self.email, self.ownedEventsCSV, self.followedEventsCSV)
@@ -65,6 +68,9 @@ class User_alch(alch_db.Model):
 
     def assignVerifiedEmail(self):
         self.verifiedEmail = get_x_randoms(16)
+
+    def assignResetPass(self):
+        self.resetPass = get_x_randoms(16)
 
     # TODO: Refactor this with many-to-many relation between User_alch and Event_alch...
     #           Uses a secondary table with cols of users and rows of events, or vice versa
@@ -124,6 +130,12 @@ def usernameAvail(usernameIn):
         return True
     return False
 
+def emailAvail(emailIn):
+    user_count = User_alch.query.filter_by(email=emailIn).count()
+    if user_count==0:
+        return True
+    return False
+
 class Event_alch(alch_db.Model):
     __tablename__="events"
     eventUrl = alch_db.Column(alch_db.String(50), primary_key=True, nullable=False)
@@ -133,11 +145,15 @@ class Event_alch(alch_db.Model):
     yesGoingCSV = alch_db.Column(alch_db.String(1000), nullable=True)
     maybeGoingCSV = alch_db.Column(alch_db.String(1000), nullable=True)
     noGoingCSV = alch_db.Column(alch_db.String(1000), nullable=True)
+    password = alch_db.Column(alch_db.String(80), nullable=False)
+    salt = alch_db.Column(alch_db.String(80), nullable=False)
+    commentsCSV = alch_db.Column(alch_db.String(10000), nullable=True)
 
     def __repr__(self):
         return '<Event Url: %r>' % self.eventUrl
 
-    def __init__(self, url, name, desc):
+    # def __init__(self, url, name, desc):
+    def __init__(self, url, name, desc, password=None):
         super(Event_alch, self).__init__()
         self.eventUrl = url
         self.eventName = name
@@ -146,6 +162,43 @@ class Event_alch(alch_db.Model):
         self.yesGoingCSV = ""
         self.maybeGoingCSV = ""
         self.noGoingCSV = ""
+        # print password
+        if password is not None and password != "":
+            # print "not none: "+repr(password)
+            self.assignPassAndSalt(password)
+        else:
+            self.password=""
+            self.salt=""
+        self.commentsCSV = ""
+
+    def addComment(self, username, comment):
+        # CSV with "user~~comment~~time~$~" format
+        fullComment = username + "~~" + comment + "~~" + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        self.commentsCSV += (fullComment + "~$~")
+
+    def returnComments(self):
+        toReturn = []
+        for rawComment in self.commentsCSV.split("~$~"):
+            if rawComment is not None and rawComment!= "":
+                commentArr = []
+                for commentSection in rawComment.split("~~"):
+                    if commentSection is not None and commentSection != "":
+                        commentArr.append(commentSection)
+                # TODO: what if commentArr is still []?
+                toReturn.append(commentArr)
+        return toReturn
+
+    def checkHashPass(self, rawPassIn):
+        if rawPassIn is None or rawPassIn=="":
+            if self.password is None or self.password=="":
+                return True
+            return False
+        correctPass = hash_pass(rawPassIn + self.salt)
+        return correctPass == self.password
+
+    def assignPassAndSalt(self, rawPass):
+        self.salt = get_x_randoms(64)
+        self.password = hash_pass(rawPass+self.salt)
 
     def unfollowUser(self, username):
         userList = self.followers.split(",")
@@ -222,8 +275,12 @@ class Event_alch(alch_db.Model):
 
 
 def eventUrlAvail(urlIn):
+    protectedUrls = ["login","lougout","register","createEvent","validateEmail","editUser"]
     event_count = Event_alch.query.filter_by(eventUrl=urlIn).count()
     if event_count == 0:
+        for url in protectedUrls:
+            if urlIn.lower() == url.lower():
+                return False
         return True
     return False
 

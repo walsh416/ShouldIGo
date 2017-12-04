@@ -21,7 +21,7 @@ mail = Mail(application)
 # When running locally, trying to force HTTPS breaks it, so set DEBUG=True
 sslify = SSLify(application)
 
-protectedUrls = ["login","lougout","register","createEvent","validateEmail","editUser"]
+# protectedUrls = ["login","lougout","register","createEvent","validateEmail","editUser"]
 
 # returns datetime object for x days from now (for cookie expiration dates)
 def get_x_daysFromNow(x):
@@ -112,6 +112,75 @@ def logout():
     resp.set_cookie('rememberme', '', expires=0)
     return resp
 
+@application.route("/forgotpassword", methods=["GET","POST"])
+def forgotpassword():
+    # POST method means data was sent by user
+    # return render_template('forgotpassword.html')
+    if request.method == "POST":
+        print "in POST method of /forgotpassword"
+        # checking valid email against regexp for it
+        _userEmail = request.form.get('email')
+
+        validEmailBool = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', _userEmail)
+        if validEmailBool == None:
+            return render_template('forgotpassword.html', badEmail=True)
+        # usr = db_h.User_alch(email=request.form.get('email'))
+        usr = db_h.User_alch.query.filter_by(email=_userEmail).first()
+
+        msg = Message(
+                'Password reset for %s' % usr.firstname,
+                sender='timsemailforlols@google.com',
+                recipients=[request.form.get('email')]
+                )
+        msg.body = render_template("changeforgotpassword.txt", firstname=usr.firstname, username=usr.username, resetPass=usr.resetPass)
+        msg.html = render_template("changeForgotPassword.html", firstname=usr.firstname, username=usr.username, resetPass=usr.resetPass)
+        thr = Thread(target=send_async_email, args=[application, msg])
+        thr.start()
+        resp = make_response(redirect(url_for('splashScreen')))
+        return resp
+    else:
+        print "in GET method of /forgotpassword"
+        email=request.args.get('email')
+
+        # TODO: what if the following query returns a NoneType?
+        usr = db_h.User_alch.query.filter_by(email=email).first()
+
+        print "returning bottom render_template(forgotpassword.html)"
+        return render_template('forgotpassword.html')
+
+@application.route('/newPassword', methods=["GET","POST"])
+def newPassword():
+    print "hello"
+    # confirm user is logged in
+    username=request.args.get('username')
+    # resetPass=request.args.get('resetPass')
+    print username
+    # usr = db_h.User_alch.query.filter_by(username = username).first()
+    # print usr.username
+
+    if username is not None:
+        session['newPass_reset'] = request.args.get('resetPass')
+        session['newPass_username'] = username
+        usr = db_h.User_alch.query.filter_by(username = username).first()
+    else:
+        usr = db_h.User_alch.query.filter_by(username = session['newPass_username']).first()
+
+    if request.method=="GET":
+        return render_template('newPassword.html')
+    else:
+        # POST means that the form has already been submitted, time to execute it
+        new_password=request.form.get('password')
+        if usr.resetPass == session['newPass_reset']:
+            usr.assignPassAndSalt(new_password)
+            usr.assignResetPass()
+            db_h.alch_db.session.commit()
+            session.pop('newPass_username', None)
+            session.pop('newPass_reset', None)
+            # Throw user back to "/" and view the splashScreen/userHome.
+            return make_response(redirect(url_for('splashScreen')))
+        else:
+            return render_template('newPassword.html', badReset=True)
+
 @application.route("/register", methods=["GET","POST"])
 def register():
     # POST method means data was sent by user
@@ -126,12 +195,15 @@ def register():
         else:
             # try opening connection to database:
             _userUsername = request.form.get('username')
-            print "Passwords match, username is: "+_userUsername
+            _userEmail = request.form.get('email')
+            print "Passwords match, username is: "+ _userUsername
             if not db_h.usernameAvail(_userUsername):
                 print _userUsername + " is not available"
                 return render_template('register.html', diffPasswords=False, duplicateUser=True)
+            if not db_h.emailAvail(_userEmail):
+                print _userEmail + " is not available"
+                return render_template('register.html', diffPasswords=False, duplicateEmail=True)
             # checking valid email against regexp for it
-            _userEmail = request.form.get('email')
             validEmailBool = re.match('^[_a-z0-9-\+]+(\.[_a-z0-9-\+]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', _userEmail)
             if validEmailBool == None:
                 return render_template('register.html', badEmail=True)
@@ -229,6 +301,7 @@ def createEvent():
             eventUrl = request.cookies.get('eventUrl')
             eventName = request.form.get('eventName')
             eventDesc = request.form.get('eventDesc')
+            password = request.form.get('password')
             dateFilter = request.form.get('datefilter')
             # TODO: force input in eventName and eventDesc
             # TODO: do something with this... duh.
@@ -241,7 +314,7 @@ def createEvent():
                 # TODO: should actually be done in javascript, because here it's buried in a post method and yeah.
                 pass
 
-            event = db_h.Event_alch(url=eventUrl, name=eventName, desc=eventDesc)
+            event = db_h.Event_alch(url=eventUrl, name=eventName, desc=eventDesc, password=password)
             db_h.alch_db.session.add(event)
             db_h.alch_db.session.commit()
 
@@ -255,6 +328,7 @@ def createEvent():
     # GET method means user is here for first time, allow to check Url availability:
     else:
         return render_template('createEvent.html', firstname=usr.firstname, firstTime=True)
+
 
 @application.route('/validateEmail')
 def resendValidationEmail():
@@ -398,21 +472,34 @@ def showEvent(eventUrl):
         if request.form.get('save'):
             new_eventName = request.form.get('eventName')
             new_eventDesc = request.form.get('eventDesc')
+            new_password = request.form.get('password')
             evnt = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
             evnt.eventName=new_eventName
             evnt.eventDesc=new_eventDesc
+            if new_password is not None and new_password!="":
+                evnt.assignPassAndSalt(new_password)
+            else:
+                evnt.password=""
+                evnt.salt=""
             evnt.clearRsvps()
             db_h.alch_db.session.commit()
             evnt.sendEmailToFollowers()
+            return redirect(url_for('showEvent', eventUrl=eventUrl))
         if request.form.get('unfollow') and usr.followsEventUrl(eventUrl):
             usr.unfollowEvent(eventUrl)
             evnt.unfollowUser(_username)
             db_h.alch_db.session.commit()
+            return redirect(url_for('showEvent', eventUrl=eventUrl))
         elif request.form.get('follow') and not usr.followsEventUrl(eventUrl):
             usr.followedEventsCSV += (eventUrl+",")
             evnt.followers += (_username+",")
             db_h.alch_db.session.commit()
-        return redirect(url_for('showEvent', eventUrl=eventUrl))
+            return redirect(url_for('showEvent', eventUrl=eventUrl))
+        if request.form.get('comment'):
+            # TODO: comments can't have tilde (~) character
+            new_comment = request.form.get('comment')
+            evnt.addComment(usr.username, new_comment)
+            db_h.alch_db.session.commit()
     userLoggedIn = False
     subscribed = False
     owner = False
@@ -424,6 +511,7 @@ def showEvent(eventUrl):
         event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
         userLoggedIn = True
         owner = usr.ownsEventUrl(eventUrl)
+        follower = usr.followsEventUrl(eventUrl)
         subscribed = db_h.is_EventUrl_in_EventUrlCSV(eventUrl, usr.followedEventsCSV)
         # If owner, and if they hit "edit" button, comes back with GET method for editing, and allows owner to edit it.
         wantsToEdit=request.args.get('wantsToEdit')
@@ -467,9 +555,21 @@ def showEvent(eventUrl):
             if username is not None and username != "":
                 user = db_h.User_alch.query.filter_by(username=username).first()
                 noUsers.append(user.firstname+" "+user.lastname)
-        return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner, going=going, yesUsers=yesUsers, maybeUsers=maybeUsers, noUsers=noUsers)
+        correctPass = event.checkHashPass(request.form.get('password'))
+        if owner or follower:
+            correctPass = True
+        badPass = False
+        if correctPass == False and request.form.get('password') is not None:
+            badPass = True
+        return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner, going=going, yesUsers=yesUsers, maybeUsers=maybeUsers, noUsers=noUsers, correctPass=correctPass, badPass=badPass, comments=event.returnComments())
     event = db_h.Event_alch.query.filter_by(eventUrl=eventUrl).first()
-    return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner)
+    print request.form.get('password')
+    correctPass = event.checkHashPass(request.form.get('password'))
+    badPass = False
+    if correctPass == False and request.form.get('password') is not None:
+        badPass = True
+    print badPass
+    return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner, correctPass=correctPass, badPass=badPass)
 
 @application.errorhandler(404)
 def page_not_found(e):
