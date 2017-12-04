@@ -44,7 +44,7 @@ Please login below:
 </head>
 
 <body>
-
+    <title>Should I Go?</title>
     <div class="container-fluid" id="splashpagewrapper">
 
         <!-- TITLE -->
@@ -52,11 +52,11 @@ Please login below:
             <h1 class="title" id="splashtitle">shouldigo.today</h1>
             <!-- TODO: @Aslan, how do I make this text pretty? -->
             {% if badUser == true %}
-            Username does not exist, please try again<br><br>
+            <div style="color:#ffffff;">Username does not exist, please try again</div><br><br>
             {% endif %}
 
             {% if badPass == true %}
-            Password does not match, please try again<br><br>
+            <div style="color:#ffffff;">Password does not match, please try again</div><br><br>
             {% endif %}
         </div>
 
@@ -67,16 +67,29 @@ Please login below:
 
             <form action="/" method="POST">
             <!-- <form action="/" method="post" name="login"> -->
+                {% if badUser == true %}
+                <input class="form-control rounded-top" type="text" id="usernameinput" name="username" placeholder="Invalid username" style="border-color: red;border-width: medium;">
+                {% else %}
                 <input class="form-control rounded-top" type="text" id="usernameinput" name="username" placeholder="username">
+                {% endif %}
                 <div style="height:1px;background-color:#d3d3d3;"></div>
+                {% if badPass == true %}
+                <input class="form-control rounded-0" type="password" id="passwordinput" name="password" placeholder="Invalid password" style="border-color: red;border-width: medium;">
+                {% else %}
                 <input class="form-control rounded-0" type="password" id="passwordinput" name="password" placeholder="password">
+                {% endif %}
                 <input class="button rounded-bottom" style="width:100%;" type="submit" id="loginbtn" value="login">
-                <input type="checkbox" name="rememberme" value="yes">Remember me?<br>
+                <div style="color:#ffffff;">
+                    <label><input type="checkbox" name="rememberme" value="yes" style="color:#ffffff;">Remember me?</label>
+                </div>
+                <!-- <input type="checkbox" name="rememberme" value="yes" style="color:#ffffff;">Remember me?<br> -->
+                <a href="/register" style="color:#ffffff;text-decoration:underline;">Register</a><br>
+                <a href="/" style="color:#ffffff;text-decoration:underline;">Forgot Password</a>
                 <!-- <a class="button rounded-bottom" style="width:100%;" href="userHome.html" id="loginbtn">Login</a> -->
             </form>
             <!-- TODO: fix this registration ability to be how we want it (scrolling vs diff page vs ??)-->
             <br><br>
-            <a class="button rounded-bottom" style="width:100%;" href="/register" id="registerbtn">Register</a>
+            <!-- <a class="button rounded-bottom" style="width:100%;" href="/register" id="registerbtn">Register</a> -->
 
         </div>
 

@@ -21,6 +21,18 @@ p {
   font-size: 16px;
 }
 
+.main-container{
+    color:#fff;
+}
+
+.list-button{
+  min-height: 50px;
+  height: 50px;
+  border-radius: 0px !important;
+  text-align: center;
+  outline:none !important;
+}
+
 .button {
     background-color: #253466; /*main color*/
     border: none;
@@ -66,14 +78,22 @@ p {
 /*FORMS*/
 
 .form-control {
-  border-radius: 0px !important;
-  border: 0 none;
+  /*border-radius: 0px !important;*/
+  /*border: 0 none;*/
 }
 
 /* remove the shadow when inmput is focused */
 .form-control:focus{
-  box-shadow: none !important;
-  border: 0 none;
+  /*box-shadow: none !important;
+  border: 0 none;*/
+}
+
+.pagelist{
+  height:91.5%;
+}
+
+.nav-btn-floor{
+    height: 3px;
 }
 
 /*FONT SCHEME */
