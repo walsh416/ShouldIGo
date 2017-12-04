@@ -62,7 +62,7 @@
                             <!-- Event name:<br> -->
                             <!-- TODO: make this not ugly and mismatched... -->
                             Pick an event name: <br>
-                            <input type="text" name="eventName" placeholder="Event name"><br>
+                            <input type="text" name="eventName" placeholder="Event name" maxlength="100"><br>
                             <!-- Enter a description of your event:<br> -->
                             <!-- <textarea rows="5" cols="40" name="eventDesc"></textarea><br> -->
                             <!-- <input type="text" name="eventDesc" size==22><br> -->
@@ -89,11 +89,11 @@
 
                     
                     If you want your event to be hidden behind a password, enter it below:<br>
-                    <input type="text" name="password" placeholder="Password (optional)"><br><br>
+                    <input type="text" name="password" placeholder="Password (optional)" maxlength="100"><br><br>
 
                     What time do you want your event to be active?<br>
-                    <input type="text" name="datefilter" value="" size=22/><br>
-                    <input type="submit" class="btn btn-primary" value="Create">
+                    <input type="text" name="datefilter" value="" size=22 maxlength="100"/><br>
+                    <input type="submit" class="btn btn-primary" value="Create" maxlength="100">
                     <a href="/" class="btn btn-secondary">Cancel</a>
                 </form>
                 {% else %}
@@ -105,7 +105,7 @@
                 Sorry, please only use letters, numbers, dashes, and underscores in your url!<br>
                 {% endif %}
                 <form method = "POST">
-                    <input type="text" name="eventUrl"><br>
+                    <input type="text" name="eventUrl" maxlength="100"><br>
                     <div style="height:3px;"></div>
                     <input type="submit" class="btn btn-primary" value="Check URL">
                     <a href="/" class="btn btn-secondary">Cancel</a>

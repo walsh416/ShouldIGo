@@ -49,7 +49,7 @@
                     {% endif %}
                     <form action="/{{eventUrl}}" method="POST">
                         This event is password protected!  Please enter the password below:<br><br>
-                        <input type="text" name="password" placeholder="Password"><br><br>
+                        <input type="text" name="password" placeholder="Password" maxlength="100"><br><br>
                         <input class="btn btn-primary" type="submit" id="passbtn" value="View Event">
                     </form>
 
@@ -121,7 +121,7 @@
                 {% endif %}
                 {% endfor %}
                 <form method="POST">
-                    <textarea class="form-control" name="comment" rows="3" placeholder="Add your comment here!"></textarea>
+                    <textarea id=comment class="form-control" name="comment" rows="3" placeholder="Add your comment here!" maxlength="1000" pattern="[^~]*"></textarea>
                     <input type="submit" class="btn btn-primary" value="Submit">
                 </form>
                 {% if subscribed == false %}
@@ -153,9 +153,49 @@
     </div>
 
     <!-- script imports -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    
+    <script>
+           $( document ).ready( function() {
+            var errorMessage = "Please remove all tildes.";
+
+            $( this ).find( "textarea" ).on( "input change propertychange", function() {
+
+                var pattern = $( this ).attr( "pattern" );
+
+                if(typeof pattern !== typeof undefined && pattern !== false)
+                {
+                    var patternRegex = new RegExp( "^" + pattern.replace(/^\^|\$$/g, '') + "$", "g" );
+
+                    hasError = !$( this ).val().match( patternRegex );
+
+                    if ( typeof this.setCustomValidity === "function") 
+                    {
+                        this.setCustomValidity( hasError ? errorMessage : "" );
+                    } 
+                    else 
+                    {
+                        $( this ).toggleClass( "error", !!hasError );
+                        $( this ).toggleClass( "ok", !hasError );
+
+                        if ( hasError ) 
+                        {
+                            $( this ).attr( "title", errorMessage );
+                        } 
+                        else
+                        {
+                            $( this ).removeAttr( "title" );
+                        }
+                    }
+                }
+
+            });
+        });
+
+    </script>
 
 
 </body>

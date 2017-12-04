@@ -48,14 +48,14 @@
 
 					<form method="POST">
 						First name<br>
-						<input type="text" name="firstname" value="{{ firstname }}"><br>
+						<input type="text" name="firstname" value="{{ firstname }}" maxlength="100"><br>
 						<br> Last name<br>
-						<input type="text" name="lastname" value="{{ lastname }}"><br>
+						<input type="text" name="lastname" value="{{ lastname }}" maxlength="100"><br>
 						<br> Email
 						<br>
-						<input type="text" name="email" value="{{ email }}"><br>
+						<input type="text" name="email" value="{{ email }}" maxlength="100"><br>
 						<br>
-						<input type="submit" class="btn btn-primary" value="Submit">
+						<input type="submit" class="btn btn-primary" value="Submit" maxlength="100">
 						<!-- <a class="btn btn-primary" href="#">Save</a> -->
 						<a href="/" class="btn btn-secondary">Cancel</a><br><br>
 					</form>

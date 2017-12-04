@@ -498,6 +498,9 @@ def showEvent(eventUrl):
         if request.form.get('comment'):
             # TODO: comments can't have tilde (~) character
             new_comment = request.form.get('comment')
+            # check_comment = re.match("~",new_comment)
+            # if(check_comment == none):
+            #     return red
             evnt.addComment(usr.username, new_comment)
             db_h.alch_db.session.commit()
     userLoggedIn = False
