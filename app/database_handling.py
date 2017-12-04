@@ -124,6 +124,12 @@ def usernameAvail(usernameIn):
         return True
     return False
 
+def emailAvail(emailIn):
+    user_count = User_alch.query.filter_by(email=emailIn).count()
+    if user_count==0:
+        return True
+    return False
+
 # TODO: come back to secret/password protected events!!
 class Event_alch(alch_db.Model):
     __tablename__="events"

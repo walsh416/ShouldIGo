@@ -213,12 +213,15 @@ def register():
         else:
             # try opening connection to database:
             _userUsername = request.form.get('username')
+            _userEmail = request.form.get('email')
             print "Passwords match, username is: "+ _userUsername
             if not db_h.usernameAvail(_userUsername):
                 print _userUsername + " is not available"
                 return render_template('register.html', diffPasswords=False, duplicateUser=True)
+            if not db_h.emailAvail(_userEmail):
+                print _userEmail + " is not available"
+                return render_template('register.html', diffPasswords=False, duplicateEmail=True)
             # checking valid email against regexp for it
-            _userEmail = request.form.get('email')
             validEmailBool = re.match('^[_a-z0-9-\+]+(\.[_a-z0-9-\+]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', _userEmail)
             if validEmailBool == None:
                 return render_template('register.html', badEmail=True)
