@@ -6,7 +6,10 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}" />
     <!-- date range picker stuff-->
     <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+    <script type='text/javascript' src="{{url_for('static', filename='CheckFields.js')}}"></script>
+  
 
+    
     <style>
     </style>
 </head>
@@ -55,7 +58,7 @@
 
                         {% if UrlInUse == false %}
                         {{eventUrl}} is not in use, set up the rest of your event!
-                        <form method="POST">
+                        <form method="POST" onsubmit='if(checkFields()) {} else { return false; }'' >
                             <!-- Event name:<br> -->
                             <!-- TODO: make this not ugly and mismatched... -->
                             Pick an event name: <br>
@@ -80,9 +83,14 @@
                     </div>
                 </div> -->
 
-                    <textarea class="form-control" name="eventDesc" rows="3" placeholder="Event description"></textarea>
+
+                    <textarea id="eventDesc" class="form-control" name="eventDesc" rows="3" placeholder="Event description" maxlength="1000"></textarea>
+                    <div id ="textcounter" style="font:15px Arial; text-align:right;">1000 Character Limit</div>
+
+                    
                     If you want your event to be hidden behind a password, enter it below:<br>
                     <input type="text" name="password" placeholder="Password (optional)"><br><br>
+
                     What time do you want your event to be active?<br>
                     <input type="text" name="datefilter" value="" size=22/><br>
                     <input type="submit" class="btn btn-primary" value="Create">
@@ -155,10 +163,28 @@ format: 'MM/DD/YYYY h:mm A'
     <script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <!-- Include Date Range Picker -->
     <script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script scr=""></script>
+    <script>
+    $(document).ready(function() {
+        $('#eventDesc').on('input propertychange', function() {
+            CharLimit(this, 1000);
+        });
+    });
 
+    function CharLimit(input, maxChar) {
+         var len = $(input).val().length;
+         $('#textcounter').text(maxChar - len + ' characters remaining');
+        
+        if (len > maxChar) {
+             $(input).val($(input).val().substring(0, maxChar));
+             $('#textcounter').text(0 + ' characters remaining');
+         }
+    }
+    </script>
 
 </body>
-
+    
 
 
 
