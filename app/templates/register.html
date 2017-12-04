@@ -13,6 +13,7 @@
     <!-- date range picker stuff-->
     <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
     <script type='text/javascript' src="{{url_for('static', filename='CheckFields.js')}}"></script>
+    <script type='text/javascript' src="{{url_for('static', filename='ValidateReg.js')}}"></script> 
 
     <!-- <link rel="stylesheet" type="text/css" href="isthere.css">
     <style>
@@ -21,7 +22,7 @@
 }
 </style>
 
-<script type='text/javascript' src="{{url_for('static', filename='ValidateReg.js')}}"></script> -->
+-->
 </head>
 
 <body class="bg-dark">
@@ -66,7 +67,7 @@
                     <div class="form-group">
 
                         <!-- <form method="POST"> -->
-<<<<<<< HEAD
+
 						<form action="/register" method="POST" onsubmit='if(ValidateReg()) {} else { return false; }''>
 							First name<br>
 							<input type="text" class="form-control" name="firstname" maxlength="100"><br>Last Name<br>
@@ -78,20 +79,6 @@
 							<br>
 							<input type="password" class="form-control" name="password" maxlength="100"><br>Confirm password<br>
 							<input type="password" class="form-control" name="passwordconfirm" maxlength="100"><br>
-=======
-                        <form action="/register" method="POST" onsubmit='if(ValidateReg()) {} else { return false; }'>
-                            First name<br>
-                            <input type="text" class="form-control" name="firstname"><br>Last Name<br>
-                            <input type="text" class="form-control" name="lastname"><br>Username
-                            <br>
-                            <input type="text" class="form-control" name="username"><br>Email
-                            <br>
-                            <input type="text" class="form-control" name="email"><br>Password
-                            <br>
-                            <input type="password" class="form-control" name="password"><br>Confirm password<br>
-                            <input type="password" class="form-control" name="passwordconfirm"><br>
->>>>>>> master
-
                             <input type="submit" class="btn btn-primary" value="Register">
 
                             <a href="/" class="btn btn-secondary">Cancel</a>

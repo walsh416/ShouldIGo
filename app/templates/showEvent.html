@@ -117,11 +117,11 @@
                 <br><br><br>
 
 
-                <form method="POST">
+                <!--<form method="POST">
                     <textarea class="form-control" name="comment" rows="3" placeholder="Add your comment here!"></textarea>
                     <input type="submit" class="btn btn-primary" value="Submit">
                 </form>
-                <!-- TODO: what if there are lots of comments?  Some sort of an ajax-y "load more" button? -->
+                <!- - TODO: what if there are lots of comments?  Some sort of an ajax-y "load more" button? -->
                 {% for username,comment,time in comments %}
                 --------------------------------------<br>
                 <!-- TODO: SOS @aslan can you make this not look like crap? -->
@@ -133,13 +133,11 @@
                 --------------------------------------<br><br>
                 {#{% endif %}#}
                 {% endfor %}
-<<<<<<< HEAD
+
                 <form method="POST">
                     <textarea id=comment class="form-control" name="comment" rows="3" placeholder="Add your comment here!" maxlength="1000" pattern="[^~]*"></textarea>
                     <input type="submit" class="btn btn-primary" value="Submit">
                 </form>
-=======
->>>>>>> master
                 {% if subscribed == false %}
                 Click below to recieve updates about this event!
                 <form method = "POST">

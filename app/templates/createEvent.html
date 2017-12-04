@@ -61,12 +61,10 @@
                         <form method="POST" onsubmit='if(checkFields()) {} else { return false; }' >
                             <!-- Event name:<br> -->
                             <!-- TODO: make this not ugly and mismatched... -->
-<<<<<<< HEAD
-                            Pick an event name: <br>
-                            <input type="text" name="eventName" placeholder="Event name" maxlength="100"><br>
-=======
+
+
                             <label for="eventName">Pick an event name:</label>
-                            <input type="text" id="eventName" name="eventName" class="form-control" aria-describedby="eventNameHelp">
+                            <input type="text" id="eventName" name="eventName" class="form-control" aria-describedby="eventNameHelp" maxlength="50">
                             <div id ="nameCounter" style="font:15px Arial; text-align:right;">50 Character Limit</div>
                             <!-- <small id="eventNameHelp" class="form-text text-muted">
                                 Names should be less than 50 characters, and contain only letters, numbers, underscores, and dashes
@@ -74,7 +72,7 @@
                             <!-- Pick an event name: <br>
                             <input type="text" name="eventName" placeholder="Event name"><br> -->
 
->>>>>>> master
+
                             <!-- Enter a description of your event:<br> -->
                             <!-- <textarea rows="5" cols="40" name="eventDesc"></textarea><br> -->
                             <!-- <input type="text" name="eventDesc" size==22><br> -->
@@ -118,16 +116,13 @@
                 {% elif badUrl == true %}
                 <label for="eventUrl">Sorry, please only use letters, numbers, dashes, and underscores in your url!</label>
                 {% endif %}
-<<<<<<< HEAD
+
                 <form method = "POST">
-                    <input type="text" name="eventUrl" maxlength="100"><br>
-=======
                     <input type="text" id="eventUrl" name="eventUrl" class="form-control" aria-describedby="eventUrlHelp" maxlength="50">
                     <div id ="urlCounter" style="font:15px Arial; text-align:right;">50 Character Limit</div>
                     <small id="eventUrlHelp" class="form-text text-muted">
                         URLs should be less than 50 characters, and contain only letters, numbers, underscores, and dashes
                     </small>
->>>>>>> master
                     <div style="height:3px;"></div>
                     <input type="submit" class="btn btn-primary" value="Check URL">
                     <a href="/" class="btn btn-secondary">Cancel</a>
