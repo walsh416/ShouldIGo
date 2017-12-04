@@ -136,6 +136,7 @@ def emailAvail(emailIn):
         return True
     return False
 
+# TODO: deleting event should look for event in all user's ownedEventsCSV (since multiple owenrs is now a thing)
 class Event_alch(alch_db.Model):
     __tablename__="events"
     eventUrl = alch_db.Column(alch_db.String(50), primary_key=True, nullable=False)
@@ -148,12 +149,13 @@ class Event_alch(alch_db.Model):
     password = alch_db.Column(alch_db.String(80), nullable=False)
     salt = alch_db.Column(alch_db.String(80), nullable=False)
     commentsCSV = alch_db.Column(alch_db.String(10000), nullable=True)
+    ownersCSV = alch_db.Column(alch_db.String(1000), nullable=False)
 
     def __repr__(self):
         return '<Event Url: %r>' % self.eventUrl
 
     # def __init__(self, url, name, desc):
-    def __init__(self, url, name, desc, password=None):
+    def __init__(self, url, name, desc, username, password=None):
         super(Event_alch, self).__init__()
         self.eventUrl = url
         self.eventName = name
@@ -170,11 +172,17 @@ class Event_alch(alch_db.Model):
             self.password=""
             self.salt=""
         self.commentsCSV = ""
+        self.ownersCSV = username+","
+
+    def clearComments(self):
+        self.commentsCSV = ""
 
     def addComment(self, username, comment):
         # CSV with "user~~comment~~time~$~" format
-        fullComment = username + "~~" + comment + "~~" + datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        self.commentsCSV += (fullComment + "~$~")
+        # fullComment = username + "~~" + comment + "~~" + datetime.now().strftime('%m-%d-%Y at %H:%M')
+        fullComment = username + "~~" + comment + "~~" + datetime.now().strftime('%A, %b %d at %I:%M %p')
+        # Puts most recent comment at start of list (so at top of comments)
+        self.commentsCSV = fullComment + "~$~" + self.commentsCSV
 
     def returnComments(self):
         toReturn = []

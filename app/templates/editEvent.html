@@ -81,16 +81,33 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
             <div class="container" id="eventform">
                 <form method = "POST">
                     Event name:<br>
+<<<<<<< HEAD
                     <input type="text" name="eventName" placeholder="Event name" value="{{ eventName }}" maxlength="100"><br>
                     Event description:<br>
                     <textarea id="eventDesc" class="form-control" name="eventDesc" rows="3" placeholder="Event description" maxlength="1000">{{ eventDesc }}</textarea>
                    
+=======
+                    <input id="eventName" type="text" name="eventName" placeholder="Event name" value="{{ eventName }}">
+                    <div id ="nameCounter" style="font:15px Arial; text-align:right;">50 characters remaining</div>
+                    <br>
+                    Event description:<br>
+                    <textarea id="eventDesc" class="form-control" name="eventDesc" rows="3" placeholder="Event description" maxlength="1000">{{ eventDesc }}</textarea>
+                    <!-- <div id ="textcounter" style="font:15px Arial; text-align:right;">1000 Character Limit</div> -->
+                    <div id ="descCounter" style="font:15px Arial; text-align:right;">{{ 1000 - eventDesc|length }} characters remaining</div>
+>>>>>>> master
 
 
                     If you want to add or update your event's password, enter it below:<br>
                     <input type="text" name="password" placeholder="Password (optional)" maxlength="100"><br><br>
 
+<<<<<<< HEAD
                     <input type="submit" class="btn btn-primary" value="Save" name="save" maxlength="100">
+=======
+                    To add another owner who can edit this event, type in their username here:<br>
+                    <input type="text" name="add_owner" placeholder="Add owner (optional)"><br><br>
+
+                    <input type="submit" class="btn btn-primary" value="Save" name="save">
+>>>>>>> master
                     <a href={{ url_for("showEvent", eventUrl=eventUrl, _external=True )}} class="btn btn-secondary">Cancel</a>
                 </form>
                 <a href={{ url_for("showEvent", eventUrl=eventUrl, wantsToDelete="True", _external=True )}} class="btn btn-primary" style="background-color: red;border-color: red;">DELETE THIS EVENT</a>
@@ -103,6 +120,45 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
     
+
+
+
+    <!-- Include Required Prerequisites for date range picking-->
+    <script type="text/javascript" src="//cdn.jsdelivr.net/jquery/1/jquery.min.js"></script>
+    <script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <!-- Include Date Range Picker -->
+    <script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script scr=""></script>
+    <script>
+    $(document).ready(function() {
+        $('#eventDesc').on('input propertychange', function() {
+            CharLimit(this, 1000, 1);
+        });
+        $('#eventName').on('input propertychange', function() {
+            CharLimit(this, 50, 0);
+        });
+    });
+
+    function CharLimit(input, maxChar, field) {
+         var len = $(input).val().length;
+         if (field == 0){
+             if (len > maxChar) {
+                  $(input).val($(input).val().substring(0, maxChar));
+                  $('#nameCounter').text(0 + ' characters remaining');
+              }
+             $('#nameCounter').text(maxChar - len + ' characters remaining');
+        }
+        if (field == 1){
+            if (len > maxChar) {
+                 $(input).val($(input).val().substring(0, maxChar));
+                 $('#descCounter').text(0 + ' characters remaining');
+             }
+             $('#descCounter').text(maxChar - len + ' characters remaining');
+        }
+    }
+    </script>
+
 
 </body>
 
