@@ -57,6 +57,8 @@
 			height: 100vh;
 		}
 	</style>
+
+	   <script type='text/javascript' src="{{url_for('static', filename='ValidateReg.js')}}"></script>
 </head>
 
 <body>
@@ -70,6 +72,8 @@
   Username already in use, select another!<br>
   ORRRRRR AN ERROR HAPPENED<br>
   {% endif %}-->
+  <title>Register - Should I Go?</title>
+
 	<div class="container-fluid middlechunk" id="pagewrapper">
 
 		<div class="container" id="titlewrapper">
@@ -95,7 +99,7 @@
 					<div class="form-group">
 
                         <!-- <form method="POST"> -->
-						<form action="/register" method="POST">
+						<form action="/register" method="POST" onsubmit='if(ValidateReg()) {} else { return false; }''>
 							First name<br>
 							<input type="text" class="form-control" name="firstname"><br>Last Name<br>
 							<input type="text" class="form-control" name="lastname"><br>Username

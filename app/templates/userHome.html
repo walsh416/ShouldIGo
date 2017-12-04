@@ -1,106 +1,117 @@
-<!-- <html>
-<head>
-<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/style.css') }}" />
-<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-</head>
-<body>
-<h1>Welcome, {{firstname}}!</h1>
-{% if resentValidationEmail == 'True' %}
-Just resent your validation email! Check your inbox.<br><br>
-{% endif %}
-Your username is {{username}}<br>
-And your full name is {{firstname}} {{lastname}}<br>
-I'd show you your hashed password, but then I'd have to kill you.<br>
-<br>
-{% if not verified %}
-You have not yet verified your email!  Click below to resend a validation email:<br>
-<a href={{ url_for("resendValidationEmail")}}>Validate Email</a><br>
-After validating, then you can start creating and following events!
-{% else %}
-{% if followedeventszipped %}
-These are the events you follow:
-{% for eventName,eventUrl in followedeventszipped %}
-<a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %}
-{% endfor %}<br>
-{% else %}
-You do not currently follow any events, explore to find ones you like!<br>
-{% endif %}
-{% if ownedeventszipped %}
-Your owned events are:
-{% for eventName,eventUrl in ownedeventszipped %}
-<!- - "if not loop.last" just checks if it's the last element, if not it puts in a comma - ->
-<a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %}
-{% endfor %}<br>
-{% else %}
-You do not currently own any events! Click below to make some!<br>
-{% endif %}
-<br>
-<a href="/createEvent">Create a new event!</a><br>
-{% endif %}
-<a href="/editUser">Edit my user information<br>
-<a href="/logout">Log out</a>
-</body>
-</html> -->
-
 <html>
 
 <head>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Quicksand:300" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Heebo:700" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="../static/styles/style.css" />
-    <style>
-    </style>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='font-awesome-4.7.0/css/font-awesome.min.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}" />
 </head>
 
-<body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <!-- <a class="navbar-brand" href="#">Home</a> -->
-        <a class="navbar-brand" href="/">Home</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+<body class="bg-dark">
+    <title>Home - Should I Go?</title>
+    <div class="container main-container">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <!-- <a class="navbar-brand" href="#">Home</a> -->
+            <a class="navbar-brand" href="/">
+                <span class="fa fa-home" style="font-size:1.5em;"></span>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
-        </button>
+            </button>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <!-- <a class="nav-link" href="userEvents.html">My Events<span class="sr-only">(current)</span></a> -->
-                    <!-- TODO: create appRoute call for a /userEvents page -->
-                    <a class="nav-link" href="/userEvents">My Events<span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <!-- <a class="nav-link" href="settings.html">Settings</a> -->
-                    <!-- TODO: are there more settings we want to include than just what's in editUser?
-                    ...probably stuff like email preferences, etc-->
-                    <a class="nav-link" href="/editUser">Settings</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/logout">Log Out</a>
-                </li>
-            </ul>
-            <ul class = "navbar-nav my-2 my-lg-0">
-                <li class="nav=item">
-                    <a class="nav-link" href="/createEvent">+ New Event</a>
-                </li>
-            </ul>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <!-- TODO: are there more settings we want to include than just what's in editUser?
+            ...probably stuff like email preferences, etc-->
+                        <a class="nav-link" href="/editUser" data-btn-target="settings-btn-floor"><span class="fa fa-user" style="font-size:1.5em;"></span></a>
+                        <div class="nav-btn-floor bg-dark" id="settings-btn-floor"></div>
+                    </li>
+                    <li class="nav-item">
+                        <!-- <a class="nav-link" href="/logout">Log Out</a> -->
+                        <a class="nav-link" href="/logout"  data-btn-target="logout-btn-floor"><span class="fa fa-power-off" style="font-size:1.5em;"></span></a>
+                        <div class="nav-btn-floor bg-dark" id="logout-btn-floor"></div>
+                    </li>
+                </ul>
+                <ul class="navbar-nav my-2 my-lg-0">
+                    <li class="nav-item">
+                        <!-- <a class="nav-link" href="/createEvent">+ New Event</a> -->
+                        <a class="nav-link" href="/createEvent" data-btn-target="addevent-btn-floor"><span class="fa fa-plus" style="font-size:1.5em;"></span></a>
+                        <div class="nav-btn-floor bg-dark" id="addevent-btn-floor"></div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="container-fluid" id="splashpagewrapper">
+            {% if verified == false %}
+            <div class="container" id="titlewrapper">
+                <br>
+                <h1 class="text-center" id="maintitle">Welcome, {{ firstname }}!</h1>
+
+                <div class="container">
+                    <div class="list-group">
+                        <!-- <h1>Welcome, {{firstname}}!</h1> -->
+                        {% if resentValidationEmail == 'True' %} Just resent your validation email! Check your inbox.<br><br> {% endif %}
+                        <br> You have not yet verified your email! Click below to resend a validation email:<br>
+                        <a href={{ url_for( "resendValidationEmail")}}>Validate Email</a><br><br> After validating, then you can start creating and following events!
+
+                    </div>
+                </div>
+            </div>
+            {% elif (followedeventszipped or ownedeventszipped) %}
+            <div class="col" style="padding:0px;">
+                <div class="col-md-4 list-group" style="padding:0px; overflow-y:auto;">
+                    <div class="pagelist list-group">
+                        {% if followedeventszipped %} Your followed events are: {% for eventName,eventUrl in followedeventszipped %}
+                        <!-- <a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %} -->
+                        <a href="{{ eventUrl }}" class="list-button list-group-item list-group-item-action">{{ eventName }}</a> {% endfor %} {% endif %} {% if ownedeventszipped %}
+                        <!-- Your owned events are: {{ownedeventszipped}}<br> -->
+                        Your owned events are: {% for eventName,eventUrl in ownedeventszipped %}
+                        <!-- "if not loop.last" just checks if it's the last element, if not it puts in a comma -->
+                        <!-- <a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %} -->
+                        <!-- <button type="button" class="list-button list-group-item list-group-item-action">{{ eventName }}</button> -->
+                        <a href="{{ eventUrl }}" class="list-button list-group-item list-group-item-action">{{ eventName }}</a> {% endfor %} {% endif %}
+
+                    </div>
+                </div>
+                <div class="col-md-8">
+
+                </div>
+            </div>
+            {% else %}
+            <div class="container" id="titlewrapper">
+                <br>
+                <h1 class="text-center" id="maintitle">Welcome, {{ firstname }}!</h1>
+
+                <div class="container">
+                    <div class="form-group">
+                        <!-- <h1>Welcome, {{firstname}}!</h1> -->
+                        You do not yet own or follow any events!<br> Click <a href="/createEvent">+ New Event</a> in the top right to get started.
+
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
         </div>
-    </nav>
+    </div>
 
-    <h1>Welcome, {{firstname}}!</h1>
-    {% if resentValidationEmail == 'True' %}
-    Just resent your validation email! Check your inbox.<br><br>
-    {% endif %}
-    Your username is {{username}}<br>
-    And your full name is {{firstname}} {{lastname}}<br>
-    I'd show you your hashed password, but then I'd have to kill you.<br>
-    <br>
-    {% if not verified %}
-    You have not yet verified your email!  Click below to resend a validation email:<br>
-    <a href={{ url_for("resendValidationEmail")}}>Validate Email</a><br>
-    After validating, then you can start creating and following events!
-    {% endif %}
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $(".nav-link").mouseenter(function(){
+                $floor = $("#" + $(this).attr('data-btn-target'));
+                $floor.removeClass("bg-dark");
+                $floor.addClass("bg-light");
+            }).mouseleave(function(){
+                $floor = $("#" + $(this).attr('data-btn-target'));
+                $floor.removeClass("bg-light");
+                $floor.addClass("bg-dark");
+            });
+        });
+
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>

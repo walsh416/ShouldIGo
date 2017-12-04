@@ -5,8 +5,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
 from threading import Thread
 
-
-
 application = Flask(__name__)
 application.config.from_object('config')
 
@@ -132,6 +130,9 @@ class Event_alch(alch_db.Model):
     eventName = alch_db.Column(alch_db.String(200), nullable=False)
     eventDesc = alch_db.Column(alch_db.String(1000), nullable=True)
     followers = alch_db.Column(alch_db.String(1000), nullable=True)
+    yesGoingCSV = alch_db.Column(alch_db.String(1000), nullable=True)
+    maybeGoingCSV = alch_db.Column(alch_db.String(1000), nullable=True)
+    noGoingCSV = alch_db.Column(alch_db.String(1000), nullable=True)
 
     def __repr__(self):
         return '<Event Url: %r>' % self.eventUrl
@@ -142,6 +143,9 @@ class Event_alch(alch_db.Model):
         self.eventName = name
         self.eventDesc = desc
         self.followers = ""
+        self.yesGoingCSV = ""
+        self.maybeGoingCSV = ""
+        self.noGoingCSV = ""
 
     def unfollowUser(self, username):
         userList = self.followers.split(",")
@@ -169,6 +173,54 @@ class Event_alch(alch_db.Model):
                 thr = Thread(target=send_async_email, args=[application, msg])
                 thr.start()
 
+    def rsvp(self, username, response):
+        # remove user from any lists they might be on currently (so they can't be on more than one)
+        newYes=""
+        for randUser in self.yesGoingCSV.split(","):
+            if randUser != username and randUser is not None and randUser != "":
+                newYes+=(randUser + ",")
+        self.yesGoingCSV = newYes
+        newMaybe=""
+        for randUser in self.maybeGoingCSV.split(","):
+            if randUser != username and randUser is not None and randUser != "":
+                newMaybe+=(randUser + ",")
+        self.maybeGoingCSV = newMaybe
+        newNo=""
+        for randUser in self.noGoingCSV.split(","):
+            if randUser != username and randUser is not None and randUser != "":
+                newNo+=(randUser + ",")
+        self.noGoingCSV = newNo
+
+        print "response = "+response
+        if response == "yes":
+            self.yesGoingCSV+=(username + ",")
+            print "Adding "+username+" to yesCSV"
+        elif response == "maybe":
+            self.maybeGoingCSV+=(username + ",")
+            print "Adding "+username+" to maybeCSV"
+        elif response == "no":
+            self.noGoingCSV+=(username + ",")
+            print "Adding "+username+" to noCSV"
+
+    # clear list of RSVPs when event is updated
+    def clearRsvps(self):
+        self.yesGoingCSV = ""
+        self.maybeGoingCSV = ""
+        self.noGoingCSV = ""
+
+    def getUsersRSVP(self, username):
+        for user in self.yesGoingCSV.split(","):
+            if user == username:
+                return "yes"
+        for user in self.maybeGoingCSV.split(","):
+            if user == username:
+                return "maybe"
+        for user in self.noGoingCSV.split(","):
+            if user == username:
+                return "no"
+        return "unknown"
+
+
 def eventUrlAvail(urlIn):
     event_count = Event_alch.query.filter_by(eventUrl=urlIn).count()
     if event_count == 0:
@@ -194,37 +246,3 @@ def is_EventUrl_in_EventUrlCSV(urlIn, csvIn):
 def killDb():
     alch_db.drop_all()
     alch_db.create_all()
-
-# def killDb():
-#     connectionTemp = mysql.connect()
-#     cursorTemp = connectionTemp.cursor()
-#     ##########################################################
-#     ###### Database notes:
-#     ###### verifiedEmail is initially a 16 character random string.
-#     ######        Once the user has verified their email, it is updated to "0"
-#     ##########################################################
-#     out = '''DROP database IF EXISTS userDb;
-#     CREATE DATABASE userDb;
-#     USE userDb;
-#     CREATE TABLE User(
-#     firstname VARCHAR(50) NOT NULL,
-#     lastname VARCHAR(50) NOT NULL,
-#     username VARCHAR(50) NOT NULL,
-#     password VARCHAR(80) NOT NULL,
-#     salt VARCHAR(80) NOT NULL,
-#     ownedEventsCSV VARCHAR(500),
-#     email VARCHAR(80) NOT NULL,
-#     followedEventsCSV VARCHAR(500),
-#     verifiedEmail VARCHAR(20),
-#     primary key(username)
-#     );
-#     CREATE TABLE Event(
-#     eventUrl VARCHAR(50) NOT NULL,
-#     eventName VARCHAR(200) NOT NULL,
-#     eventDesc VARCHAR(1000) NOT NULL,
-#     followers VARCHAR(1000) NOT NULL,
-#     primary key(eventUrl)
-#     );'''
-#     cursorTemp.execute(out)
-#     connectionTemp.commit()
-#     connectionTemp.close()
