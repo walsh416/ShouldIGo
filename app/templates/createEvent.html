@@ -118,7 +118,7 @@
                 {% endif %}
 
                 <form method = "POST">
-                    <input type="text" id="eventUrl" name="eventUrl" class="form-control" aria-describedby="eventUrlHelp" maxlength="50">
+                    <input type="text" id="eventUrl" name="eventUrl" class="form-control" aria-describedby="eventUrlHelp" maxlength="50" pattern="^[a-zA-Z0-9_\-]+$">
                     <div id ="urlCounter" style="font:15px Arial; text-align:right;">50 Character Limit</div>
                     <small id="eventUrlHelp" class="form-text text-muted">
                         URLs should be less than 50 characters, and contain only letters, numbers, underscores, and dashes
