@@ -9,16 +9,38 @@
 }
 
 #loginform {
-  width: 22%;
+  width: 30%;
   margin: 10px auto;
   text-align: center;
 }
 
 #splashtitle{
   font-size: 70px;
+  word-wrap: normal
   user-select: none;
+}
+
+#responsive-login{
+    width:23%;
 }
 
 #usernameinput{
   border-radius: 4px 4px 0px 0px !important;
+}
+
+@media(max-width: 900px) {
+  #splashtitle {
+    font-size: 60px;
+  }
+  #loginform {
+    width: 45%;
+  }
+}
+@media(max-width: 550px) {
+  #splashtitle {
+    font-size: 40px;
+  }
+  #loginform {
+    width: 70%;
+  }
 }
