@@ -69,7 +69,7 @@
 					</form>
 
 				</div>
-                <a href={{ url_for("editUser", wantsToDelete="True", _external=True )}} class="btn btn-primary" style="background-color: red;border-color: red;">DELETE MY ACCOUNT</a>
+                <a href={{ url_for("editUser", wantsToDelete="True", _external=True )}} class="btn btn-primary" style="background-color: red;border-color: red;" onclick="return confirm('Are you sure you want to delete your account?')">DELETE MY ACCOUNT</a>
 			</div>
 			<!-- </form> -->
 

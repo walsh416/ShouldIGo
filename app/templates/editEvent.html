@@ -102,7 +102,7 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
 
                     <a href={{ url_for("showEvent", eventUrl=eventUrl, _external=True )}} class="btn btn-secondary">Cancel</a>
                 </form>
-                <a href={{ url_for("showEvent", eventUrl=eventUrl, wantsToDelete="True", _external=True )}} class="btn btn-primary" style="background-color: red;border-color: red;">DELETE THIS EVENT</a>
+                <a href={{ url_for("showEvent", eventUrl=eventUrl, wantsToDelete="True", _external=True )}} class="btn btn-primary" style="background-color: red;border-color: red;" onclick="return confirm('Are you sure you want to delete this event?');">DELETE THIS EVENT</a>
 
             </div>
         </div>
