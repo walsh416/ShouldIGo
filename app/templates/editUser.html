@@ -47,13 +47,21 @@
 				<div class="form-group">
 
 					<form method="POST">
-						First name<br>
-						<input type="text" name="firstname" value="{{ firstname }}" maxlength="100"><br>
-						<br> Last name<br>
-						<input type="text" name="lastname" value="{{ lastname }}" maxlength="100"><br>
-						<br> Email
-						<br>
-						<input type="text" name="email" value="{{ email }}" maxlength="100"><br>
+                        First name<br>
+                        <input type="text" class="form-control" name="firstname" maxlength="100" pattern="[a-zA-Z\-_]{1,50}" required aria-describedby="firstnameHelp" value="{{ firstname }}">
+                        <small id="firstnameHelp" class="form-text text-muted">
+                            Less than 50 characters, made up of upper and lower case letters
+                        </small>
+                        Last Name<br>
+                        <input type="text" class="form-control" name="lastname" maxlength="100" pattern="[a-zA-Z\-_]{1,50}" required aria-describedby="lastnameHelp" value="{{ lastname }}">
+                        <small id="lastnameHelp" class="form-text text-muted">
+                            Less than 50 characters, made up of upper and lower case letters
+                        </small>
+                        Email<br>
+                        <input type="text" class="form-control" name="email" maxlength="100" pattern="^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$" required aria-describedby="emailHelp" value="{{ email }}">
+                        <small id="emailHelp" class="form-text text-muted">
+                            Enter a valid email address
+                        </small>
 						<br>
 						<input type="submit" class="btn btn-primary" value="Submit" maxlength="100">
 						<!-- <a class="btn btn-primary" href="#">Save</a> -->

@@ -125,8 +125,8 @@
                 {% for username,comment,time in comments %}
                 --------------------------------------<br>
                 <!-- TODO: SOS @aslan can you make this not look like crap? -->
-                {{ username }} -- {{ time }}<br>
-                {{ comment }}<br>
+                <b><u>{{ username }}</u></b> -- {{ time }}<br>
+                <div style="white-space: pre-wrap;">{{ comment }}</div><br>
 
                 <!-- the curlybrace-pound sign thing comments out jinja2 code -->
                 {#{% if not loop.last %}#}
@@ -171,7 +171,7 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
-    
+
     <script>
            $( document ).ready( function() {
             var errorMessage = "Please remove all tildes.";
@@ -186,19 +186,19 @@
 
                     hasError = !$( this ).val().match( patternRegex );
 
-                    if ( typeof this.setCustomValidity === "function") 
+                    if ( typeof this.setCustomValidity === "function")
                     {
                         this.setCustomValidity( hasError ? errorMessage : "" );
-                    } 
-                    else 
+                    }
+                    else
                     {
                         $( this ).toggleClass( "error", !!hasError );
                         $( this ).toggleClass( "ok", !hasError );
 
-                        if ( hasError ) 
+                        if ( hasError )
                         {
                             $( this ).attr( "title", errorMessage );
-                        } 
+                        }
                         else
                         {
                             $( this ).removeAttr( "title" );
