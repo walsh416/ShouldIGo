@@ -1,6 +1,6 @@
 
 from flask import Flask, render_template
-import hashlib, os
+import hashlib, os, pytz
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
 from threading import Thread
@@ -180,8 +180,13 @@ class Event_alch(alch_db.Model):
     def addComment(self, username, comment):
         # CSV with "user~~comment~~time~$~" format
         # fullComment = username + "~~" + comment + "~~" + datetime.now().strftime('%m-%d-%Y at %H:%M')
-        print "In addComment, setting time as: " + datetime.now().strftime('%A, %b %d at %I:%M %p')
-        fullComment = username + "~~" + comment + "~~" + datetime.now().strftime('%A, %b %d at %I:%M %p')
+        # print "In addComment, setting time as: " + datetime.now().strftime('%A, %b %d at %I:%M %p')
+        fullComment = username + "~~" + comment + "~~" + datetime.now(pytz.timezone('US/Eastern')).strftime('%A, %b %d at %I:%M %p')
+
+        # now = datetime.now(utc) # timezone-aware datetime.utcnow()
+        # today = datetime(now.year, now.month, now.day, now.hour, now.minute, tzinfo=utc) # midnight
+        # fullComment = username + "~~" + comment + "~~" + today.strftime('%A, %b %d at %I:%M %p')
+
         # Puts most recent comment at start of list (so at top of comments)
         self.commentsCSV = self.commentsCSV + fullComment + "~$~"
         # self.commentsCSV = fullComment + "~$~" + self.commentsCSV
