@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, request, redirect, url_for, make_response, send_from_directory, session, escape, abort
+from flask import Flask, render_template, request, redirect, url_for, make_response, send_from_directory, session, escape, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
 from flask_sslify import SSLify
@@ -74,16 +74,15 @@ def splashScreen():
         return resp
     # POST method means script was sent login data by user:
     if request.method == "POST":
-        usr = db_h.User_alch.query.filter_by(username=request.form.get('username')).first()
-        if usr is None:
-            session.pop('username', None)
-            return render_template('login.html', badUser=True)
-        if not usr.checkHashPass(request.form.get('password')):
-            session.pop('username', None)
-            # keep user at login screen, with "bad password!" shown to user
-            return render_template('login.html', badPass=True)
+        # usr = db_h.User_alch.query.filter_by(username=request.form.get('username')).first()
+        # if usr is None:
+        #     session.pop('username', None)
+        #     return render_template('login.html', badUser=True)
+        # if not usr.checkHashPass(request.form.get('password')):
+        #     session.pop('username', None)
+        #     # keep user at login screen, with "bad password!" shown to user
+        #     return render_template('login.html', badPass=True)
         session['username'] = usr.username
-
         # Can't see home screen unless they have verified their email address
         if usr.verifiedEmail!="0":
             session['username'] = usr.username
@@ -620,3 +619,28 @@ def killDb():
 @application.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(application.root_path, 'static'),'favicon.ico')
+
+# AJAX REQUESTS here
+
+#For login page
+@application.route('/_log_in')
+def _log_in():
+    username = request.args.get('username', "", type=str)
+    password = request.args.get('password',"",type=str)
+    rememberme = request.args.get('rememberme',0,type=int)
+    # if the username and password are correct
+
+    print "username: " + username + ", password: " + password + ", rememberme: " + str(rememberme);
+
+    usr = db_h.User_alch.query.filter_by(username=username).first()
+    if usr is None:
+        print "username wrong"
+        session.pop('username', None)
+        return jsonify(0, rememberme, username)
+    elif not usr.checkHashPass(password):
+        session.pop('username', None)
+        # keep user at login screen, with "bad password!" shown to user
+        return jsonify(-1, rememberme, username)
+
+    session['username'] = usr.username
+    return jsonify(1, rememberme, username);
