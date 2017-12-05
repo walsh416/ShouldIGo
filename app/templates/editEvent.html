@@ -36,6 +36,8 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
 <html>
 
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/style.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='font-awesome-4.7.0/css/font-awesome.min.css') }}" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
@@ -43,40 +45,41 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
 
 <body class="bg-dark">
     <title>Edit {{ eventName }} - Should I Go?</title>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="mainnav">
+        <div class="container">
+        <!-- <a class="navbar-brand" href="#">Home</a> -->
+        <a class="navbar-brand" href="/">
+            <span class="fa fa-home" style="font-size:1.5em;"></span>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <!-- TODO: are there more settings we want to include than just what's in editUser?
+                    ...probably stuff like email preferences, etc-->
+                    <a class="nav-link" href="/editUser" data-btn-target="settings-btn-floor"><span class="fa fa-user" style="font-size:1.5em;"></span></a>
+                    <div class="nav-btn-floor bg-dark" id="settings-btn-floor"></div>
+                </li>
+                <li class="nav-item">
+                    <!-- <a class="nav-link" href="/logout">Log Out</a> -->
+                    <a class="nav-link" href="/logout"  data-btn-target="logout-btn-floor"><span class="fa fa-power-off" style="font-size:1.5em;"></span></a>
+                    <div class="nav-btn-floor bg-dark" id="logout-btn-floor"></div>
+                </li>
+            </ul>
+            <ul class="navbar-nav my-2 my-lg-0">
+                <li class="nav-item">
+                    <!-- <a class="nav-link" href="/createEvent">+ New Event</a> -->
+                    <a class="nav-link" href="/createEvent" data-btn-target="addevent-btn-floor"><span class="fa fa-plus" style="font-size:1.5em;"></span></a>
+                    <div class="nav-btn-floor bg-dark" id="addevent-btn-floor"></div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    </nav>
     <div class="container main-container">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <!-- <a class="navbar-brand" href="#">Home</a> -->
-            <a class="navbar-brand" href="/">
-                <span class="fa fa-home" style="font-size:1.5em;"></span>
-            </a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <!-- TODO: are there more settings we want to include than just what's in editUser?
-                        ...probably stuff like email preferences, etc-->
-                        <a class="nav-link" href="/editUser" data-btn-target="settings-btn-floor"><span class="fa fa-user" style="font-size:1.5em;"></span></a>
-                        <div class="nav-btn-floor bg-dark" id="settings-btn-floor"></div>
-                    </li>
-                    <li class="nav-item">
-                        <!-- <a class="nav-link" href="/logout">Log Out</a> -->
-                        <a class="nav-link" href="/logout"  data-btn-target="logout-btn-floor"><span class="fa fa-power-off" style="font-size:1.5em;"></span></a>
-                        <div class="nav-btn-floor bg-dark" id="logout-btn-floor"></div>
-                    </li>
-                </ul>
-                <ul class="navbar-nav my-2 my-lg-0">
-                    <li class="nav-item">
-                        <!-- <a class="nav-link" href="/createEvent">+ New Event</a> -->
-                        <a class="nav-link" href="/createEvent" data-btn-target="addevent-btn-floor"><span class="fa fa-plus" style="font-size:1.5em;"></span></a>
-                        <div class="nav-btn-floor bg-dark" id="addevent-btn-floor"></div>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-
     <div class="container-fluid" id="splashpagewrapper">
         <!-- <h1 class="containter-fluid">Create an Event!</h1> -->
         <div class="container" id="titlewrapper">

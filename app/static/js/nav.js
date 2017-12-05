@@ -9,3 +9,17 @@ $(document).ready(function(){
         $floor.addClass("bg-dark");
     });
 });
+
+
+$(window).scroll(function(){
+    // console.log($(window).scrollTop());
+    var fixheight = $("#mainnav").height();
+    if($(window).scrollTop()>=fixheight){
+        $("#mainnav").addClass("fixed-top");
+        $("body").css("padding-top", $("#mainnav").height());
+    }
+    else{
+        $("#mainnav").removeClass("fixed-top");
+        $("body").css("padding-top", 0);
+    }
+});
