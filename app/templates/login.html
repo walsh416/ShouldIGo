@@ -8,12 +8,6 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="../static/styles/style.css" />
     <link rel="stylesheet" type="text/css" href="../static/styles/splashscreen.css" />
-    <style>
-
-
-
-
-    </style>
 </head>
 
 <body>
@@ -23,35 +17,19 @@
         <!-- TITLE -->
         <div class="container text-center" id="titlewrapper">
             <h1 class="title" id="splashtitle">shouldigo.today</h1>
-            <!-- TODO: @Aslan, how do I make this text pretty? -->
-            {% if badUser == true %}
-            <div style="color:#ffffff;">Username does not exist, please try again</div><br><br>
-            {% endif %}
-
-            {% if badPass == true %}
-            <div style="color:#ffffff;">Password does not match, please try again</div><br><br>
-            {% endif %}
         </div>
 
-
+        <div class="collapse" style="text-align:center;" id="invalidinput"></div>
 
         <!-- LOGIN FORM -->
         <div class="container" style="width:22%;" id="loginform">
 
             <form action="/" method="POST">
             <!-- <form action="/" method="post" name="login"> -->
-                {% if badUser == true %}
-                <input class="form-control rounded-top" type="text" id="usernameinput" name="username" placeholder="Invalid username" style="border-color: red;border-width: medium;">
-                {% else %}
                 <input class="form-control rounded-top" type="text" id="usernameinput" name="username" placeholder="username">
-                {% endif %}
                 <div style="height:1px;background-color:#d3d3d3;"></div>
-                {% if badPass == true %}
-                <input class="form-control rounded-0" type="password" id="passwordinput" name="password" placeholder="Invalid password" style="border-color: red;border-width: medium;">
-                {% else %}
                 <input class="form-control rounded-0" type="password" id="passwordinput" name="password" placeholder="password">
-                {% endif %}
-                <input class="button rounded-bottom" style="width:100%;" type="submit" id="loginbtn" value="login">
+                <input type="button" class="button rounded-bottom" style="width:100%;" type="submit" id="loginbtn" value="login">
                 <div style="color:#ffffff;">
                     <label><input type="checkbox" name="rememberme" value="yes" style="color:#ffffff;">Remember me?</label>
                 </div>
@@ -69,8 +47,66 @@
         </div>
 
 
-<!-- script imports -->
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <!-- script imports -->
+        <script src="{{ url_for('static',filename='js/jquery-3.2.1.js') }}" charset="utf-8"></script>
+        <script type="text/javascript">
+            $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+            $(function() {
+            $('#loginbtn').on('click', function() {
+              $.getJSON($SCRIPT_ROOT + '/_log_in', {
+                username: $('input[name="username"]').val(),
+                password: $('input[name="password"]').val(),
+                rememberme: $('input[name="rememberme"]').val()
+            }, function(data) {
+                type = data[0];
+                rememberme = data[1];
+                username = data[2];
+
+                var invdiv = document.getElementById("invalidinput");
+                while (invdiv.hasChildNodes()) {
+                    invdiv.removeChild(invdiv.lastChild);
+                }
+
+                if(type == 0){ //if username is wrong
+                    var wrongusr = document.createElement("p");
+                    wrongusr.innerHTML = "Username does not exist, please try again";
+                    wrongusr.style.color="#ffffff";
+                    invdiv.appendChild(wrongusr);
+                    $("#invalidinput").collapse("show");
+                }
+                else if(type== -1){ //if password is wrong
+                    var wrongpass = document.createElement("p");
+                    wrongpass.innerHTML = "Password does not match, please try again";
+                    wrongpass.style.color="#ffffff";
+                    invdiv.appendChild(wrongpass);
+                    $("#invalidinput").collapse("show");
+                }
+                else if(type == 1){ //if the username and password is correct create custom form
+                    var f = document.createElement("form");
+                    var usr = document.createElement("input");
+                    var rmb = document.createElement("input")
+
+                    f.setAttribute('method',"post");
+                    f.setAttribute('action',"/");
+
+                    usr.value=username;
+                    usr.name="username";
+                    usr.type="hidden"
+                    f.appendChild(usr);
+
+                    rmb.value=rememberme;
+                    rmb.name="rememberme";
+                    rmb.type="hidden"
+                    f.appendChild(rmb);
+
+                    document.body.appendChild(f);
+                    f.submit();
+                }
+              });
+              return true;
+            });
+          });
+        </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
 
