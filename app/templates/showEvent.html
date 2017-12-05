@@ -44,7 +44,7 @@
         </div>
     </div>
     </nav>
-    
+
     <div class="container main-container">
             <div class="container-fluid" id="splashpagewrapper">
 
@@ -140,8 +140,8 @@
                         <div class="card-body comment" style="color:black;">
                             <!-- TODO: SOS @aslan can you make this not look like crap? -->
                             <b><u>{{ username }}</u></b> -- {{ time }}<br>
-                            <!-- <div style="white-space: pre-wrap;">{{ comment }}</div><br> -->
-                            {{comment}} <br>
+                            <div style="white-space: pre-wrap;">{{ comment }}</div>
+                            <!-- {{comment}} <br> -->
 
                             <!-- the curlybrace-pound sign thing comments out jinja2 code -->
 
@@ -209,7 +209,7 @@
 
     <script>
            $( document ).ready( function() {
-            var errorMessage = "Please remove all tildes.";
+            var errorMessage = "Please remove all tilde (~) characters.";
 
             $( this ).find( "textarea" ).on( "input change propertychange", function() {
 
