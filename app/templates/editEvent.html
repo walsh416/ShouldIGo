@@ -81,8 +81,11 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
             <div class="container" id="eventform">
                 <form method = "POST">
                     Event name:<br>
-                    <input id="eventName" type="text" name="eventName" placeholder="Event name" value="{{ eventName }}" maxlength="50">
-                    <div id ="nameCounter" style="font:15px Arial; text-align:right;">50 characters remaining</div>
+                    <input id="eventName" type="text" name="eventName" placeholder="Event name" value="{{ eventName }}" maxlength="50" pattern="[a-zA-Z\-_]{1,50}" required aria-describedby="nameHelp">
+                    <div id ="nameCounter" style="font:15px Arial; text-align:right;">{{ 50 - eventName|length }} characters remaining</div>
+                    <small id="eventHelp" class="form-text text-muted">
+                        Event names must less than 50 characters, and may contain letters, numbers, and the characters !@#$%^*_-
+                    </small>
                     <br>
                     Event description:<br>
                     <textarea id="eventDesc" class="form-control" name="eventDesc" rows="3" placeholder="Event description" maxlength="1000">{{ eventDesc }}</textarea>
@@ -108,7 +111,7 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
-    
+
 
 
 

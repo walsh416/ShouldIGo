@@ -13,7 +13,7 @@
     <!-- date range picker stuff-->
     <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
     <script type='text/javascript' src="{{url_for('static', filename='CheckFields.js')}}"></script>
-    <script type='text/javascript' src="{{url_for('static', filename='ValidateReg.js')}}"></script> 
+    <script type='text/javascript' src="{{url_for('static', filename='ValidateReg.js')}}"></script>
 
     <!-- <link rel="stylesheet" type="text/css" href="isthere.css">
     <style>
@@ -68,16 +68,33 @@
 
                         <!-- <form method="POST"> -->
 
-						<form action="/register" method="POST" onsubmit='if(ValidateReg()) {} else { return false; }''>
+						<form action="/register" method="POST" onsubmit='if(ValidateReg()) {} else { return false; }'>
 							First name<br>
-							<input type="text" class="form-control" name="firstname" maxlength="100"><br>Last Name<br>
-							<input type="text" class="form-control" name="lastname" maxlength="100"><br>Username
-							<br>
-							<input type="text" class="form-control" name="username" maxlength="100"><br>Email
-							<br>
-							<input type="text" class="form-control" name="email" maxlength="100"><br>Password
-							<br>
-							<input type="password" class="form-control" name="password" maxlength="100"><br>Confirm password<br>
+							<input type="text" class="form-control" name="firstname" maxlength="100" pattern="[a-zA-Z\-_]{1,50}" required aria-describedby="firstnameHelp">
+                            <small id="firstnameHelp" class="form-text text-muted">
+                                Less than 50 characters, made up of upper and lower case letters
+                            </small>
+                            Last Name<br>
+							<input type="text" class="form-control" name="lastname" maxlength="100" pattern="[a-zA-Z\-_]{1,50}" required aria-describedby="lastnameHelp">
+                            <small id="lastnameHelp" class="form-text text-muted">
+                                Less than 50 characters, made up of upper and lower case letters
+                            </small>
+                            Username<br>
+							<input type="text" class="form-control" name="username" maxlength="100" pattern="[a-zA-Z0-9!@#$%\^\*\-_]{1,50}" required aria-describedby="usernameHelp">
+                            <small id="usernameHelp" class="form-text text-muted">
+                                Usernames must be less than 50 characters, and may contain letters, numbers, and the characters !@#$%^*_-
+                            </small>
+                            Email<br>
+							<input type="text" class="form-control" name="email" maxlength="100" pattern="^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$" required aria-describedby="emailHelp">
+                            <small id="emailHelp" class="form-text text-muted">
+                                Enter a valid email address
+                            </small>
+                            Password<br>
+							<input type="password" class="form-control" name="password" maxlength="100" pattern="[a-zA-Z0-9!@#$%\^\*\-_]{6,20}" required aria-describedby="passwordHelp">
+                            <small id="passwordHelp" class="form-text text-muted">
+                                Passwords must be 6-20 characters, and may contain letters, numbers, and the characters !@#$%^*_-
+                            </small>
+                            Confirm password<br>
 							<input type="password" class="form-control" name="passwordconfirm" maxlength="100"><br>
                             <input type="submit" class="btn btn-primary" value="Register">
 
