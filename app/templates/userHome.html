@@ -12,37 +12,37 @@
     <title>Home - Should I Go?</title>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="mainnav">
         <div class="container">
-        <!-- <a class="navbar-brand" href="#">Home</a> -->
-        <a class="navbar-brand" href="/">
-            <span class="fa fa-home" style="font-size:1.5em;"></span>
-        </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+            <!-- <a class="navbar-brand" href="#">Home</a> -->
+            <a class="navbar-brand" href="/">
+                <span class="fa fa-home" style="font-size:1.5em;"></span>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <!-- TODO: are there more settings we want to include than just what's in editUser?
-                    ...probably stuff like email preferences, etc-->
-                    <a class="nav-link" href="/editUser" data-btn-target="settings-btn-floor"><span class="fa fa-user" style="font-size:1.5em;"></span></a>
-                    <div class="nav-btn-floor bg-dark" id="settings-btn-floor"></div>
-                </li>
-                <li class="nav-item">
-                    <!-- <a class="nav-link" href="/logout">Log Out</a> -->
-                    <a class="nav-link" href="/logout"  data-btn-target="logout-btn-floor"><span class="fa fa-power-off" style="font-size:1.5em;"></span></a>
-                    <div class="nav-btn-floor bg-dark" id="logout-btn-floor"></div>
-                </li>
-            </ul>
-            <ul class="navbar-nav my-2 my-lg-0">
-                <li class="nav-item">
-                    <!-- <a class="nav-link" href="/createEvent">+ New Event</a> -->
-                    <a class="nav-link" href="/createEvent" data-btn-target="addevent-btn-floor"><span class="fa fa-plus" style="font-size:1.5em;"></span></a>
-                    <div class="nav-btn-floor bg-dark" id="addevent-btn-floor"></div>
-                </li>
-            </ul>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <!-- TODO: are there more settings we want to include than just what's in editUser?
+                        ...probably stuff like email preferences, etc-->
+                        <a class="nav-link" href="/editUser" data-btn-target="settings-btn-floor"><span class="fa fa-user" style="font-size:1.5em;"></span></a>
+                        <div class="nav-btn-floor bg-dark" id="settings-btn-floor"></div>
+                    </li>
+                    <li class="nav-item">
+                        <!-- <a class="nav-link" href="/logout">Log Out</a> -->
+                        <a class="nav-link" href="/logout"  data-btn-target="logout-btn-floor"><span class="fa fa-power-off" style="font-size:1.5em;"></span></a>
+                        <div class="nav-btn-floor bg-dark" id="logout-btn-floor"></div>
+                    </li>
+                </ul>
+                <ul class="navbar-nav my-2 my-lg-0">
+                    <li class="nav-item">
+                        <!-- <a class="nav-link" href="/createEvent">+ New Event</a> -->
+                        <a class="nav-link" href="/createEvent" data-btn-target="addevent-btn-floor"><span class="fa fa-plus" style="font-size:1.5em;"></span></a>
+                        <div class="nav-btn-floor bg-dark" id="addevent-btn-floor"></div>
+                    </li>
+                </ul>
+            </div>
         </div>
-    </div>
     </nav>
     <div class="container main-container">
 
@@ -63,23 +63,27 @@
                 </div>
             </div>
             {% elif (followedeventszipped or ownedeventszipped) %}
-            <div class="col" style="padding:0px;">
-                <div class="col-md-4 list-group" style="padding:0px; overflow-y:auto;">
-                    <div class="pagelist list-group">
-                        {% if followedeventszipped %} Your followed events are: {% for eventName,eventUrl in followedeventszipped %}
-                        <!-- <a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %} -->
-                        <a href="{{ eventUrl }}" class="list-button list-group-item list-group-item-action">{{ eventName }}</a> {% endfor %} {% endif %} {% if ownedeventszipped %}
-                        <!-- Your owned events are: {{ownedeventszipped}}<br> -->
-                        Your owned events are: {% for eventName,eventUrl in ownedeventszipped %}
-                        <!-- "if not loop.last" just checks if it's the last element, if not it puts in a comma -->
-                        <!-- <a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %} -->
-                        <!-- <button type="button" class="list-button list-group-item list-group-item-action">{{ eventName }}</button> -->
-                        <a href="{{ eventUrl }}" class="list-button list-group-item list-group-item-action">{{ eventName }}</a> {% endfor %} {% endif %}
+            <div class="container" id="titlewrapper">
+                <br>
+                <h1 class="text-center" id="maintitle">Welcome, {{ firstname }}!</h1>
+                <div class="col" style="padding:0px;">
+                    <div class="col-md-4 list-group" style="padding:0px; overflow-y:auto;">
+                        <div class="pagelist list-group">
+                            {% if followedeventszipped %} Your followed events are: {% for eventName,eventUrl in followedeventszipped %}
+                            <!-- <a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %} -->
+                            <a href="{{ eventUrl }}" class="list-button list-group-item list-group-item-action">{{ eventName }}</a> {% endfor %} {% endif %} {% if ownedeventszipped %}
+                            <!-- Your owned events are: {{ownedeventszipped}}<br> -->
+                            Your owned events are: {% for eventName,eventUrl in ownedeventszipped %}
+                            <!-- "if not loop.last" just checks if it's the last element, if not it puts in a comma -->
+                            <!-- <a href="{{ eventUrl }}">{{eventName}}</a>{% if not loop.last %}, {% endif %} -->
+                            <!-- <button type="button" class="list-button list-group-item list-group-item-action">{{ eventName }}</button> -->
+                            <a href="{{ eventUrl }}" class="list-button list-group-item list-group-item-action">{{ eventName }}</a> {% endfor %} {% endif %}
+
+                        </div>
+                    </div>
+                    <div class="col-md-8">
 
                     </div>
-                </div>
-                <div class="col-md-8">
-
                 </div>
             </div>
             {% else %}
