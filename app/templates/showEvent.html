@@ -172,6 +172,7 @@
                     <textarea id=comment class="form-control" style="border-radius: 0px 0px 3px 3px;" name="comment" rows="3" placeholder="Add your comment here!" maxlength="1000" pattern="[^~]*"></textarea>
                     <input type="submit" class="btn btn-primary" value="Submit">
                 </form>
+                {% if owner == false %}
                 {% if subscribed == false %}
                 Click below to recieve updates about this event!
                 <form method = "POST">
@@ -183,6 +184,7 @@
                 <form method = "POST">
                     <input type="submit" name="unfollow" value="Unfollow this event" class="btn btn-primary">
                 </form>
+                {% endif %}
                 {% endif %}
                 {% endif %}
                 {% if owner==true %}

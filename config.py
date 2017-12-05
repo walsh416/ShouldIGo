@@ -35,7 +35,6 @@ DEBUG = True
 # SQLALCHEMY_DATABASE_URI = "mysql://root:localhost/userDb"
 # SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:@localhost/userDb"
 SQLALCHEMY_DATABASE_URI = "mysql://root:@127.0.0.1/userDb"
-
 #####################################################
 
 ################### IF RUNNING ON AWS: #################
