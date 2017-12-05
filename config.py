@@ -31,13 +31,13 @@ SECRET_KEY = "}M\xfc;.\xa0?\x99\xbb;\xe8\x96\xca7\x04\xc2K\x06\xb1\xc0JOeoE\xd9\
 
 ### SSLify doesn't run if DEBUG = True, which is good because it doesn't work on localhost
 ################### IF RUNNING LOCALLY: ################
-# DEBUG = True
+DEBUG = True
 # SQLALCHEMY_DATABASE_URI = "mysql://root:localhost/userDb"
 # SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:@localhost/userDb"
-# SQLALCHEMY_DATABASE_URI = "mysql://root:@127.0.0.1/userDb"
+SQLALCHEMY_DATABASE_URI = "mysql://root:@127.0.0.1/userDb"
 #####################################################
 
 ################### IF RUNNING ON AWS: #################
-DEBUG = False
-SQLALCHEMY_DATABASE_URI = "mysql+pymysql://walsh416:walsh416pass@walsh416dbinstance.cuo7hfdlcl5g.us-east-2.rds.amazonaws.com/thedatabase"
+# DEBUG = False
+# SQLALCHEMY_DATABASE_URI = "mysql+pymysql://walsh416:walsh416pass@walsh416dbinstance.cuo7hfdlcl5g.us-east-2.rds.amazonaws.com/thedatabase"
 #####################################################
