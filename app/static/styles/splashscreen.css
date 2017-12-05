@@ -1,7 +1,9 @@
-#splashpagewrapper {
-  background: url(../images/BokehLights3.jpg) no-repeat center center fixed;
-  background-size: cover;
+body{
+    background: url(../images/BokehLights3.jpg) no-repeat center center fixed;
+    background-size: cover;
+}
 
+#splashpagewrapper {
   height: 100vh;
   display: flex;
   flex-flow: column;
@@ -28,7 +30,7 @@
   border-radius: 4px 4px 0px 0px !important;
 }
 
-@media(max-width: 900px) {
+@media(max-width: 1100px) {
   #splashtitle {
     font-size: 60px;
   }
