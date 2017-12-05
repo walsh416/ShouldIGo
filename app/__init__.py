@@ -590,7 +590,7 @@ def showEvent(eventUrl):
     if correctPass == False and request.form.get('password') is not None:
         badPass = True
     print badPass
-    return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner, correctPass=correctPass, badPass=badPass)
+    return render_template('showEvent.html', eventUrl=eventUrl, eventName=event.eventName, eventDesc=event.eventDesc, userLoggedIn=userLoggedIn, subscribed=subscribed, owner=owner, correctPass=correctPass, badPass=badPass, comments=event.returnComments() )
 
 @application.errorhandler(404)
 def page_not_found(e):
