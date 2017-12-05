@@ -607,14 +607,14 @@ def page_not_found(e):
 
 # Hidden URL never shown to user, for testing only and to be removed before production
 # Gives ability to call MySQL code to reset the databases without logging into MySQL
-@application.route('/KILL_DB')
-def killDb():
-    db_h.killDb()
-    print "################ DB killed ################"
-
-    session.pop('username', None)
-    resp = make_response(redirect(url_for('splashScreen')))
-    return resp
+# @application.route('/KILL_DB')
+# def killDb():
+#     db_h.killDb()
+#     print "################ DB killed ################"
+#
+#     session.pop('username', None)
+#     resp = make_response(redirect(url_for('splashScreen')))
+#     return resp
 
 @application.route('/favicon.ico')
 def favicon():

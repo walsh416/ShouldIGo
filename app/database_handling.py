@@ -285,7 +285,7 @@ class Event_alch(alch_db.Model):
 
 
 def eventUrlAvail(urlIn):
-    protectedUrls = ["login","lougout","register","createEvent","validateEmail","editUser"]
+    protectedUrls = ["login","lougout","register","createEvent","validateEmail","editUser","KILL_DB"]
     event_count = Event_alch.query.filter_by(eventUrl=urlIn).count()
     if event_count == 0:
         for url in protectedUrls:
@@ -310,6 +310,6 @@ def is_EventUrl_in_EventUrlCSV(urlIn, csvIn):
             return True
     return False
 
-def killDb():
-    alch_db.drop_all()
-    alch_db.create_all()
+# def killDb():
+#     alch_db.drop_all()
+#     alch_db.create_all()
