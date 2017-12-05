@@ -89,7 +89,7 @@ Sorry, please only use letters, numbers, dashes, and underscores in your url!<br
             <div class="container" id="eventform">
                 <form method = "POST">
                     Event name:<br>
-                    <input id="eventName" type="text" name="eventName" placeholder="Event name" value="{{ eventName }}" maxlength="50" pattern="[a-zA-Z\-_]{1,50}" required aria-describedby="nameHelp">
+                    <input id="eventName" type="text" name="eventName" placeholder="Event name" value="{{ eventName }}" maxlength="50" pattern="[a-zA-Z\-_\ ]{1,50}" required aria-describedby="nameHelp">
                     <div id ="nameCounter" style="font:15px Arial; text-align:right;">{{ 50 - eventName|length }} characters remaining</div>
                     <small id="eventHelp" class="form-text text-muted">
                         Event names must less than 50 characters, and may contain letters, numbers, and the characters !@#$%^*_-
