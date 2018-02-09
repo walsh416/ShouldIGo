@@ -74,14 +74,14 @@ def splashScreen():
         return resp
     # POST method means script was sent login data by user:
     if request.method == "POST":
-        # usr = db_h.User_alch.query.filter_by(username=request.form.get('username')).first()
-        # if usr is None:
-        #     session.pop('username', None)
-        #     return render_template('login.html', badUser=True)
-        # if not usr.checkHashPass(request.form.get('password')):
-        #     session.pop('username', None)
-        #     # keep user at login screen, with "bad password!" shown to user
-        #     return render_template('login.html', badPass=True)
+        usr = db_h.User_alch.query.filter_by(username=request.form.get('username')).first()
+        if usr is None:
+            session.pop('username', None)
+            return render_template('login.html', badUser=True)
+        if not usr.checkHashPass(request.form.get('password')):
+            session.pop('username', None)
+            # keep user at login screen, with "bad password!" shown to user
+            return render_template('login.html', badPass=True)
         session['username'] = usr.username
         # Can't see home screen unless they have verified their email address
         if usr.verifiedEmail!="0":
@@ -126,6 +126,7 @@ def forgotpassword():
 
         msg = Message(
                 'Password reset for %s' % usr.firstname,
+                # TODO: check for bad/old emails.  Yikes.
                 sender='timsemailforlols@google.com',
                 recipients=[request.form.get('email')]
                 )

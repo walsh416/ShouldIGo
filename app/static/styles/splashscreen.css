@@ -10,6 +10,13 @@ body{
   justify-content: center;
 }
 
+#introwrapper {
+    width: 80%;
+    margin: 10px auto;
+    text-align: center;
+    color: #ffffff;
+}
+
 #loginform {
   width: 30%;
   margin: 10px auto;

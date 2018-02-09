@@ -15,35 +15,48 @@
 
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <!-- <a class="navbar-brand" href="#">Home</a> -->
-        <a class="navbar-brand" href="/">Home</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="mainnav">
+        <div class="container">
+            <!-- <a class="navbar-brand" href="#">Home</a> -->
+            <a class="navbar-brand" href="/">
+                <span class="fa fa-home" style="font-size:1.5em;"></span>
+                <span class="nav navbar-text"> Home</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <!-- <a class="nav-link" href="userEvents.html">My Events<span class="sr-only">(current)</span></a> -->
-                    <!-- TODO: create appRoute call for a /userEvents page -->
-                    <a class="nav-link" href="/userEvents">My Events<span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <!-- <a class="nav-link" href="settings.html">Settings</a> -->
-                    <!-- TODO: are there more settings we want to include than just what's in editUser?
-                    ...probably stuff like email preferences, etc-->
-                    <a class="nav-link" href="/editUser">Settings</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/logout">Log Out</a>
-                </li>
-            </ul>
-            <ul class = "navbar-nav my-2 my-lg-0">
-                <li class="nav=item">
-                    <a class="nav-link" href="/createEvent">+ New Event</a>
-                </li>
-            </ul>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <!-- TODO: are there more settings we want to include than just what's in editUser?
+                        ...probably stuff like email preferences, etc-->
+                        <a class="nav-link" href="/editUser" data-btn-target="settings-btn-floor">
+                            <span class="fa fa-user" style="font-size:1.5em;"></span>
+                            <span class="nav navbar-text"> Preferences</span>
+                        </a>
+                        <div class="nav-btn-floor bg-dark" id="settings-btn-floor"></div>
+                    </li>
+                    <li class="nav-item">
+                        <!-- <a class="nav-link" href="/logout">Log Out</a> -->
+                        <a class="nav-link" href="/logout"  data-btn-target="logout-btn-floor">
+                            <span class="fa fa-power-off" style="font-size:1.5em;"></span>
+                            <span class="nav navbar-text"> Logout</span>
+                        </a>
+                        <div class="nav-btn-floor bg-dark" id="logout-btn-floor"></div>
+                    </li>
+                </ul>
+                <ul class="navbar-nav my-2 my-lg-0">
+                    <li class="nav-item">
+                        <!-- <a class="nav-link" href="/createEvent">+ New Event</a> -->
+                        <a class="nav-link" href="/createEvent" data-btn-target="addevent-btn-floor">
+                            <span class="fa fa-plus" style="font-size:1.5em;"></span>
+                            <span class="nav navbar-text"> New Event</span>
+                        </a>
+                        <div class="nav-btn-floor bg-dark" id="addevent-btn-floor"></div>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
 

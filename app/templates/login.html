@@ -21,15 +21,40 @@
             <h1 class="title" id="splashtitle">shouldigo.today</h1>
         </div>
 
+        <div class="container" id="introwrapper">
+            <div class="row">
+                <div class="col-md-2 my-auto">
+                    1. Log in or create your account
+                </div>
+                <div class="col-md-1 my-auto">
+                    >>
+                </div>
+                <div class="col-md-2 my-auto">
+                    2. Pick a memorable event URL
+                </div>
+                <div class="col-md-1 my-auto">
+                    >>
+                </div>
+                <div class="col-md-2 my-auto">
+                    3. Create the event and share the URL
+                </div>
+                <div class="col-md-1 my-auto">
+                    >>
+                </div>
+                <div class="col-md-2 my-auto">
+                    4. Comment, follow, and update events
+                </div>
+            </div>
+        </div>
+
+
         <div class="collapse" style="text-align:center;" id="invalidinput"></div>
 
         <!-- LOGIN FORM -->
         <!-- <div class="container" style="width:22%;" id="loginform"> -->
         <div class="container" id="loginform">
-
-
             <form action="/" method="POST">
-            <!-- <form action="/" method="post" name="login"> -->
+                <!-- <form action="/" method="post" name="login"> -->
 
                 <!-- <div class="text-center align-center" id="responsive-login"> -->
                 <input class="form-control rounded-top" type="text" id="usernameinput" name="username" placeholder="username">
@@ -58,66 +83,66 @@
         <!-- script imports -->
         <script src="{{ url_for('static',filename='js/jquery-3.2.1.js') }}" charset="utf-8"></script>
         <script type="text/javascript">
-            $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-            $(function() {
+        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+        $(function() {
             $('#loginbtn').on('click', function() {
-              $.getJSON($SCRIPT_ROOT + '/_log_in', {
-                username: $('input[name="username"]').val(),
-                password: $('input[name="password"]').val(),
-                rememberme: $('input[name="rememberme"]').val()
-            }, function(data) {
-                type = data[0];
-                rememberme = data[1];
-                username = data[2];
+                $.getJSON($SCRIPT_ROOT + '/_log_in', {
+                    username: $('input[name="username"]').val(),
+                    password: $('input[name="password"]').val(),
+                    rememberme: $('input[name="rememberme"]').val()
+                }, function(data) {
+                    type = data[0];
+                    rememberme = data[1];
+                    username = data[2];
 
-                var invdiv = document.getElementById("invalidinput");
-                while (invdiv.hasChildNodes()) {
-                    invdiv.removeChild(invdiv.lastChild);
-                }
+                    var invdiv = document.getElementById("invalidinput");
+                    while (invdiv.hasChildNodes()) {
+                        invdiv.removeChild(invdiv.lastChild);
+                    }
 
-                if(type == 0){ //if username is wrong
-                    var wrongusr = document.createElement("p");
-                    wrongusr.innerHTML = "Username does not exist, please try again";
-                    wrongusr.style.color="#ffffff";
-                    invdiv.appendChild(wrongusr);
-                    $("#invalidinput").collapse("show");
-                }
-                else if(type== -1){ //if password is wrong
-                    var wrongpass = document.createElement("p");
-                    wrongpass.innerHTML = "Password does not match, please try again";
-                    wrongpass.style.color="#ffffff";
-                    invdiv.appendChild(wrongpass);
-                    $("#invalidinput").collapse("show");
-                }
-                else if(type == 1){ //if the username and password is correct create custom form
-                    var f = document.createElement("form");
-                    var usr = document.createElement("input");
-                    var rmb = document.createElement("input")
+                    if(type == 0){ //if username is wrong
+                        var wrongusr = document.createElement("p");
+                        wrongusr.innerHTML = "Username does not exist, please try again";
+                        wrongusr.style.color="#ffffff";
+                        invdiv.appendChild(wrongusr);
+                        $("#invalidinput").collapse("show");
+                    }
+                    else if(type== -1){ //if password is wrong
+                        var wrongpass = document.createElement("p");
+                        wrongpass.innerHTML = "Password does not match, please try again";
+                        wrongpass.style.color="#ffffff";
+                        invdiv.appendChild(wrongpass);
+                        $("#invalidinput").collapse("show");
+                    }
+                    else if(type == 1){ //if the username and password is correct create custom form
+                        var f = document.createElement("form");
+                        var usr = document.createElement("input");
+                        var rmb = document.createElement("input")
 
-                    f.setAttribute('method',"post");
-                    f.setAttribute('action',"/");
+                        f.setAttribute('method',"post");
+                        f.setAttribute('action',"/");
 
-                    usr.value=username;
-                    usr.name="username";
-                    usr.type="hidden"
-                    f.appendChild(usr);
+                        usr.value=username;
+                        usr.name="username";
+                        usr.type="hidden"
+                        f.appendChild(usr);
 
-                    rmb.value=rememberme;
-                    rmb.name="rememberme";
-                    rmb.type="hidden"
-                    f.appendChild(rmb);
+                        rmb.value=rememberme;
+                        rmb.name="rememberme";
+                        rmb.type="hidden"
+                        f.appendChild(rmb);
 
-                    document.body.appendChild(f);
-                    f.submit();
-                }
-              });
-              return true;
+                        document.body.appendChild(f);
+                        f.submit();
+                    }
+                });
+                return true;
             });
-          });
+        });
         </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
 
-</body>
+    </body>
 
-</html>
+    </html>
