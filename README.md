@@ -1,4 +1,4 @@
-#ShouldIGo.today
+# ShouldIGo.today
 Should I Go?
 
 Created by Timothy Walsh, with assistance from Aslan Bakri, Brendan Chin, Robert Gerami, and Won-Kuk Lee for University of Rochester CSC210, Fall 2017.
